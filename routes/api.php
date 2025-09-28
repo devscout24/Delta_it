@@ -4,8 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CollaboratorController;
 use App\Http\Controllers\Api\CompanyController;
-
-
+use App\Http\Controllers\Api\ContractController;
 
 Route::controller(AuthController::class)->group(function () {
     // user login and logout
@@ -23,7 +22,6 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('/user/profile/reset-password', [AuthController::class, 'userResetPassword'])->middleware('auth:api');
 });
 
-
 Route::controller(CompanyController::class)->middleware('auth:api')->group(function () {
     Route::post('/add-company', 'addCompany');
     Route::post('/get-specific-company', 'getSpecificCompanies');
@@ -39,4 +37,10 @@ Route::controller(CollaboratorController::class)->middleware('auth:api')->group(
     Route::post('/collaborators-add', 'store');
     Route::post('/collaborators-update', 'update');
     Route::post('/collaborators-delete', 'destroy');
+});
+
+
+Route::controller(ContractController::class)->middleware('auth:api')->group(function () {
+    Route::post('/contracts-add', 'store');
+    Route::post('/contracts-update', 'update');
 });
