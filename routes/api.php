@@ -43,4 +43,5 @@ Route::controller(CollaboratorController::class)->middleware('auth:api')->group(
 Route::controller(ContractController::class)->middleware('auth:api')->group(function () {
     Route::post('/contracts-add', 'store');
     Route::post('/contracts-update', 'update');
+    Route::post('/contracts-delete', 'destroy');
 });

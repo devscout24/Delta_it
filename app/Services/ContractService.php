@@ -25,7 +25,7 @@ class ContractService extends Controller
 
         if ($files) {
             foreach ($files as $file) {
-                $filePath = $this->uploadImage($file, 'uploads/contracts',);
+                $filePath = $this->uploadFile($file, 'contracts');
                 ContractFile::create([
                     'contract_id' => $contract->id,
                     'file_path' => $filePath,
@@ -53,7 +53,7 @@ class ContractService extends Controller
 
         if ($files) {
             foreach ($files as $file) {
-                $filePath = $file->store('contracts');
+                $filePath = $this->uploadFile($file, 'contracts');
                 ContractFile::create([
                     'contract_id' => $contract->id,
                     'file_path' => $filePath,

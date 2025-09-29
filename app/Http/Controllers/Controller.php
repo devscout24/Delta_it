@@ -81,13 +81,20 @@ abstract class Controller
      */
 
 
-    public static function uploadFile($file, $folder)
+
+    public static function uploadFile($file, $folder, $oldImage = null)
     {
         try {
             if (!$file || !$file->isValid()) {
                 Log::warning('Invalid file upload attempt.');
                 return null;
             }
+
+            // Delete old image if it exists
+            if ($oldImage && File::exists(public_path($oldImage))) {
+                File::delete(public_path($oldImage));
+            }
+
 
             $fileName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
             $targetPath = public_path('uploads/' . $folder);
