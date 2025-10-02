@@ -55,6 +55,7 @@ class CompanyController extends Controller
 
     public function updateCompanyGeneralData(Request $request)
     {
+
         $validator = Validator::make($request->all(), [
             'commercial_name' => 'required',
             'company_email' => 'required|email',
@@ -67,6 +68,7 @@ class CompanyController extends Controller
             'bussiness_area' => 'nullable',
             'company_manager' => 'nullable',
             'description' => 'nullable',
+            'logo' => 'nullable',
         ]);
 
         if ($validator->fails()) {
@@ -80,6 +82,16 @@ class CompanyController extends Controller
         $occpaied_office = json_encode($request->occupied_office);
         $bussiness_area = json_encode($request->bussiness_area);
 
+        if ($request->id) {
+            $company = Company::where('id', $request->id)->first();
+        }
+
+        if ($request->hasFile('logo')) {
+            $file = $request->file('logo');
+            $uploadPath =  $this->uploadImage($file, $company->logo, 'uploads/companyLogo', 150, 150);
+        } else {
+            $uploadPath = $company->logo ?? null;
+        }
 
         Company::Where('id', $request->id)->update([
             'commercial_name' => $request->commercial_name,
@@ -93,6 +105,7 @@ class CompanyController extends Controller
             'bussiness_area' => $bussiness_area,
             'company_manager' => $request->company_manager,
             'description' => $request->description,
+            'logo' => $uploadPath,
         ]);
 
         return $this->success((object)[], 'Company General Data updated', 201);

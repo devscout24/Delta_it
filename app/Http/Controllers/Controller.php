@@ -82,7 +82,7 @@ abstract class Controller
 
 
 
-    public static function uploadFile($file, $folder, $oldImage = null)
+    public static function uploadFile($file, $folder, $oldFile = null)
     {
         try {
             if (!$file || !$file->isValid()) {
@@ -91,8 +91,8 @@ abstract class Controller
             }
 
             // Delete old image if it exists
-            if ($oldImage && File::exists(public_path($oldImage))) {
-                File::delete(public_path($oldImage));
+            if ($oldFile && File::exists(public_path($oldFile))) {
+                File::delete(public_path($oldFile));
             }
 
 

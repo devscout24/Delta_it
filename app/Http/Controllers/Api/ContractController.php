@@ -63,12 +63,27 @@ class ContractController extends Controller
 
     public function deleteSingleFile(Request $request)
     {
-        $file = ContractFile::find($request->file_id);
+
+        $file = ContractFile::where('id', $request->id)->where('contract_id', $request->contract_id)->first();
+
         if (!$file) {
             return $this->error(null, 'File not found', 404);
         }
 
         $file->delete();
         return $this->success(null, 'File deleted successfully', 200);
+    }
+
+
+    public function show(Request $request)
+    {
+
+        $contract = Contract::with('company')->find($request->id);
+
+        if (!$contract) {
+            return $this->error(null, 'Contract not found', 404);
+        }
+
+        return $this->success($contract, 'Contract details', 200);
     }
 }

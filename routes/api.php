@@ -2,9 +2,11 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\CollaboratorController;
 use App\Http\Controllers\Api\CompanyController;
+use App\Http\Controllers\Api\RequestController;
 use App\Http\Controllers\Api\ContractController;
+use App\Http\Controllers\Api\DocumentController;
+use App\Http\Controllers\Api\CollaboratorController;
 
 Route::controller(AuthController::class)->group(function () {
     // user login and logout
@@ -42,6 +44,21 @@ Route::controller(CollaboratorController::class)->middleware('auth:api')->group(
 
 Route::controller(ContractController::class)->middleware('auth:api')->group(function () {
     Route::post('/contracts-add', 'store');
+    Route::post('/collaborators-single', 'show');
     Route::post('/contracts-update', 'update');
     Route::post('/contracts-delete', 'destroy');
+    Route::post('/contracts-singleFile-delete', 'deleteSingleFile');
+});
+
+Route::controller(DocumentController::class)->middleware('auth:api')->group(function () {
+    Route::post('/add-documents', 'store');
+    Route::post('/delete-document', 'deleteDocument');;
+});
+
+
+
+Route::controller(RequestController::class)->middleware('auth:api')->group(function () {
+    Route::post('/add-request', 'store');
+    Route::get('/show-single-requests/{id}', 'show');
+    Route::post('/add-update', 'update');
 });

@@ -9,6 +9,7 @@ use App\Models\ContractFile;
 class ContractService extends Controller
 {
 
+    use \App\Traits\ApiResponse;
 
     public function create(array $data, $files = null)
     {
@@ -39,7 +40,11 @@ class ContractService extends Controller
 
     public function update($id, array $data, $files = null)
     {
-        $contract = Contract::findOrFail($id);
+        $contract = Contract::find($id);
+
+        if (!$contract) {
+            return $this->error(null, 'Contract not found', 404);
+        }
 
         $contract->update([
             'name' => $data['name'],
@@ -53,7 +58,7 @@ class ContractService extends Controller
 
         if ($files) {
             foreach ($files as $file) {
-                $filePath = $this->uploadFile($file, 'contracts');
+                $filePath = $this->uploadFile($file, 'contracts',  $file->file_path);
                 ContractFile::create([
                     'contract_id' => $contract->id,
                     'file_path' => $filePath,
