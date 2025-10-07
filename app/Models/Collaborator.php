@@ -16,4 +16,6 @@ class Collaborator extends Model
         'access_card_number',
         'parking_card',
     ];
+
+    protected $hidden = ['created_at', 'updated_at'];
 }

@@ -25,6 +25,7 @@ return new class extends Migration
             $table->longText('bussiness_area', 11)->nullable();
             $table->string('company_manager', 100)->nullable();
             $table->string('description', 255)->nullable();
+            $table->enum('status',['active', 'archive']);
             $table->timestamps();
         });
     }

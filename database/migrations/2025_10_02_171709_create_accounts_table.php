@@ -11,12 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('user_requests', function (Blueprint $table) {
+        Schema::create('accounts', function (Blueprint $table) {
             $table->id();
-            $table->text('description');
-            $table->string('requested_by');
-            $table->enum('status',['pending','solved'])->default('pending');
-            $table->date('date');
+            $table->string('first_name');
+            $table->string('last_name');
+            $table->string('job_position')->nullable();
+            $table->string('email')->unique();
+            $table->string('password');
             $table->timestamps();
         });
     }
@@ -26,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('user_requests');
+        Schema::dropIfExists('accounts');
     }
 };

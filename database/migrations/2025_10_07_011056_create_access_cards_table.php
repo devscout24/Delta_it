@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('user_requests', function (Blueprint $table) {
-            $table->id();
-            $table->text('description');
-            $table->string('requested_by');
-            $table->enum('status',['pending','solved'])->default('pending');
-            $table->date('date');
+        Schema::create('access_cards', function (Blueprint $table) {
+               $table->id();
+            $table->integer('active_card')->default(0);
+            $table->integer('lost_damage_card')->default(0);
+            $table->integer('active_parking_card')->default(0);
+            $table->integer('max_parking_card')->default(0);
             $table->timestamps();
         });
     }
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('user_requests');
+        Schema::dropIfExists('access_cards');
     }
 };

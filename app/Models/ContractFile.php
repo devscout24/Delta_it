@@ -10,4 +10,6 @@ class ContractFile extends Model
         'contract_id',
         'file_path',
     ];
+
+    protected $hidden = ['created_at', 'updated_at'];
 }

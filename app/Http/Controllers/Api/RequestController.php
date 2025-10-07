@@ -48,13 +48,13 @@ class RequestController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return $this->error('Validation Error', $validator->errors(), 422);
         }
 
         // Find the existing request
         $userRequest = UserRequest::find($request->id);
         if (!$userRequest) {
-            return response()->json(['message' => 'Request not found'], 404);
+            return $this->error(null, 'Request not found', 404);
         }
 
         // Update record
@@ -68,8 +68,15 @@ class RequestController extends Controller
         return $this->success($userRequest, 'Request updated successfully');
     }
 
-    public function  show($id)
+
+    public function  allRequest()
     {
-        return $this->success(UserRequest::all(), 'Request fetched successfully');
+
+        $userRequest = UserRequest::all();
+        if (!$userRequest) {
+            return $this->error(null, 'Request not found', 404);
+        }
+        return $this->success($userRequest, 'Request fetched successfully');
+
     }
 }

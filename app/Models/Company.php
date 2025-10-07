@@ -18,6 +18,8 @@ class Company extends Model
         'occupied_area',
         'bussiness_area',
         'company_manager',
-        'description'
+        'description',
+        'status'
     ];
+    protected $hidden = ['created_at', 'updated_at'];
 }

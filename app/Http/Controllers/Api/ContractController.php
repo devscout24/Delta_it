@@ -40,10 +40,14 @@ class ContractController extends Controller
 
 
 
-    public function update(ContractRequest $request)
+    public function update(Request $request)
     {
-        $validated  = $request->validated();
-        $this->contractService->update($request->id, $validated, $request->file('files'));
+        $validated  = app(ContractRequest::class)->validated();
+        $files = $request->file('files') ?? [];
+        if (!is_array($files)) {
+            $files = [$files];
+        }
+        $this->contractService->update($request->id, $validated, $files);
         return $this->success(null, 'Contract updated successfully');
     }
 
@@ -77,11 +81,15 @@ class ContractController extends Controller
 
     public function show(Request $request)
     {
-
         $contract = Contract::with('company')->find($request->id);
 
         if (!$contract) {
             return $this->error(null, 'Contract not found', 404);
+        }
+
+        // Check if company exists and add logo URL
+        if ($contract->company && $contract->company->logo) {
+            $contract->company->logo = asset($contract->company->logo);
         }
 
         return $this->success($contract, 'Contract details', 200);

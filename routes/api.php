@@ -2,11 +2,15 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\AccountController;
+use App\Http\Controllers\Api\ArchiveController;
 use App\Http\Controllers\Api\CompanyController;
 use App\Http\Controllers\Api\RequestController;
 use App\Http\Controllers\Api\ContractController;
 use App\Http\Controllers\Api\DocumentController;
+use App\Http\Controllers\Api\AccessCardController;
 use App\Http\Controllers\Api\CollaboratorController;
+use App\Http\Controllers\Api\InternalNoteController;
 
 Route::controller(AuthController::class)->group(function () {
     // user login and logout
@@ -44,7 +48,7 @@ Route::controller(CollaboratorController::class)->middleware('auth:api')->group(
 
 Route::controller(ContractController::class)->middleware('auth:api')->group(function () {
     Route::post('/contracts-add', 'store');
-    Route::post('/collaborators-single', 'show');
+    Route::post('/get-single/contract', 'show');
     Route::post('/contracts-update', 'update');
     Route::post('/contracts-delete', 'destroy');
     Route::post('/contracts-singleFile-delete', 'deleteSingleFile');
@@ -59,6 +63,32 @@ Route::controller(DocumentController::class)->middleware('auth:api')->group(func
 
 Route::controller(RequestController::class)->middleware('auth:api')->group(function () {
     Route::post('/add-request', 'store');
-    Route::get('/show-single-requests/{id}', 'show');
-    Route::post('/add-update', 'update');
+    Route::get('/show-all-requests', 'allRequest');
+    Route::post('/update-request', 'update');
+});
+
+
+Route::controller(AccountController::class)->middleware('auth:api')->group(function () {
+    Route::post('/add-account', 'store');
+    Route::get('/delete-account/{id}', 'destroy');
+    Route::post('/update-account', 'update');
+});
+
+
+Route::controller(InternalNoteController::class)->middleware('auth:api')->group(function () {
+    Route::post('/add-note', 'store');
+    Route::get('/delete-note/{id}', 'destroy');
+    Route::post('/update-note/{id}', 'update');
+});
+
+
+Route::controller(ArchiveController::class)->middleware('auth:api')->group(function () {
+    Route::post('/add-to-archive', 'addToArchive');
+    Route::post('/restore-comapany', 'restoreComapany');
+});
+
+
+Route::controller(AccessCardController::class)->middleware('auth:api')->group(function () {
+
+Route::post('/access_card/update', 'updateAccessCode');
 });
