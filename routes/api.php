@@ -9,8 +9,12 @@ use App\Http\Controllers\Api\RequestController;
 use App\Http\Controllers\Api\ContractController;
 use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\AccessCardController;
+use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\Api\CollaboratorController;
 use App\Http\Controllers\Api\InternalNoteController;
+use App\Http\Controllers\Api\MeetingController;
+use App\Http\Controllers\Api\RoomController;
+use App\Models\Meeting;
 
 Route::controller(AuthController::class)->group(function () {
     // user login and logout
@@ -89,6 +93,21 @@ Route::controller(ArchiveController::class)->middleware('auth:api')->group(funct
 
 
 Route::controller(AccessCardController::class)->middleware('auth:api')->group(function () {
+    Route::post('/access_card/update', 'updateAccessCode');
+});
 
-Route::post('/access_card/update', 'updateAccessCode');
+Route::controller(RoomController::class)->middleware('auth:api')->group(function () {
+    Route::post('/add-room', 'addRoom');
+});
+
+
+Route::controller(MeetingController::class)->middleware('auth:api')->group(function () {
+    Route::post('/add-meeting', 'store');
+    Route::get('/filter-meetings', 'filter');
+});
+
+
+
+Route::controller(AppointmentController::class)->middleware('auth:api')->group(function () {
+    Route::post('/add-appointment', 'addAppointment');
 });

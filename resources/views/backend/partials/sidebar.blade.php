@@ -5,7 +5,7 @@
               <!-- Brand logo -->
               <a class="navbar-brand" href="{{ route('dashboard') }}">
                   <img
-                      src="{{ isset($admin_setting->logo) ? asset($admin_setting->logo) : asset('uploads/default.png') }}" />
+                      src="{{ isset($admin_setting->logo) ? asset($admin_setting->logo) : asset('uploads/default.png') }} alt='Logo' " />
               </a>
               <!-- Navbar nav -->
               <ul class="navbar-nav flex-column" id="sideNavbar">
@@ -24,7 +24,6 @@
                       </a>
                   </li> --}}
 
-                  {{-- Product Management --}}
                   {{-- Product Management --}}
                   <li class="nav-item {{ request()->routeIs('product.*', 'category.*') ? 'active' : '' }}">
                       <a class="nav-link has-arrow" href="#!" data-bs-toggle="collapse"
