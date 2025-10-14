@@ -11,13 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('appointment_slots', function (Blueprint $table) {
+        Schema::create('days', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('appointment_id')->constrained('appointments')->onDelete('cascade');
-            $table->string('day_of_week');
-            $table->time('start_time');
-            $table->time('end_time');
-            $table->boolean('availability_status');
+            $table->string('day');
             $table->timestamps();
         });
     }
@@ -27,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('appointment_slots');
+        Schema::dropIfExists('days');
     }
 };
