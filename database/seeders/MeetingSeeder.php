@@ -4,117 +4,79 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Meeting;
+use App\Models\Email;
 use Carbon\Carbon;
 
 class MeetingSeeder extends Seeder
 {
-    public function run()
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
     {
         $meetings = [
             [
-                'name' => 'Weekly Project Sync-up',
-                'date' => Carbon::today()->toDateString(),
-                'start_time' => '10:00:00',
-                'end_time' => '11:00:00',
-                'location' => 'Conference Room A',
-                'add_emails' => 'john@example.com, sarah@example.com',
-                'meeting_type' => 'physical',
-                'online_link' => null,
-            ],
-            [
-                'name' => 'Client Call',
-                'date' => Carbon::today()->addDay()->toDateString(),
-                'start_time' => '14:00:00',
-                'end_time' => '15:00:00',
-                'location' => 'Zoom',
-                'add_emails' => 'client@example.com',
-                'meeting_type' => 'online',
-                'online_link' => 'https://zoom.us/abcd1234',
-            ],
-            [
-                'name' => 'Team Retrospective',
-                'date' => Carbon::today()->subDays(2)->toDateString(),
+                'meeting_name' => 'Project Kickoff',
+                'date' => '2025-10-15',
                 'start_time' => '09:00:00',
                 'end_time' => '10:00:00',
-                'location' => 'Conference Room B',
-                'add_emails' => 'team@example.com',
+                'room_id' => 1,
                 'meeting_type' => 'physical',
                 'online_link' => null,
+                'add_emails' => ['john@example.com', 'sarah@example.com', 'david@example.com'],
             ],
             [
-                'name' => 'Design Review',
-                'date' => Carbon::today()->addDays(3)->toDateString(),
+                'meeting_name' => 'Weekly Team Sync',
+                'date' => '2025-10-13',
                 'start_time' => '11:00:00',
                 'end_time' => '12:00:00',
-                'location' => 'Figma',
-                'add_emails' => 'designer@example.com',
+                'room_id' => 2,
                 'meeting_type' => 'online',
-                'online_link' => 'https://figma.com/meeting123',
+                'online_link' => 'https://meet.google.com/abc-xyz',
+                'add_emails' => ['team1@example.com', 'team2@example.com'],
             ],
             [
-                'name' => 'Management Meeting',
-                'date' => Carbon::today()->addDays(7)->toDateString(),
-                'start_time' => '16:00:00',
-                'end_time' => '17:00:00',
-                'location' => 'Conference Room C',
-                'add_emails' => 'manager@example.com',
-                'meeting_type' => 'physical',
-                'online_link' => null,
-            ],
-            [
-                'name' => 'Sprint Planning',
-                'date' => Carbon::today()->addWeek()->toDateString(),
-                'start_time' => '10:00:00',
-                'end_time' => '11:30:00',
-                'location' => 'Teams',
-                'add_emails' => 'team@example.com',
-                'meeting_type' => 'online',
-                'online_link' => 'https://teams.microsoft.com/meeting123',
-            ],
-            [
-                'name' => 'Marketing Brainstorm',
-                'date' => Carbon::today()->subWeek()->toDateString(),
-                'start_time' => '13:00:00',
-                'end_time' => '14:30:00',
-                'location' => 'Conference Room D',
-                'add_emails' => 'marketing@example.com',
-                'meeting_type' => 'physical',
-                'online_link' => null,
-            ],
-            [
-                'name' => 'Product Demo',
-                'date' => Carbon::today()->addDays(10)->toDateString(),
+                'meeting_name' => 'Client Presentation',
+                'date' => '2025-10-20',
                 'start_time' => '15:00:00',
-                'end_time' => '16:00:00',
-                'location' => 'Zoom',
-                'add_emails' => 'client@example.com',
-                'meeting_type' => 'online',
-                'online_link' => 'https://zoom.us/demo123',
-            ],
-            [
-                'name' => 'HR Interview',
-                'date' => Carbon::today()->addDays(5)->toDateString(),
-                'start_time' => '09:30:00',
-                'end_time' => '10:30:00',
-                'location' => 'Conference Room E',
-                'add_emails' => 'hr@example.com',
+                'end_time' => '16:30:00',
+                'room_id' => 3,
                 'meeting_type' => 'physical',
                 'online_link' => null,
+                'add_emails' => ['client@example.com', 'manager@example.com'],
             ],
             [
-                'name' => 'Board Meeting',
-                'date' => Carbon::today()->addMonth()->toDateString(),
-                'start_time' => '11:00:00',
-                'end_time' => '13:00:00',
-                'location' => 'Conference Room A',
-                'add_emails' => 'board@example.com',
+                'meeting_name' => 'Monthly Planning',
+                'date' => '2025-11-01',
+                'start_time' => '10:00:00',
+                'end_time' => '12:00:00',
+                'room_id' => 4,
                 'meeting_type' => 'physical',
                 'online_link' => null,
+                'add_emails' => ['lead@example.com', 'planner@example.com'],
             ],
         ];
 
-        foreach ($meetings as $meeting) {
-            Meeting::create($meeting);
+        foreach ($meetings as $data) {
+            $meeting = Meeting::create([
+                'meeting_name' => $data['meeting_name'],
+                'date' => $data['date'],
+                'start_time' => $data['start_time'],
+                'end_time' => $data['end_time'],
+                'room_id' => $data['room_id'],
+                'meeting_type' => $data['meeting_type'],
+                'online_link' => $data['online_link'], // if stored as comma-separated
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ]);
+
+            // Add related emails
+            foreach ($data['add_emails'] as $email) {
+                Email::create([
+                    'meeting_id' => $meeting->id,
+                    'email' => $email,
+                ]);
+            }
         }
     }
 }

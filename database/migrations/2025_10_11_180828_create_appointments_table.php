@@ -18,14 +18,20 @@ return new class extends Migration
             $table->string('max_invitees');
             $table->string('event_color');
             $table->string('description');
-            $table->date('start_date');
-            $table->date('end_date');
             $table->string('duration');
             $table->string('timezone');
             $table->timestamps();
         });
     }
 
+    //   'meeting_id',
+    //     'room_id',
+    //     "online_link",
+    //     'max_invitees',
+    //     'event_color',
+    //     'description',
+    //     'duration',
+    //     'timezone',
     /**
      * Reverse the migrations.
      */

@@ -6,10 +6,12 @@ use Exception;
 use Carbon\Carbon;
 use App\Models\Email;
 use App\Models\Meeting;
+use App\Models\Appointment;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Http\Controllers\Controller;
+use Monolog\Handler\ElasticaHandler;
 
 class MeetingController extends Controller
 {
@@ -36,16 +38,27 @@ class MeetingController extends Controller
                 ],
             ]);
 
+            if($request->meeting_type =='online'){
+            $online_link = $request->online_link;
+            }else{
+                $online_link = null;
+            }      
+            
+            if($request->meeting_type =='physical'){
+                $room_id = $request->room_id;
+            }else{
+                $room_id = null;
+            }
 
             $meeting = Meeting::create([
-                'meeting_name' => $request->meeting_name,
-                'date' => $request->date,
-                'start_time' => $request->start_time,
-                'end_time' => $request->end_time,
-                'room_id' => $request->room_id,
-                'add_emails' => $request->add_emails,
-                'meeting_type' => $request->meeting_type,
-                'online_link' => $request->online_link,
+            'meeting_name' => $request->meeting_name,
+            'date' => $request->date,
+            'start_time' => $request->start_time,
+            'end_time' => $request->end_time,
+            'room_id' => $room_id,
+            'add_emails' => $request->add_emails,
+            'meeting_type' => $request->meeting_type,
+            'online_link' => $online_link,
             ]);
 
             if (is_array($request->add_emails)) {
@@ -70,6 +83,8 @@ class MeetingController extends Controller
 
         // dd($filter, $date);
         $query = Meeting::query();
+
+        
 
         if ($date) {
             $parsedDate = Carbon::parse($date)->toDateString();
@@ -97,4 +112,50 @@ class MeetingController extends Controller
             'data' => $meetings,
         ], 200);
     }
+
+
+    function getSingleMeeting($id){
+        
+        $meeting = Meeting::select('id','meeting_name','date','start_time','end_time','meeting_type')
+        ->with(['room','appointmentSlots'])
+        ->where('id', $id)
+        ->get();
+
+        if (empty($meeting)) {
+            return $this->error('Meeting not found', 404);
+        }
+        return $this->success($meeting, 'Meeting fetched successfully', 200);
+    }
+
+    function getAllEvents()
+    {
+        $events = Appointment::with(['room', 'meeting'])->get();
+    
+        if ($events->isEmpty()) {
+            return $this->error('Events not found', 404);
+        }
+    
+        $formattedEvents = $events->map(function ($event) {
+            return [
+                'id' => $event->id,
+                'meeting_id' => $event->meeting_id,
+                'room_id' => $event->room_id,
+                'room' => [
+                    'id' => $event->room?->id,
+                    'room_name' => $event->room?->room_name,
+                ],
+                'meeting' => [
+                    'id' => $event->meeting?->id,
+                    'meeting_name' => $event->meeting?->meeting_name,
+                    'date' => $event->meeting?->date,
+
+                ],
+            ];
+        });
+    
+        return $this->success($formattedEvents, 'Events fetched successfully', 200);
+    }
+    
+    
 }
+

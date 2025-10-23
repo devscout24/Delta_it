@@ -104,6 +104,8 @@ Route::controller(RoomController::class)->middleware('auth:api')->group(function
 Route::controller(MeetingController::class)->middleware('auth:api')->group(function () {
     Route::post('/add-meeting', 'store');
     Route::get('/filter-meetings', 'filter');
+    Route::get('/get-single-meeting/{id}', 'getSingleMeeting');
+    Route::get('/get-all-events', 'getAllEvents');
 });
 
 

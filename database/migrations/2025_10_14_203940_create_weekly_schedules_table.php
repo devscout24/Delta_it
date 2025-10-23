@@ -11,13 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('meeting_slots', function (Blueprint $table) {
+        Schema::create('weekly_schedules', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('appointment_id')->constrained('appointments')->onDelete('cascade');
             $table->foreignId('meeting_id')->constrained('meetings')->onDelete('cascade');
-            $table->foreignId('day_id')->constrained('days')->onDelete('cascade')->comment('based on date');
-            $table->time('start_time');
-            $table->time('end_time');
-            $table->date('date')->comment('based on date condition where comes from invitees can select field');
+            $table->string('day')->nullable();
+            $table->time('start_time')->nullable();
+            $table->time('end_time')->nullable();
             $table->timestamps();
         });
     }
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('meeting_slots');
+        Schema::dropIfExists('weekly_schedules');
     }
 };

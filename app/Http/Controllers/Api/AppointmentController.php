@@ -2,65 +2,126 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
+use Exception;
+use App\Services\SlotService;
+use Carbon\Carbon;
 use App\Models\Appointment;
-use App\Models\AppointmentSlot;
-use App\Models\MeetingSlot;
+use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
+use App\Models\WeeklySchedule;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use App\Models\AppointmentSlot;
 
 class AppointmentController extends Controller
 {
-    public function addAppointment(Request $request)
-    {
-        // dd($request->all());
 
+    use ApiResponse;
+
+    protected $slotService;
+    public function __construct(SlotService $slotService)
+    {
+        $this->slotService = $slotService;
+    }
+
+   public function addAppointment(Request $request)
+{
+    // 1️⃣ Validate input
+    $validation = validator($request->all(), [
+        'meeting_id'     => 'required',
+        'room_id'        => 'required',
+        'max_invitees'   => 'required',
+        'event_color'    => 'required',
+        'description'    => 'required',
+        'duration'       => 'required|integer',
+        'timezone'       => 'required',
+        'day'            => 'required|array',
+        'start_time'     => 'required|array',
+        'end_time'       => 'required|array',
+        'invitees_select'=> 'required|integer',
+    ]);
+
+    if ($validation->fails()) {
+        return $this->error('Validation Error.', $validation->errors(), 422);
+    }
+
+    try {
+        DB::beginTransaction();
+
+        //  Create appointment
         $appointment = Appointment::create([
-            'meeting_id' => 2,
-            'room_id' => 1,
+            'meeting_id'   => $request->meeting_id,
+            'room_id'      => $request->room_id,
             'max_invitees' => $request->max_invitees,
-            'event_color' => $request->event_color,
-            'description' => $request->description,
-            'start_date' => $request->start_date,
-            'end_date' => $request->end_date,
-            'duration' => $request->duration,
-            'timezone' => $request->timezone,
+            'event_color'  => $request->event_color,
+            'description'  => $request->description,
+            'duration'     => $request->duration,
+            'timezone'     => $request->timezone,
         ]);
 
-        // dd($request->invitees_select);
+        //  Create weekly schedules
+        $days = count($request->day);
+        for ($i = 0; $i < $days; $i++) {
+            WeeklySchedule::create([
+                'appointment_id' => $appointment->id,
+                'meeting_id'     => $request->meeting_id,
+                'day'            => $request->day[$i],
+                'start_time'     => $request->start_time[$i],
+                'end_time'       => $request->end_time[$i],
+            ]);
+        }
 
-        if ($request->invitees_select) {
-            for ($i = 1; $i <= $request->invitees_select; $i++) {
-                MeetingSlot::create([
-                    'day_id' => $request->day_id,
-                    'date' => $request->date,
-                    'start_time' => $request->start_time,
-                    'end_time' => $request->end_time,
-                    'meeting_id' => 2,
+        //  Get date range for slot generation
+        $startDate = Carbon::today();
+        $endDate   = Carbon::today()->addDays((int)$request->invitees_select);
+
+        //  Fetch all weekly schedules for this meeting
+        $weeklySchedules = WeeklySchedule::where('meeting_id', $request->meeting_id)->get();
+
+        //  Loop through each day schedule and generate slots
+        foreach ($weeklySchedules as $weekly) {
+            $slots = $this->slotService->splitTimeSlots(
+                $weekly->start_time,
+                $weekly->end_time,
+                (int)$request->duration
+            );
+
+            foreach ($slots as $slot) {
+                AppointmentSlot::create([
+                    'appointment_id'      => $appointment->id,
+                    'weekly_schedule_id'  => $weekly->id,
+                    'meeting_id'          => $request->meeting_id,
+                    'day'                 => $weekly->day,
+                    'start_time'          => $slot['start'],
+                    'end_time'            => $slot['end'],
+                    'availability_status' => 'available',
                 ]);
             }
         }
 
-        // if ($request->invitees_select) {
-        //     foreach ($request->slots as $slot) {
-        //         MeetingSlot::create([
-        //             'day_id' => $slot['day_id'],
-        //             'date' => $slot['date'],
-        //             'start_time' => $slot['start_time'],
-        //             'end_time' => $slot['end_time'],
-        //             'meeting_id' => 2,
-        //         ]);
-        //     }
-        // }
+        DB::commit();
 
-        return response()->json(['success' => true]);
+        return $this->success('Meeting Scheduled & Slots Generated Successfully', [
+            'appointment' => $appointment,
+            'slots' => AppointmentSlot::where('appointment_id', $appointment->id)->get(),
+        ], 200);
+
+    } catch (Exception $e) {
+        DB::rollBack();
+        return $this->error('Server Error', $e->getMessage(), 500);
     }
-
-
-    // 'invitees_select' => $request->invitees_select, 7
-    // 'within_date_range' => $request->date_range,
-
 }
 
+
+    
+}
+
+
+  // 'invitees_select' => $request->invitees_select, 7
+    // 'within_date_range' => $request->date_range,
+
+
+    
 // "meeting_id" => "1"
 //   "room_id" => "1"
 //   "max_invitees" => "10"
