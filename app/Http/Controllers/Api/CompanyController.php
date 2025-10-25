@@ -160,4 +160,139 @@ class CompanyController extends Controller
 
         return $this->success($data, 'Incubation types fetched successfully', 200);
     }
+
+    public function uploadLogo(Request $request)
+    {
+
+        // Validate file input
+        $request->validate([
+            'logo' => 'required|image|mimes:jpeg,png,jpg,svg|max:2048',
+            'company_id' => 'required|exists:companies,id',
+        ]);
+
+        // Find the company
+        $company = Company::find($request->company_id);
+
+        // Handle file upload
+        if ($request->hasFile('logo')) {
+            $file = $request->file('logo');
+
+            // Optional: Delete old logo if exists
+            if ($company->logo && file_exists(public_path($company->logo))) {
+                unlink(public_path($company->logo));
+            }
+
+            // Generate unique file name
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+
+            // Save file to public/uploads/companyLogo
+            $uploadPath = 'uploads/companyLogo/';
+            $file->move(public_path($uploadPath), $filename);
+
+            // Update company record
+            $company->logo = $uploadPath . $filename;
+            $company->save();
+
+            return $this->success(asset($company->logo), 'Logo uploaded successfully', 200);
+        }
+
+        return $this->error(null, 'Comapany Logo not fond', 201);
+    }
+
+    public function deleteLogo(Request $request)
+    {
+        $request->validate([
+            'company_id' => 'required|exists:companies,id',
+        ]);
+
+        $company = Company::find($request->company_id);
+
+        if (!$company) {
+            return $this->error(null, 'Company not found', 404);
+        }
+
+        if ($company->logo && file_exists(public_path($company->logo))) {
+            unlink(public_path($company->logo));
+            $company->logo = null;
+            $company->save();
+
+            return $this->success(null, 'Company Logo deleted successfully', 200);
+        }
+
+        return $this->error(null, 'Company Logo not found', 201);
+    }
+
+
+
+
+    // mobile api 
+
+    public function show(Request $request, $id)
+    {
+        $company  = Company::where('id', $id)->first();
+
+        if (!$company) {
+            return $this->error($company, 'Comapany fetched successfully', 201);
+        }
+
+        return $this->success($company, 'Comapany fetched successfully', 201);
+    }
+
+    public function update(Request $request)
+    {
+
+        $validator = Validator::make($request->all(), [
+            'commercial_name' => 'required',
+            'company_email' => 'required|email',
+            'fiscal_name' => 'nullable',
+            'nif' => 'nullable',
+            'phone_number' => 'nullable',
+            'incubation_type' => 'nullable',
+            'occupied_office' => 'nullable',
+            'occupied_area' => 'nullable',
+            'bussiness_area' => 'nullable',
+            'company_manager' => 'nullable',
+            'description' => 'nullable',
+            'logo' => 'nullable',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->error($validator->errors(), 'Validation error', 422);
+        }
+
+        if (!$request->id) {
+            return $this->error('', 'Id not sent', 404);
+        }
+
+        $occpaied_office = json_encode($request->occupied_office);
+        $bussiness_area = json_encode($request->bussiness_area);
+
+        if ($request->id) {
+            $company = Company::where('id', $request->id)->first();
+        }
+
+        if ($request->hasFile('logo')) {
+            $file = $request->file('logo');
+            $uploadPath =  $this->uploadImage($file, $company->logo, 'uploads/companyLogo', 150, 150);
+        } else {
+            $uploadPath = $company->logo ?? null;
+        }
+
+        Company::Where('id', $request->id)->update([
+            'commercial_name' => $request->commercial_name,
+            'company_email' => $request->company_email,
+            'fiscal_name' => $request->fiscal_name,
+            'nif' => $request->nif,
+            'phone_number' => $request->phone_number,
+            'incubation_type' => $request->incubation_type,
+            'occupied_office' => $occpaied_office,
+            'occupied_area' => $request->occupied_area,
+            'bussiness_area' => $bussiness_area,
+            'company_manager' => $request->company_manager,
+            'description' => $request->description,
+            'logo' => $uploadPath,
+        ]);
+
+        return $this->success((object)[], 'Company General Data updated', 201);
+    }
 }

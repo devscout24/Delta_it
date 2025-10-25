@@ -344,60 +344,7 @@ class AuthController extends Controller
 
 
     // user profile
-    public function updateUser(Request $request)
-    {
-        try {
-            $validator = Validator::make($request->all(), [
-                'first_name' => 'required|string|max:50',
-                'last_name'  => 'required|string|max:50',
-                'email'      => 'required|email|max:100',
-                'phone'      => ['required', 'regex:/^(\+965)?[569]\d{7}$/'],
-                'address'    => 'required|string|min:5|max:255',
-                'town'       => 'required|string|regex:/^[\pL\s\-]+$/u|max:100',
-            ]);
 
-            if ($validator->fails()) {
-                return $this->error($validator->errors(), 'Error in Validation', 422);
-            }
-
-            $id = Auth::guard('api')->user()->id;
-            $user  = User::where('id', $id)->first();
-            if ($user->username  == $request->first_name . '-' . rand(1000, 9999)) {
-                return $this->error((object)[], 'Username already exist', 400);
-            };
-            $updateuser = User::where('id', $id)->first()->update([
-                'name' =>  $request->first_name . ' ' . $request->last_name,
-                'username' => $request->first_name . '-' . rand(1000, 9999),
-                'email'      => $request->email,
-                'phone'      => $request->phone,
-            ]);
-
-            if ($updateuser) {
-                $data = ShippingAddress::where('user_id', $id)->updateOrCreate(
-                    [
-                        'user_id' => $id
-                    ],
-                    [
-                        'first_name' => $request->first_name,
-                        'last_name'  => $request->last_name,
-                        'address'    => $request->address,
-                        'town'       => $request->town,
-                        'zipcode'    => $request->zipcode ?? '000',
-                        'state'      => $request->state ?? 'N/A'
-                    ]
-                );
-
-                $data['email'] = $request->first_name . ' ' . $request->last_name;
-                $data['phone'] = $request->phone;
-                return $this->success($data, 'User updated successfully', 200);
-            }
-
-
-            return $this->error((object)[], 'User not updated', 400);
-        } catch (\Exception $e) {
-            return $this->error((object)[], $e->getMessage(), 400);
-        }
-    }
 
     public function deleteSelfAccount()
     {
@@ -437,5 +384,40 @@ class AuthController extends Controller
         $userModel->password = Hash::make($request->new_password);
         $userModel->save();
         return $this->success((object)[], 'Password changed successfully', 200);
+    }
+
+    // company account create
+    public function createAccount(Request $request)
+    {
+        $validator = validator(
+            $request->all(),
+            [
+                'email' => 'required|email|unique:users,email',
+                'password' => 'required|min:8',
+            ],
+            [
+
+                'email.required' => 'Email is required.',
+                'email.email' => 'Please provide a valid email address.',
+                'email.unique' => 'This email is already registered.',
+                'password.required' => 'Password is required.',
+                'password.min' => 'Password must be at least 8 characters.',
+            ]
+        );
+
+        // Check for validation errors
+        if ($validator->fails()) {
+            return $this->error(null, $validator->errors(), 422);
+        }
+
+        // If validation passes Create user
+        $user = User::create([
+            'email' => $request->email,
+            'password' => bcrypt($request->password),
+            'user_type' => 'user'
+        ]);
+
+
+        return $this->success($user, 'Account created Successfully', 200);
     }
 }

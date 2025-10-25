@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Account\AccountController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Backend\BackendController;
 use App\Http\Controllers\Product\ProductController;
@@ -20,36 +21,7 @@ Route::controller(BackendController::class)->middleware('auth.check')->group(fun
     Route::get('/dashboard-data', 'monthlyData');
 });
 
-Route::controller(ProductController::class)->middleware('auth.check')->group(function () {
-    Route::get('/product/index', 'index')->name('product.index');
-    Route::get('/product/show/{id}', 'show')->name('product.show');
-    Route::get('/product/create', 'create')->name('product.create');
-    Route::post('/product/store', 'store')->name('product.store');
-    Route::get('/product/edit/{id}', 'edit')->name('product.edit');
-    Route::put('/product/update/{id}', 'update')->name('product.update');
-    Route::get('/product/destroy/{id}', 'destroy')->name('product.destroy');
-    Route::get('product/status/{id}/{status}', 'changeStatus')->name('product.status');
-    Route::delete('/product/image/destroy/{id}', 'productImageDestroy')->name('product.image.destroy');
-});
 
-
-Route::controller(CategoryController::class)->middleware('auth.check')->group(function () {
-    Route::get('/category/index', 'index')->name('category.index');
-    Route::post('/category/store', 'store')->name('category.store');
-    Route::get('/category/destroy/{category_id}', 'destroy')->name('category.destroy');
-    Route::get('/category/edit/{category_id}', 'edit')->name('category.edit');
-    Route::put('/category/update/{category_id}', 'update')->name('category.update');
-    Route::get('/category/{category_id}/toggle-status', 'toggleStatus')->name('category.Toggle.status');
-});
-
-// Route::controller(ReviewController::class)->middleware('auth.check')->group(function () {
-//     Route::resource('review', ReviewController::class);
-//     Route::get('/review/destroy/{id}', 'destroy')->name('review.delete');
-//     Route::post('/review/change-status', 'changeStatus')->name('review.changeStatus');
-//     Route::get('/review/user/create', 'userReview')->name('user.create.review');
-//     Route::post('/review/user/change-status', 'changeUserStatus')->name('review.change.user.status');
-//     Route::get('/review/user/show/{id}', 'showUserReview')->name('user-review.show');
-// });
 
 
 // Role and Permission Management start
@@ -107,9 +79,4 @@ Route::controller(AdminSettingsController::class)->middleware('auth.check')->gro
 });
 
 
-// dynamic page management start
-Route::controller(DynamicPageController::class)->middleware('auth.check')->group(function () {
-    Route::resource('dynamic-pages', DynamicPageController::class);
-    Route::get('/dynamic/pages/destroy/{id}', 'destroy')->name('dynamic-pages.delete');
-    Route::get('/dynamic/pages/toggle-status/{id}/{status}', 'pageSatus')->name('dynamic-pages.toggleStatus');
-});
+

@@ -87,11 +87,19 @@ class ContractController extends Controller
             return $this->error(null, 'Contract not found', 404);
         }
 
-        // Check if company exists and add logo URL
-        if ($contract->company && $contract->company->logo) {
-            $contract->company->logo = asset($contract->company->logo);
+        // Prepare contract data
+        $data = $contract->toArray();
+
+        // Include only required company fields (name + logo)
+        if ($contract->company) {
+            $data['company'] = [
+                'commercial_name' => $contract->company->commercial_name,
+                'logo' => $contract->company->logo ? asset($contract->company->logo) : null,
+            ];
+        } else {
+            $data['company'] = null;
         }
 
-        return $this->success($contract, 'Contract details', 200);
+        return $this->success($data, 'Contract details', 200);
     }
 }

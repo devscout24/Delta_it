@@ -16,48 +16,53 @@ class DocumentController extends Controller
     public function store(Request $request)
     {
         $validated = Validator::make($request->all(), [
-            'file' => 'required|file|max:255',
+            'document_name' => 'required|string|max:255',
+            'document_type' => 'required|string|max:100',
+            'file' => 'required|file|max:2048', // 2MB max
             'tags' => 'nullable|array',
-            'tags.*' => 'string|max:50|distinct'
+            'tags.*' => 'string|max:50|distinct',
         ]);
 
         if ($validated->fails()) {
-            return response()->json(['errors' => $validated->errors()], 422);
+            return $this->error($validated->errors(), 422);
         }
 
         try {
             DB::beginTransaction();
+
             $file = $request->file('file');
             if (!$file) {
                 return $this->error('No file uploaded', 400);
             }
-            $filePath = $this->uploadFile($file,  'documents', null);
-            $document_id  = Document::create([
+
+            // Upload file (custom helper)
+            $filePath = $this->uploadFile($file, 'documents', null);
+
+            // Create document
+            $document = Document::create([
+                'document_name' => $request->document_name,
+                'document_type' => $request->document_type,
                 'document_path' => $filePath,
             ]);
 
-            $tags = $request->tags;
-            if (!$tags) {
-                return $this->error('Tags are required', 400);
-            }
-            if ($tags && is_array($tags)) {
-                foreach ($tags as $tag) {
-                    Tag::create(
-                        [
-                            'document_id' => $document_id->id,
-                            'tag' => $tag
-                        ]
-                    );
+            // Handle tags
+            if ($request->filled('tags') && is_array($request->tags)) {
+                foreach ($request->tags as $tag) {
+                    Tag::create([
+                        'document_id' => $document->id,
+                        'tag' => $tag,
+                    ]);
                 }
             }
 
             DB::commit();
+            return $this->success($document, 'Document uploaded successfully', 200);
         } catch (\Exception $e) {
             DB::rollBack();
-            return $this->error('Server Error', $e->getMessage(), 500);
+            return $this->error($e->getMessage(), 500);
         }
-        return $this->success('Document uploaded successfully', 200);
     }
+
 
     public function deleteDocument(Request $request)
     {

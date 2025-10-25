@@ -42,8 +42,24 @@ class AccessCardController extends Controller
             ]));
             $message = 'Access card created successfully';
         }
-                $accessCard = AccessCard::first();
+        $accessCard = AccessCard::first();
 
         return $this->success($accessCard, $message, 200);
+    }
+
+
+    // mobile api 
+    public function getCardStats()
+    {
+        $data = AccessCard::select('active_card', 'lost_damage_card', 'active_parking_card', 'max_parking_card')->first();
+        if (!$data) {
+            return $this->error(null, 'Data not found', 404);
+        }
+
+        return $this->success(
+            $data,
+            'Access card data fetched successfully',
+            200
+        );
     }
 }

@@ -13,10 +13,18 @@ return new class extends Migration
     {
         Schema::create('documents', function (Blueprint $table) {
             $table->id();
+
+            $table->string('document_name');
+            $table->string('document_type');
             $table->string('document_path');
+
+            $table->unsignedBigInteger('company_id')->nullable(); // Optional association
+            $table->foreign('company_id')->references('id')->on('companies')->onDelete('set null');
+
             $table->timestamps();
         });
     }
+
 
     /**
      * Reverse the migrations.

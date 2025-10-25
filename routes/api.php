@@ -14,7 +14,6 @@ use App\Http\Controllers\Api\CollaboratorController;
 use App\Http\Controllers\Api\InternalNoteController;
 use App\Http\Controllers\Api\MeetingController;
 use App\Http\Controllers\Api\RoomController;
-use App\Models\Meeting;
 
 Route::controller(AuthController::class)->group(function () {
     // user login and logout
@@ -30,6 +29,9 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('/update-user', [AuthController::class, 'updateUser']);
     Route::post('/delete-account', [AuthController::class, 'deleteSelfAccount'])->middleware('auth:api');
     Route::post('/user/profile/reset-password', [AuthController::class, 'userResetPassword'])->middleware('auth:api');
+
+    // Account create 
+    Route::post('/create-account', 'createAccount');
 });
 
 Route::controller(CompanyController::class)->middleware('auth:api')->group(function () {
@@ -39,6 +41,13 @@ Route::controller(CompanyController::class)->middleware('auth:api')->group(funct
     Route::post('/delete-company', 'deleteCompany');
     Route::get('/list-companies', 'getAllCompanies');
     Route::get('/list-incubation-types-for_filter', 'getIncubationTypes');
+
+    // logo 
+    Route::post('/upload_logo', 'uploadLogo');
+    Route::post('/upload-delete', 'deleteLogo');
+    // mobile api 
+    Route::get('/show-company/{id}', 'show');
+    Route::post('/update-company', 'update');
 });
 
 
@@ -94,6 +103,9 @@ Route::controller(ArchiveController::class)->middleware('auth:api')->group(funct
 
 Route::controller(AccessCardController::class)->middleware('auth:api')->group(function () {
     Route::post('/access_card/update', 'updateAccessCode');
+    // mobile api 
+
+    Route::get('/get-cards', 'getCardStats');
 });
 
 Route::controller(RoomController::class)->middleware('auth:api')->group(function () {
