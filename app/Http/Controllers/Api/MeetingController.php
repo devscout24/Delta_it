@@ -10,8 +10,8 @@ use App\Models\Appointment;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use App\Models\MettingBookRequest;
 use App\Http\Controllers\Controller;
-use Monolog\Handler\ElasticaHandler;
 
 class MeetingController extends Controller
 {
@@ -38,27 +38,27 @@ class MeetingController extends Controller
                 ],
             ]);
 
-            if($request->meeting_type =='online'){
-            $online_link = $request->online_link;
-            }else{
+            if ($request->meeting_type == 'online') {
+                $online_link = $request->online_link;
+            } else {
                 $online_link = null;
-            }      
-            
-            if($request->meeting_type =='physical'){
+            }
+
+            if ($request->meeting_type == 'physical') {
                 $room_id = $request->room_id;
-            }else{
+            } else {
                 $room_id = null;
             }
 
             $meeting = Meeting::create([
-            'meeting_name' => $request->meeting_name,
-            'date' => $request->date,
-            'start_time' => $request->start_time,
-            'end_time' => $request->end_time,
-            'room_id' => $room_id,
-            'add_emails' => $request->add_emails,
-            'meeting_type' => $request->meeting_type,
-            'online_link' => $online_link,
+                'meeting_name' => $request->meeting_name,
+                'date' => $request->date,
+                'start_time' => $request->start_time,
+                'end_time' => $request->end_time,
+                'room_id' => $room_id,
+                'add_emails' => $request->add_emails,
+                'meeting_type' => $request->meeting_type,
+                'online_link' => $online_link,
             ]);
 
             if (is_array($request->add_emails)) {
@@ -84,7 +84,7 @@ class MeetingController extends Controller
         // dd($filter, $date);
         $query = Meeting::query();
 
-        
+
 
         if ($date) {
             $parsedDate = Carbon::parse($date)->toDateString();
@@ -114,12 +114,13 @@ class MeetingController extends Controller
     }
 
 
-    function getSingleMeeting($id){
-        
-        $meeting = Meeting::select('id','meeting_name','date','start_time','end_time','meeting_type')
-        ->with(['room','appointmentSlots'])
-        ->where('id', $id)
-        ->get();
+    function getSingleMeeting($id)
+    {
+
+        $meeting = Meeting::select('id', 'meeting_name', 'date', 'start_time', 'end_time', 'meeting_type')
+            ->with(['room', 'appointmentSlots'])
+            ->where('id', $id)
+            ->get();
 
         if (empty($meeting)) {
             return $this->error('Meeting not found', 404);
@@ -130,11 +131,11 @@ class MeetingController extends Controller
     function getAllEvents()
     {
         $events = Appointment::with(['room', 'meeting'])->get();
-    
+
         if ($events->isEmpty()) {
             return $this->error('Events not found', 404);
         }
-    
+
         $formattedEvents = $events->map(function ($event) {
             return [
                 'id' => $event->id,
@@ -152,10 +153,38 @@ class MeetingController extends Controller
                 ],
             ];
         });
-    
+
         return $this->success($formattedEvents, 'Events fetched successfully', 200);
     }
-    
-    
-}
 
+    // meeting request 
+    public function StoreMeeting(Request $request)
+    {
+        //  Validate request data
+        $request->validate([
+            'room_id'     => 'required|exists:rooms,id',
+            'company_id'  => 'required|exists:companies,id',
+            'date'        => 'required|date',
+            'start_time'  => 'required|date_format:H:i',
+            'end_time'    => 'required|date_format:H:i|after:start_time',
+            'status'      => 'nullable|string|in:pending,confirmed,cancelled',
+        ]);
+
+        //  Create meeting
+        $meeting = MettingBookRequest::create([
+            'room_id'     => $request->room_id,
+            'company_id'  => $request->company_id,
+            'date'        => $request->date,
+            'start_time'  => $request->start_time,
+            'end_time'    => $request->end_time,
+            'status'      => $request->status ?? 'pending',
+        ]);
+
+        //  Return response
+        return response()->json([
+            'status'  => true,
+            'message' => 'Meeting Requested submited successfully.',
+            'data'    => $meeting,
+        ], 201);
+    }
+}

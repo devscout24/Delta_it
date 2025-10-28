@@ -118,7 +118,12 @@ Route::controller(MeetingController::class)->middleware('auth:api')->group(funct
     Route::get('/filter-meetings', 'filter');
     Route::get('/get-single-meeting/{id}', 'getSingleMeeting');
     Route::get('/get-all-events', 'getAllEvents');
+
+    // meeting request api 
+    Route::post('/add/request', 'StoreMeeting');
 });
+
+
 
 
 

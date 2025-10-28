@@ -12,18 +12,31 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('meetings', function (Blueprint $table) {
+            // $table->id();
+            // $table->string('meeting_name');
+            // $table->date('date');
+            // $table->time('start_time');
+            // $table->time('end_time');
+            // $table->enum('meeting_type', ['physical', 'online']);
+
+            // // Foreign keys
+            // $table->foreignId('room_id')->constrained('rooms')->onDelete('cascade');
+
+            // $table->text('online_link')->nullable();
+            // $table->timestamps();
+
             $table->id();
             $table->string('meeting_name');
             $table->date('date');
             $table->time('start_time');
             $table->time('end_time');
-            $table->enum('meeting_type', ['physical', 'online']);
-
-            // Foreign keys
-            $table->foreignId('room_id')->constrained('rooms')->onDelete('cascade');
-
-            $table->text('online_link')->nullable();
+            $table->unsignedBigInteger('room_id');
+            $table->string('meeting_type');
+            $table->string('online_link')->nullable();
+            $table->json('add_emails')->nullable();
             $table->timestamps();
+
+            $table->foreign('room_id')->references('id')->on('rooms')->onDelete('cascade');
         });
     }
 
