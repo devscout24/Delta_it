@@ -23,8 +23,8 @@ Route::controller(AuthController::class)->group(function () {
     // user otp verify
     Route::post('/send-otp', [AuthController::class, 'sendOtp']);
     Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
-    Route::post('reset-password', [AuthController::class, 'resetPassword']);
-    Route::post('verify/email_otp', [AuthController::class, 'verifyEmailOtp']);
+    Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+    Route::post('/verify/email_otp', [AuthController::class, 'verifyEmailOtp']);
     // user profile
     Route::post('/update-user', [AuthController::class, 'updateUser']);
     Route::post('/delete-account', [AuthController::class, 'deleteSelfAccount'])->middleware('auth:api');
@@ -41,6 +41,11 @@ Route::controller(CompanyController::class)->middleware('auth:api')->group(funct
     Route::post('/delete-company', 'deleteCompany');
     Route::get('/list-companies', 'getAllCompanies');
     Route::get('/list-incubation-types-for_filter', 'getIncubationTypes');
+    Route::post('/assign-associate_company', 'assignAssociateCompany');
+    Route::post('/show-room-details/{id}', 'showRoomDetails');
+    Route::get('/room-status-change/{status}/{id}', 'roomStatusChange');
+
+
 
     // logo 
     Route::post('/upload_logo', 'uploadLogo');
@@ -69,7 +74,8 @@ Route::controller(ContractController::class)->middleware('auth:api')->group(func
 
 Route::controller(DocumentController::class)->middleware('auth:api')->group(function () {
     Route::post('/add-documents', 'store');
-    Route::post('/delete-document', 'deleteDocument');;
+    Route::post('/delete-document', 'deleteDocument');
+    Route::get('/get-all-documents', 'allDocuments');
 });
 
 
@@ -116,8 +122,11 @@ Route::controller(RoomController::class)->middleware('auth:api')->group(function
 Route::controller(MeetingController::class)->middleware('auth:api')->group(function () {
     Route::post('/add-meeting', 'store');
     Route::get('/filter-meetings', 'filter');
-    Route::get('/get-single-meeting/{id}', 'getSingleMeeting');
+    Route::post('/filter-meetings-type-room', 'filterMeetingBytype');
+    Route::get('/show-single-meeting/{id}', 'singleMeeting');
+    Route::get('/get-all-meeting', 'getAllMeeting');
     Route::get('/get-all-events', 'getAllEvents');
+    Route::get('/get-all-meeting-request', 'getmeetingRequest');
 
     // meeting request api 
     Route::post('/add/request', 'StoreMeeting');

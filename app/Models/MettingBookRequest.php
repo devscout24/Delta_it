@@ -16,4 +16,5 @@ class MettingBookRequest extends Model
         'end_time',
         'status',
     ];
+    protected $hidden = ['created_at', 'updated_at'];
 }

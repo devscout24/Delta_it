@@ -26,7 +26,18 @@ class RoomController extends Controller
             return $this->error(null, 'Area already exists', 422);
         }
 
-        $room = Room::create($validated);
+        if ($request->hasFile('position')) {
+            $position = $this->uploadFile($request->file('position'), 'uploads/room_position', null);;
+        }
+
+        $room = Room::create([
+            'room_name' => $request->room_name,
+            'area' => $request->area,
+            'position' => $position,
+            'status' => 'available'
+        ]);
+
+        $room->position = asset($room->position);
         return $this->success($room, 'Room added successfully', 201);
     }
 }

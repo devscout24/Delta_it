@@ -18,7 +18,6 @@ class MeetingController extends Controller
     use ApiResponse;
     public function store(Request $request)
     {
-        // dd($request->add_emails);
         try {
             $request->validate([
                 'meeting_name' => 'required',
@@ -40,14 +39,11 @@ class MeetingController extends Controller
 
             if ($request->meeting_type == 'online') {
                 $online_link = $request->online_link;
-            } else {
-                $online_link = null;
+                $room_id = $request->room_id;
             }
 
             if ($request->meeting_type == 'physical') {
                 $room_id = $request->room_id;
-            } else {
-                $room_id = null;
             }
 
             $meeting = Meeting::create([
@@ -81,10 +77,7 @@ class MeetingController extends Controller
         $filter = $request->query('filter'); // day, week, month
         $date   = $request->query('date');   // user-defined date
 
-        // dd($filter, $date);
         $query = Meeting::query();
-
-
 
         if ($date) {
             $parsedDate = Carbon::parse($date)->toDateString();
@@ -104,6 +97,10 @@ class MeetingController extends Controller
 
         $meetings = $query->orderBy('date', 'asc')->get();
 
+        if ($meetings->isEmpty()) {
+            return $this->error([], 'Meeting not fond', 404);
+        }
+
         return response()->json([
             'status' => true,
             'message' => 'Meetings fetched successfully',
@@ -114,15 +111,80 @@ class MeetingController extends Controller
     }
 
 
-    function getSingleMeeting($id)
+
+    public function singleMeeting($id)
+    {
+        if (!$id) {
+            return $this->error([], 'Id not fond', 404);
+        }
+        $meeting =  Meeting::where('id', $id)->first();
+        if (! $meeting) {
+            return $this->error([], 'Meeting data not fond', 404);
+        }
+
+        return $this->error($meeting, 'Meeting fetched successfully', 201);
+    }
+
+
+
+    public function filterMeetingBytype(Request $request)
+    {
+
+
+        $query = Meeting::with('room');
+
+        // Meeting type
+        if ($request->has('meeting_type') && !empty($request->meeting_type)) {
+            $query->where('meeting_type', $request->meeting_type);
+        }
+
+        // Room name 
+        if ($request->has('room_name') && !empty($request->room_name)) {
+            $query->whereHas('room', function ($q) use ($request) {
+                $q->where('room_name', 'like', '%' . $request->room_name . '%');
+            });
+        }
+
+        $meetings = $query->get();
+
+        if ($meetings->isEmpty()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'No meetings found for given filters',
+                'data' => [],
+                'code' => 404
+            ]);
+        }
+
+        $formattedMeetings = $meetings->map(function ($meeting) {
+            return [
+                'id' => $meeting->id,
+                'meeting_name' => $meeting->meeting_name,
+                'date' => $meeting->date,
+                'start_time' => $meeting->start_time,
+                'end_time' => $meeting->end_time,
+                'meeting_type' => $meeting->meeting_type,
+                'online_link' => $meeting->online_link,
+                'room_name' => optional($meeting->room)->room_name,
+                'add_emails' => $meeting->add_emails,
+            ];
+        });
+
+        return $this->success(
+            $formattedMeetings,
+            'Meetings filtered successfully',
+            200
+        );
+    }
+
+    function getAllMeeting()
     {
 
         $meeting = Meeting::select('id', 'meeting_name', 'date', 'start_time', 'end_time', 'meeting_type')
-            ->with(['room', 'appointmentSlots'])
-            ->where('id', $id)
+
             ->get();
 
-        if (empty($meeting)) {
+        if ($meeting->isEmpty()) {
             return $this->error('Meeting not found', 404);
         }
         return $this->success($meeting, 'Meeting fetched successfully', 200);
@@ -139,16 +201,19 @@ class MeetingController extends Controller
         $formattedEvents = $events->map(function ($event) {
             return [
                 'id' => $event->id,
-                'meeting_id' => $event->meeting_id,
-                'room_id' => $event->room_id,
+                // 'meeting_id' => $event->meeting_id,
+                // 'room_id' => $event->room_id,
                 'room' => [
                     'id' => $event->room?->id,
                     'room_name' => $event->room?->room_name,
+
                 ],
                 'meeting' => [
                     'id' => $event->meeting?->id,
                     'meeting_name' => $event->meeting?->meeting_name,
                     'date' => $event->meeting?->date,
+                    'duration' => $event->duration,
+                    'event_color' => $event->event_color
 
                 ],
             ];
@@ -157,7 +222,26 @@ class MeetingController extends Controller
         return $this->success($formattedEvents, 'Events fetched successfully', 200);
     }
 
-    // meeting request 
+    public function getmeetingRequest()
+    {
+        $meetings = MettingBookRequest::all();
+
+        if ($meetings->isEmpty()) {
+            return $this->error(
+                [],
+                'No meeting requests found.',
+                404
+            );
+        }
+
+        return $this->success(
+            $meetings,
+            'All meeting requests retrieved successfully.',
+            200
+        );
+    }
+
+    // meeting request for mobile
     public function StoreMeeting(Request $request)
     {
         //  Validate request data

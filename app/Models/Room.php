@@ -10,6 +10,7 @@ class Room extends Model
         'room_name',
         'area',
         'position',
+        'status'
     ];
     protected $hidden = [
         'created_at',

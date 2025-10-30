@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('room_name');
             $table->string('area');
             $table->string('position')->nullable();
+            $table->string('status')->default('available');
             $table->timestamps();
         });
     }

@@ -235,18 +235,24 @@ class AuthController extends Controller
 
         // Save OTP and expiry to user
         $user->update([
-            'otp' => $otp,
-            'otp_expired_at' => $expiresAt,
+            'password_otp' => $otp,
+            'password_otp_expired_at' => $expiresAt,
         ]);
-
         // Send OTP via email
         Mail::to($user->email)->send(new OtpSend($otp));
 
-        return $this->success([
-            'email' => $user->email,
-            'expires_at' => $expiresAt,
-            // 'otp' => $otp     // Only expose OTP in development
-        ], 'OTP sent successfully.', 200);
+        $expiresAt = now()->addMinutes(5)->format('H:i');
+
+
+        return $this->success(
+            [
+                'email' => $user->email,
+                'password_otp_expired_at' => $expiresAt,
+                // 'otp' => $otp, // Uncomment this line only in development mode
+            ],
+            'OTP sent successfully.',
+            200
+        );
     }
 
     public function verifyOtp(Request $request)
@@ -257,19 +263,19 @@ class AuthController extends Controller
             'email' => 'required|email',
         ]);
 
-        $user = User::where('email', $request->email)->where('otp', $request->otp)->first();
+        $user = User::where('email', $request->email)->where('password_otp', $request->otp)->first();
 
         if (!$user) {
             return $this->error([], 'User not available for this email', 400);
-        } else if ($user->otp_expired_at < Carbon::now()) {
+        } else if ($user->password_otp_expired_at < Carbon::now()) {
 
-            $user->otp = null;
-            $user->otp_expired_at = null;
+            $user->password_otp = null;
+            $user->password_otp_expired_at = null;
             $user->save();
             return $this->success((object)[], 'OTP expired', 410);
         }
 
-        $user->otp_verified_at                 = Carbon::now();
+        $user->password_otp_expired_at                 = Carbon::now();
         $user->password_reset_token            = Str::random(64);
         $user->password_reset_token_expires_at = Carbon::now()->addMinutes(5);
         $user->save();
@@ -307,7 +313,6 @@ class AuthController extends Controller
         }
 
         $user = User::where('email', $request->email)
-            ->where('password_reset_token', $request->reset_token)
             ->first();
 
 

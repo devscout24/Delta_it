@@ -10,4 +10,5 @@ class Email extends Model
         'meeting_id',
         'email'
     ];
+    protected $hidden = ['created_at', 'updated_at'];
 }

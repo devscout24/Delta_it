@@ -9,6 +9,7 @@ use Intervention\Image\Facades\Image;
 
 abstract class Controller
 {
+
     public function deleteImage($imagePath)
     {
         $fullPath = public_path($imagePath);
@@ -68,7 +69,7 @@ abstract class Controller
         // Resize and save image
         Image::make($image)->resize($width, $height)->save($fullImagePath);
 
-        return $imagePath; // Relative path for saving in DB or showing in views
+        return $imagePath;
     }
 
 

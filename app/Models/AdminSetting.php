@@ -25,4 +25,5 @@ class AdminSetting extends Model
         'hotline' => 'string',
         'address' => 'string',
     ];
+    protected $hidden = ['created_at', 'updated_at'];
 }

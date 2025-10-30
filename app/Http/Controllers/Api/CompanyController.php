@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Api;
 
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
+use App\Models\Room;
 use App\Models\Company;
 use App\Traits\ApiResponse;
+use Illuminate\Http\Request;
+use App\Models\AssignCompany;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 
 class CompanyController extends Controller
@@ -294,5 +296,64 @@ class CompanyController extends Controller
         ]);
 
         return $this->success((object)[], 'Company General Data updated', 201);
+    }
+
+    public function assignAssociateCompany(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'room_id' => 'required|exists:rooms,id',
+            'company_id' => 'required|exists:companies,id',
+        ]);
+
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $exixt = AssignCompany::where('company_id', $request->company_id)->where('room_id', $request->room_id)->first();
+
+        if ($exixt) {
+            return $this->error('', 'Company already exist', 201);
+        }
+        AssignCompany::create([
+            'room_id' => $request->room_id,
+            'company_id' => $request->company_id,
+        ]);
+
+        return $this->success('', 'Comapany added successfull', 200);
+    }
+
+
+    public function showRoomDetails($id)
+    {
+
+        $roomDetails = AssignCompany::with('company', 'room')->where('room_id', $id)->first();
+
+        if (!$roomDetails) {
+
+            return $this->error('No company assigned to this room.');
+        }
+
+
+        return $this->success($roomDetails, 'Room details fetched successfully.');
+    }
+
+
+    public function roomStatusChange($status, $id)
+    {
+        $room = Room::find($id);
+
+        if (!$room) {
+            return $this->error('Room not found', 404);
+        }
+
+        $room->update([
+            'status' => $status,
+        ]);
+
+        return $this->success((object)[], 'Room status updated successfully', 201);
     }
 }

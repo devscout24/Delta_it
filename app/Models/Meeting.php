@@ -15,18 +15,19 @@ class Meeting extends Model
         'meeting_type',
         'online_link'
     ];
-protected $hidden = [
+    protected $hidden = [
         'created_at',
         'updated_at',
     ];
 
     public function appointmentSlots()
-{
-    return $this->hasMany(AppointmentSlot::class, 'meeting_id');
-}
+    {
+        return $this->hasMany(AppointmentSlot::class, 'meeting_id');
+    }
 
 
-    function room(){
-        return $this->belongsTo(Room::class,'meeting_id');
+    public function room()
+    {
+        return $this->belongsTo(Room::class);
     }
 }

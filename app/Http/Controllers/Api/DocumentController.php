@@ -88,4 +88,24 @@ class DocumentController extends Controller
 
         return $this->success('Document deleted successfully', 200);
     }
+
+
+    public function allDocuments()
+    {
+        $documents = Document::all();
+
+        if ($documents->isEmpty()) {
+            return $this->error(
+                [],
+                'No documents available.',
+                404
+            );
+        }
+
+        return $this->success(
+            $documents,
+            'All documents retrieved successfully.',
+            200
+        );
+    }
 }
