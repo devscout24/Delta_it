@@ -13,15 +13,12 @@ return new class extends Migration
     {
         Schema::create('room_bookings', function (Blueprint $table) {
             $table->id();
-            $table->string('event_name');
             $table->foreignId('room_id')->constrained('rooms')->onDelete('cascade');
-            $table->string('max_invitees');
-            $table->string('event_color');
-            $table->string('description');
-            $table->string('invitees_select');
-            $table->date('date_range');
-            $table->string('duration');
-            $table->string('timezone');
+            $table->foreignId('company_id')->constrained('companies')->onDelete('cascade');
+            $table->string('booking_name');
+            $table->date('start_date');
+            $table->date('end_date');
+            $table->string('add_emails');
             $table->timestamps();
         });
     }

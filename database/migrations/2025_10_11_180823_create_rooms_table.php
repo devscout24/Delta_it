@@ -13,10 +13,11 @@ return new class extends Migration
     {
         Schema::create('rooms', function (Blueprint $table) {
             $table->id();
-            $table->string('room_name');
-            $table->string('area');
-            $table->string('position')->nullable();
-            $table->string('status')->default('available');
+            $table->string('room_name'); // e.g., "Sala - 1.1.14"
+            $table->decimal('area', 8, 2); // e.g., 20.00
+            $table->json('polygon_points');
+            $table->foreignId('company_id')->nullable()->constrained('companies')->onDelete('set null');
+            $table->enum('status', ['available', 'occupied', 'maintenance'])->default('available');
             $table->timestamps();
         });
     }

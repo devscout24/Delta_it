@@ -22,4 +22,10 @@ class Company extends Model
         'status'
     ];
     protected $hidden = ['created_at', 'updated_at'];
+
+    public function room()
+    {
+        // A company has one room.
+        return $this->hasOne(Room::class);
+    }
 }

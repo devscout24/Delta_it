@@ -16,29 +16,39 @@ class RoomSeeder extends Seeder
 
         Room::insert([
             [
-                'room_name' => 'Main Conference Room',
-                'area'      => 'Building A - 1st Floor',
-                'position'  => 'Near Reception',
+                'room_name'      => 'Main Conference Room',
+                'area'           => 50.00, // numeric value
+                'polygon_points' => json_encode([[0, 0], [0, 5], [5, 5], [5, 0]]), // example points
+                'company_id'     => 1,
+                'status'         => 'available',
             ],
             [
-                'room_name' => 'Project Discussion Room',
-                'area'      => 'Building A - 2nd Floor',
-                'position'  => 'Next to HR Office',
+                'room_name'      => 'Project Discussion Room',
+                'area'           => 35.00,
+                'polygon_points' => json_encode([[0, 0], [0, 4], [4, 4], [4, 0]]),
+                'company_id'     => 1,
+                'status'         => 'available',
             ],
             [
-                'room_name' => 'Client Meeting Room',
-                'area'      => 'Building B - 3rd Floor',
-                'position'  => 'Corner Office',
+                'room_name'      => 'Client Meeting Room',
+                'area'           => 40.00,
+                'polygon_points' => json_encode([[0, 0], [0, 6], [6, 6], [6, 0]]),
+                'company_id'     => 2,
+                'status'         => 'available',
             ],
             [
-                'room_name' => 'Training Hall',
-                'area'      => 'Building C - Ground Floor',
-                'position'  => 'Left Wing',
+                'room_name'      => 'Training Hall',
+                'area'           => 80.00,
+                'polygon_points' => json_encode([[0, 0], [0, 10], [10, 10], [10, 0]]),
+                'company_id'     => 3,
+                'status'         => 'available',
             ],
             [
-                'room_name' => 'Board Room',
-                'area'      => 'Head Office - 5th Floor',
-                'position'  => 'Central Section',
+                'room_name'      => 'Board Room',
+                'area'           => 60.00,
+                'polygon_points' => json_encode([[0, 0], [0, 8], [8, 8], [8, 0]]),
+                'company_id'     => 1,
+                'status'         => 'available',
             ],
         ]);
     }

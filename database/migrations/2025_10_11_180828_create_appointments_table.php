@@ -24,14 +24,6 @@ return new class extends Migration
         });
     }
 
-    //   'meeting_id',
-    //     'room_id',
-    //     "online_link",
-    //     'max_invitees',
-    //     'event_color',
-    //     'description',
-    //     'duration',
-    //     'timezone',
     /**
      * Reverse the migrations.
      */

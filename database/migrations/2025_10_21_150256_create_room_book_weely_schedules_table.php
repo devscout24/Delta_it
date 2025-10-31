@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('room_book_weely_schedules', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('room_book_id')->constrained('room_books')->onDelete('cascade');
             $table->foreignId('room_id')->constrained('rooms')->onDelete('cascade');
             $table->string('day')->nullable();
             $table->time('start_time')->nullable();
