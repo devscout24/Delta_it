@@ -23,14 +23,14 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('/user-signup', 'signup');
     Route::post('/user-logout', 'logout');
     // user otp verify
-    Route::post('/send-otp', [AuthController::class, 'sendOtp']);
-    Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
-    Route::post('/reset-password', [AuthController::class, 'resetPassword']);
-    Route::post('/verify/email_otp', [AuthController::class, 'verifyEmailOtp']);
+    Route::post('/send-otp', 'sendOtp');
+    Route::post('/verify-otp', 'verifyOtp');
+    Route::post('/reset-password', 'resetPassword');
+    Route::post('/verify/email_otp', 'verifyEmailOtp');
     // user profile
-    Route::post('/update-user', [AuthController::class, 'updateUser']);
-    Route::post('/delete-account', [AuthController::class, 'deleteSelfAccount'])->middleware('auth:api');
-    Route::post('/user/profile/reset-password', [AuthController::class, 'userResetPassword'])->middleware('auth:api');
+    Route::post('/update-user', 'updateUser');
+    Route::post('/delete-account', 'deleteSelfAccount')->middleware('auth:api');
+    Route::post('/user/profile/reset-password', 'userResetPassword')->middleware('auth:api');
 
     // Account create 
     Route::post('/create-account', 'createAccount');

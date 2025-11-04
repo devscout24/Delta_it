@@ -28,4 +28,10 @@ class Company extends Model
         // A company has one room.
         return $this->hasOne(Room::class);
     }
+
+    public function contract()
+    {
+        // A company has one contract.
+        return $this->hasOne(Contract::class);
+    }
 }

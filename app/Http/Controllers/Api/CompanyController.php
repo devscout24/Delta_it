@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Room;
 use App\Models\Company;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
-use App\Models\AssignCompany;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 
@@ -52,7 +50,6 @@ class CompanyController extends Controller
         ];
         return $this->success($company, 'Company fetched successful', 200);
     }
-
 
 
     public function updateCompanyGeneralData(Request $request)
@@ -131,21 +128,37 @@ class CompanyController extends Controller
         return $this->success((object)[], 'Company deleted successfully', 200);
     }
 
-    public function getAllCompanies()
+    public function getAllCompanies(Request $request)
     {
+        // Get filter from request, default to all
+        $status = $request->query('status'); // 'active' or 'archive'
 
-        $companies = Company::all();
+        // Build query
+        $query = Company::with('room', 'contract');
+
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        $companies = $query->get();
 
         $data = [];
         foreach ($companies as $company) {
             $data[] = [
                 'id' => $company->id,
                 'commercial_name' => $company->commercial_name,
-                'company_email' => $company->company_email,
+                'incubation_type' => $company->incubation_type,
+                'logo' => asset($company->logo),
+                'contract' => $company->contract ? [
+                    'id' => $company->contract->id,
+                    'start_date' => $company->contract->start_date,
+                    'end_date' => $company->contract->end_date,
+                ] : null,
             ];
         }
 
-        return $this->success($companies, 'Companies fetched successful', 200);
+
+        return $this->success($data, 'Companies fetched successfully', 200);
     }
 
 
@@ -172,14 +185,13 @@ class CompanyController extends Controller
             'company_id' => 'required|exists:companies,id',
         ]);
 
-        // Find the company
         $company = Company::find($request->company_id);
 
         // Handle file upload
         if ($request->hasFile('logo')) {
             $file = $request->file('logo');
 
-            // Optional: Delete old logo if exists
+
             if ($company->logo && file_exists(public_path($company->logo))) {
                 unlink(public_path($company->logo));
             }
