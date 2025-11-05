@@ -30,4 +30,10 @@ class RoomBookController extends Controller
 
         return $this->success($bookData, 'Room booking created successfully', 201);
     }
+
+    public function getAllBookingRoom()
+    {
+        $allBookingRoom = RoomBookings::all();
+        return $this->success($allBookingRoom, 'All Booking Room', 200);
+    }
 }

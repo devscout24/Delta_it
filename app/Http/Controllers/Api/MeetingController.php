@@ -52,7 +52,6 @@ class MeetingController extends Controller
                 'start_time' => $request->start_time,
                 'end_time' => $request->end_time,
                 'room_id' => $room_id,
-                'add_emails' => $request->add_emails,
                 'meeting_type' => $request->meeting_type,
                 'online_link' => $online_link,
             ]);
@@ -71,6 +70,60 @@ class MeetingController extends Controller
             return $this->error($e->getMessage());
         }
     }
+
+
+    public function update(Request $request, $id)
+    {
+        try {
+            $meeting = Meeting::findOrFail($id);
+
+            $request->validate([
+                'meeting_name' => 'required',
+                'date' => 'required',
+                'start_time' => 'required',
+                'end_time' => 'required',
+                'add_emails' => 'required|array',
+                'meeting_type' => 'required',
+                'online_link' => [
+                    'nullable',
+                    'url'
+                ],
+
+            ]);
+
+            // Determine which fields to update
+            $online_link = $request->meeting_type === 'online' ? $request->online_link : null;
+            $room_id = $request->meeting_type === 'physical' ? $request->room_id : ($request->meeting_type === 'online' ? $request->room_id : null);
+
+            // Update the meeting
+            $meeting->update([
+                'meeting_name' => $request->meeting_name,
+                'date' => $request->date,
+                'start_time' => $request->start_time,
+                'end_time' => $request->end_time,
+                'room_id' => $room_id,
+                'meeting_type' => $request->meeting_type,
+                'online_link' => $online_link,
+            ]);
+
+            // Update emails
+            Email::where('meeting_id', $meeting->id)->delete();
+            if (is_array($request->add_emails)) {
+                foreach ($request->add_emails as $email) {
+                    Email::create([
+                        'meeting_id' => $meeting->id,
+                        'email' => $email,
+                    ]);
+                }
+            }
+
+            return $this->success($meeting, 'Meeting updated successfully', 200);
+        } catch (Exception $e) {
+            return $this->error($e->getMessage());
+        }
+    }
+
+
 
     public function filter(Request $request)
     {
@@ -130,7 +183,6 @@ class MeetingController extends Controller
     public function filterMeetingBytype(Request $request)
     {
 
-
         $query = Meeting::with('room');
 
         // Meeting type
@@ -144,6 +196,7 @@ class MeetingController extends Controller
                 $q->where('room_name', 'like', '%' . $request->room_name . '%');
             });
         }
+
 
         $meetings = $query->get();
 
@@ -190,37 +243,6 @@ class MeetingController extends Controller
         return $this->success($meeting, 'Meeting fetched successfully', 200);
     }
 
-    function getAllEvents()
-    {
-        $events = Appointment::with(['room', 'meeting'])->get();
-
-        if ($events->isEmpty()) {
-            return $this->error('Events not found', 404);
-        }
-
-        $formattedEvents = $events->map(function ($event) {
-            return [
-                'id' => $event->id,
-                // 'meeting_id' => $event->meeting_id,
-                // 'room_id' => $event->room_id,
-                'room' => [
-                    'id' => $event->room?->id,
-                    'room_name' => $event->room?->room_name,
-
-                ],
-                'meeting' => [
-                    'id' => $event->meeting?->id,
-                    'meeting_name' => $event->meeting?->meeting_name,
-                    'date' => $event->meeting?->date,
-                    'duration' => $event->duration,
-                    'event_color' => $event->event_color
-
-                ],
-            ];
-        });
-
-        return $this->success($formattedEvents, 'Events fetched successfully', 200);
-    }
 
     public function getmeetingRequest()
     {
@@ -242,7 +264,7 @@ class MeetingController extends Controller
     }
 
     // meeting request for mobile
-    public function StoreMeeting(Request $request)
+    public function StoreMeetingRequest(Request $request)
     {
         //  Validate request data
         $request->validate([

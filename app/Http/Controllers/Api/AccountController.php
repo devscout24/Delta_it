@@ -5,12 +5,22 @@ namespace App\Http\Controllers\Api;
 use App\Models\Account;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Traits\ApiResponse;
 use Illuminate\Support\Facades\Validator;
 
 class AccountController extends Controller
 {
     use ApiResponse;
+
+    // List all accounts
+    public function index()
+    {
+        $accounts = User::whereNull('name')->get();
+        return $this->success($accounts, 'Account list retrieved successfully', 200);
+    }
+
+    // Create account
     public function store(Request $request)
     {
 
@@ -25,14 +35,16 @@ class AccountController extends Controller
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
-        $account = Account::create($request->all());
+
+
+        $account = User::create($request->all());
         return $this->success($account, 'Account created successfully', 201);
     }
 
     // Update account
     public function update(Request $request)
     {
-        $account = Account::find($request->id);
+        $account = User::find($request->id);
         if (!$account) {
             return $this->error(null, 'Account not found', 404);
         }
@@ -56,7 +68,8 @@ class AccountController extends Controller
     // Delete account
     public function destroy($id)
     {
-        $account = Account::find($id);
+
+        $account = User::find($id);
         if (!$account) {
             return $this->error(null, 'Account not found', 404);
         }

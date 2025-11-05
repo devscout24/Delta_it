@@ -15,6 +15,11 @@ class RoomBookings extends Model
         'add_emails',
     ];
 
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+    ];
+
     protected $casts = [
         'add_emails' => 'array',
     ];

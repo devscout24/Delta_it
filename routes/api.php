@@ -7,7 +7,6 @@ use App\Http\Controllers\Api\AccountController;
 use App\Http\Controllers\Api\ArchiveController;
 use App\Http\Controllers\Api\CompanyController;
 use App\Http\Controllers\Api\MeetingController;
-use App\Http\Controllers\Api\RequestController;
 use App\Http\Controllers\Api\ContractController;
 use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\RoomBookController;
@@ -16,6 +15,7 @@ use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\Api\CollaboratorController;
 use App\Http\Controllers\Api\InternalNoteController;
 use App\Http\Controllers\Api\RoomAppointmentController;
+use App\Http\Controllers\Api\CUserController;
 
 Route::controller(AuthController::class)->group(function () {
     // user login and logout
@@ -31,9 +31,6 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('/update-user', 'updateUser');
     Route::post('/delete-account', 'deleteSelfAccount')->middleware('auth:api');
     Route::post('/user/profile/reset-password', 'userResetPassword')->middleware('auth:api');
-
-    // Account create 
-    Route::post('/create-account', 'createAccount');
 });
 
 Route::controller(CompanyController::class)->middleware('auth:api')->group(function () {
@@ -74,23 +71,16 @@ Route::controller(ContractController::class)->middleware('auth:api')->group(func
 Route::controller(DocumentController::class)->middleware('auth:api')->group(function () {
     Route::post('/add-documents', 'store');
     Route::post('/delete-document', 'deleteDocument');
+    Route::get('/get-all-documents-list', 'getAllDocumentsList');
     Route::get('/get-all-documents', 'allDocuments');
 });
 
 
 
-Route::controller(RoomBookController::class)->middleware('auth:api')->group(function () {
-    Route::post('/add-room-booking', 'RoomBook');
-});
-
-Route::controller(RoomAppointmentController::class)->middleware('auth:api')->group(function () {
-    Route::post('/add-room-appointment', 'RoomAppointment');
-});
-
-
 Route::controller(AccountController::class)->middleware('auth:api')->group(function () {
+    Route::get('/all-account-list', 'index');
     Route::post('/add-account', 'store');
-    Route::get('/delete-account/{id}', 'destroy');
+    Route::get('/delete-company/account/{id}', 'destroy');
     Route::post('/update-account', 'update');
 });
 
@@ -110,8 +100,8 @@ Route::controller(ArchiveController::class)->middleware('auth:api')->group(funct
 
 Route::controller(AccessCardController::class)->middleware('auth:api')->group(function () {
     Route::post('/access_card/update', 'updateAccessCode');
-    // mobile api 
 
+    // mobile api 
     Route::get('/get-cards', 'getCardStats');
 });
 
@@ -127,21 +117,39 @@ Route::controller(RoomController::class)->middleware('auth:api')->group(function
 
 Route::controller(MeetingController::class)->middleware('auth:api')->group(function () {
     Route::post('/add-meeting', 'store');
+    Route::post('/update-meeting/{id}', 'update');
     Route::get('/filter-meetings', 'filter');
     Route::post('/filter-meetings-type-room', 'filterMeetingBytype');
     Route::get('/show-single-meeting/{id}', 'singleMeeting');
     Route::get('/get-all-meeting', 'getAllMeeting');
-    Route::get('/get-all-events', 'getAllEvents');
     Route::get('/get-all-meeting-request', 'getmeetingRequest');
 
     // meeting request api 
-    Route::post('/add/request', 'StoreMeeting');
+    Route::post('/add-request', 'StoreMeetingRequest');
 });
-
-
 
 
 
 Route::controller(AppointmentController::class)->middleware('auth:api')->group(function () {
     Route::post('/add-appointment', 'addAppointment');
+    Route::post('/update-appointment/{id}', 'updateAppointment');
+    Route::get('/get-all-events', 'getAllEvents');
+});
+
+
+Route::controller(RoomBookController::class)->middleware('auth:api')->group(function () {
+    Route::post('/add-room-booking', 'RoomBook');
+    Route::get('/get-all-booking-rooms', 'getAllBookingRoom');
+});
+
+Route::controller(RoomAppointmentController::class)->middleware('auth:api')->group(function () {
+    Route::post('/add-room-appointment', 'RoomAppointment');
+});
+
+
+
+Route::controller(CUserController::class)->middleware('auth:api')->group(function () {
+    Route::post('/add-user', 'store');
+    Route::post('/update-user/{id}', 'update');
+    Route::get('/delete-user/{id}', 'destroy');
 });

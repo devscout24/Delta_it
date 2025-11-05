@@ -30,4 +30,9 @@ class Meeting extends Model
     {
         return $this->belongsTo(Room::class);
     }
+
+    public function emails()
+    {
+        return $this->hasMany(Email::class, 'meeting_id');
+    }
 }

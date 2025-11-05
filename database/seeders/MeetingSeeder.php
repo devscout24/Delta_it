@@ -17,27 +17,44 @@ class MeetingSeeder extends Seeder
     {
 
         DB::table('meetings')->insert([
+            // ✅ WEEK MEETING (this week)
             [
-                'meeting_name' => 'Weekly Team Sync',
-                'date' => '2025-11-05',
-                'start_time' => '10:00:00',
-                'end_time' => '11:00:00',
+                'meeting_name' => 'Weekly Standup Meeting',
+                'date' => '2025-11-07',   // This week
+                'start_time' => '09:00:00',
+                'end_time' => '10:00:00',
                 'room_id' => 1,
-                'add_emails' => json_encode(['john@example.com', 'jane@example.com']),
+                'add_emails' => json_encode(['dev1@example.com', 'dev2@example.com']),
                 'meeting_type' => 'online',
-                'online_link' => 'https://zoom.us/j/123456789',
+                'online_link' => 'https://zoom.us/j/987654321',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
+
+            // ✅ MONTH MEETING (within same month)
             [
-                'meeting_name' => 'Project Kickoff',
-                'date' => '2025-11-07',
-                'start_time' => '14:00:00',
-                'end_time' => '15:30:00',
+                'meeting_name' => 'Monthly Review & Planning',
+                'date' => '2025-11-25',   // Same month but different week
+                'start_time' => '15:00:00',
+                'end_time' => '16:30:00',
                 'room_id' => 2,
-                'add_emails' => json_encode(['manager@example.com', 'teamlead@example.com']),
-                'meeting_type' => 'offline',
+                'add_emails' => json_encode(['ceo@example.com', 'hr@example.com']),
+                'meeting_type' => 'physical',
                 'online_link' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+
+            // ✅ CUSTOM DATE MEETING (future random date)
+            [
+                'meeting_name' => 'Investor Presentation',
+                'date' => '2026-02-10',   // Completely different date
+                'start_time' => '11:00:00',
+                'end_time' => '13:00:00',
+                'room_id' => 3,
+                'add_emails' => json_encode(['investor@example.com', 'founder@example.com']),
+                'meeting_type' => 'online',
+                'online_link' => 'https://meet.google.com/abc-xyz-def',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],

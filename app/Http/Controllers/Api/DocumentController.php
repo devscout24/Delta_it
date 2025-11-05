@@ -38,12 +38,25 @@ class DocumentController extends Controller
             // Upload file (custom helper)
             $filePath = $this->uploadFile($file, 'documents', null);
 
+
+            if ($request->document_type == 'company') {
+
+                $company_id  = $request->company_id;
+                if (!$company_id) {
+                    return $this->error('Company ID is required for company documents', 400);
+                }
+            } else {
+                $company_id  = null;
+            }
+
             // Create document
             $document = Document::create([
                 'document_name' => $request->document_name,
                 'document_type' => $request->document_type,
                 'document_path' => $filePath,
+                'company_id' => $company_id,
             ]);
+
 
             // Handle tags
             if ($request->filled('tags') && is_array($request->tags)) {
@@ -54,6 +67,16 @@ class DocumentController extends Controller
                     ]);
                 }
             }
+
+
+            $document = [
+                'id' => $document->id,
+                'document_name' => $document->document_name,
+                'document_type' => $document->document_type,
+                'document_path' => asset($document->document_path),
+                'company_id' => $document->company_id,
+            ];
+
 
             DB::commit();
             return $this->success($document, 'Document uploaded successfully', 200);
@@ -89,10 +112,55 @@ class DocumentController extends Controller
         return $this->success('Document deleted successfully', 200);
     }
 
+    public function getAllDocumentsList(Request $request)
+    {
+        $query = Document::with(['company', 'tags']);
 
+        //  Filter by document type (internal / company)
+        if ($request->has('document_type')) {
+            $query->where('document_type', $request->document_type);
+        }
+
+        //  Filter by company (if you want company based document)
+        if ($request->has('company_id')) {
+            $query->where('company_id', $request->company_id);
+        }
+
+        //  Filter by tag name 
+        if ($request->has('tag')) {
+            $query->whereHas('tags', function ($q) use ($request) {
+                $q->where('tag', 'LIKE', '%' . $request->tag . '%');
+            });
+        }
+
+        $documents = $query->get()->map(function ($doc) {
+
+            return [
+                'id' => $doc->id,
+                'document_name' => $doc->document_name,
+                'document_type' => $doc->document_type,
+                'company' => $doc->company ? $doc->company->commercial_name : 'techlabs',
+                'tags' => $doc->tags->pluck('tag'),
+                'document_url' => asset($doc->document_path),
+            ];
+        });
+
+        if ($documents->isEmpty()) {
+            return $this->error([], 'No documents available', 404);
+        }
+
+        return $this->success(
+            $documents,
+            'Documents retrieved successfully',
+            200
+        );
+    }
+
+
+    // mobile api 
     public function allDocuments()
     {
-        $documents = Document::all();
+        $documents = Document::with(['company', 'tags'])->get();
 
         if ($documents->isEmpty()) {
             return $this->error(
@@ -102,8 +170,15 @@ class DocumentController extends Controller
             );
         }
 
+        $formattedDocuments = $documents->map(function ($doc) {
+            return [
+                'id' => $doc->id,
+                'document_path' => asset($doc->document_path),
+            ];
+        });
+
         return $this->success(
-            $documents,
+            $formattedDocuments,
             'All documents retrieved successfully.',
             200
         );

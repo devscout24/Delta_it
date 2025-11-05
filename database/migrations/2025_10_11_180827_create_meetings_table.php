@@ -21,7 +21,6 @@ return new class extends Migration
             $table->unsignedBigInteger('room_id');
             $table->string('meeting_type');
             $table->string('online_link')->nullable();
-            $table->json('add_emails')->nullable();
             $table->timestamps();
         });
     }

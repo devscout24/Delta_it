@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Appointment extends Model
 {
     protected $fillable = [
+        'event_name',
         'meeting_id',
         'room_id',
         "online_link",
@@ -17,12 +18,14 @@ class Appointment extends Model
         'timezone',
     ];
 
-    function room(){
-        return $this->belongsTo(Room::class,'room_id');
+    function room()
+    {
+        return $this->belongsTo(Room::class, 'room_id');
     }
 
-    function meeting(){
-        return $this->belongsTo(Meeting::class,'meeting_id');
+    function meeting()
+    {
+        return $this->belongsTo(Meeting::class, 'meeting_id');
     }
 
     protected $hidden = ['created_at', 'updated_at'];

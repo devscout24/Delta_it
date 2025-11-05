@@ -48,6 +48,7 @@ class RoomAppointmentController extends Controller
 
             //  Create appointment
             $appointment = RoomAppointment::create([
+                'event_name'   => $request->event_name,
                 'room_id'      => $request->room_id,
                 'max_invitees' => $request->max_invitees,
                 'event_color'  => $request->event_color,
