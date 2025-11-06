@@ -8,8 +8,7 @@ class WeeklySchedule extends Model
 {
     protected $fillable =
     [
-        'appointment_id',
-        'meeting_id',
+        'event_id',
         'day',
         'start_time',
         'end_time',

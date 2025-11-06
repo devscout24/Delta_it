@@ -16,6 +16,8 @@ use App\Http\Controllers\Api\CollaboratorController;
 use App\Http\Controllers\Api\InternalNoteController;
 use App\Http\Controllers\Api\RoomAppointmentController;
 use App\Http\Controllers\Api\CUserController;
+use App\Http\Controllers\Api\EventController;
+use Illuminate\Console\Scheduling\Event;
 
 Route::controller(AuthController::class)->group(function () {
     // user login and logout
@@ -152,4 +154,11 @@ Route::controller(CUserController::class)->middleware('auth:api')->group(functio
     Route::post('/add-user', 'store');
     Route::post('/update-user/{id}', 'update');
     Route::get('/delete-user/{id}', 'destroy');
+});
+
+
+Route::controller(EventController::class)->middleware('auth:api')->group(function () {
+    Route::post('/add-meeting-event', 'store');
+    Route::get('/meeting-event/available-slots', 'getAvailableSlots');
+    Route::post('/book-meeting-slot', 'bookSlot');
 });

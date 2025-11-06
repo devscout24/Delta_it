@@ -13,11 +13,10 @@ return new class extends Migration
     {
         Schema::create('weekly_schedules', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('appointment_id')->constrained('appointments')->onDelete('cascade');
-            $table->foreignId('meeting_id')->constrained('meetings')->onDelete('cascade');
-            $table->string('day')->nullable();
-            $table->time('start_time')->nullable();
-            $table->time('end_time')->nullable();
+            $table->foreignId('meeting_event_id')->constrained('meeting_events')->onDelete('cascade');
+            $table->enum('day', ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']);
+            $table->time('start_time');
+            $table->time('end_time');
             $table->timestamps();
         });
     }
