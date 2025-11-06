@@ -27,7 +27,13 @@ class CompanyController extends Controller
             'company_email' => $request->company_email,
         ]);
 
-        return $this->success((object)[], 'Company Added Successful');
+        $data = [
+            'company_id' => Company::latest()->first()->id,
+            'commercial_name' => $request->commercial_name,
+            'company_email' => $request->company_email,
+        ];
+
+        return $this->success($data, 'Company Added Successful');
     }
 
 
@@ -54,20 +60,19 @@ class CompanyController extends Controller
 
     public function updateCompanyGeneralData(Request $request)
     {
-
         $validator = Validator::make($request->all(), [
             'commercial_name' => 'required',
-            'company_email' => 'required|email',
-            'fiscal_name' => 'nullable',
-            'nif' => 'nullable',
-            'phone_number' => 'nullable',
+            'company_email'   => 'required|email|unique:companies,company_email,' . $request->id,
+            'fiscal_name'     => 'nullable',
+            'nif'             => 'nullable',
+            'phone_number'    => 'nullable',
             'incubation_type' => 'nullable',
             'occupied_office' => 'nullable',
-            'occupied_area' => 'nullable',
-            'bussiness_area' => 'nullable',
+            'occupied_area'   => 'nullable',
+            'bussiness_area'  => 'nullable',
             'company_manager' => 'nullable',
-            'description' => 'nullable',
-            'logo' => 'nullable',
+            'description'     => 'nullable',
+            'logo'            => 'nullable',
         ]);
 
         if ($validator->fails()) {
@@ -236,7 +241,7 @@ class CompanyController extends Controller
         return $this->error(null, 'Company Logo not found', 201);
     }
 
-    // mobile api 
+    // mobile api
 
     public function show(Request $request, $id)
     {
