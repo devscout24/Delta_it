@@ -24,21 +24,25 @@ class AccountController extends Controller
     public function store(Request $request)
     {
 
-        $validator = Validator::make($request->all(), [
-            'first_name' => 'required|string|max:255',
-            'last_name'  => 'required|string|max:255',
-            'job_position' => 'nullable|string|max:255',
-            'email'      => 'required|email|unique:accounts,email',
-            'password'   => 'required|string|min:6',
-        ]);
+        try {
+            $validator = Validator::make($request->all(), [
+                'first_name' => 'required|string|max:255',
+                'last_name'  => 'required|string|max:255',
+                'job_position' => 'nullable|string|max:255',
+                'email'      => 'required|email|unique:accounts,email',
+                'password'   => 'required|string|min:6',
+            ]);
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
+
+
+            $account = User::create($request->all());
+            return $this->success($account, 'Account created successfully', 201);
+        } catch (\Exception $e) {
+            return $this->error(null, $e->getMessage(), 500);
         }
-
-
-        $account = User::create($request->all());
-        return $this->success($account, 'Account created successfully', 201);
     }
 
     // Update account
@@ -76,5 +80,26 @@ class AccountController extends Controller
 
         $account->delete();
         return $this->success(null, 'Account deleted successfully', 200);
+    }
+
+
+    public function PasswordReset(Request $request)
+    {
+
+        $validator = Validator::make($request->all(), [
+            'new_password' => 'required|string|confirmed|min:6',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->error(null, $validator->errors(), 422);
+        }
+
+        $user  = new User();
+        $user->where('id', auth()->guard('api')->user()->id)
+            ->update(['password' => bcrypt($request->new_password)]);
+
+
+
+        return $this->success(null, 'Password reset successfully', 200);
     }
 }

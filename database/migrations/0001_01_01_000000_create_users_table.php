@@ -24,7 +24,6 @@ return new class extends Migration
             $table->string('zipcode', 20)->nullable();
             $table->string('password');
             $table->string('profile_photo')->nullable();
-            $table->string('user_type', 255);
             // email verificaton
             $table->timestamp('email_verified_at')->nullable();
             $table->string('email_otp')->nullable();

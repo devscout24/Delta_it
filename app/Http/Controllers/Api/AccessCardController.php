@@ -24,7 +24,7 @@ class AccessCardController extends Controller
         $accessCard = AccessCard::first();
 
         if ($accessCard) {
-            // Row exists → update it
+
             $accessCard->update($request->only([
                 'active_card',
                 'lost_damage_card',
@@ -33,7 +33,7 @@ class AccessCardController extends Controller
             ]));
             $message = 'Access card updated successfully';
         } else {
-            // No row → create it
+
             $accessCard = AccessCard::create($request->only([
                 'active_card',
                 'lost_damage_card',

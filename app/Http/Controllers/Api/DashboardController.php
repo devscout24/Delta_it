@@ -2,26 +2,23 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Models\Room;
 use App\Models\Company;
-use Illuminate\Http\Request;
+use App\Traits\ApiResponse;
 use App\Http\Controllers\Controller;
 
 class DashboardController extends Controller
 {
+    use ApiResponse;
     public function getMetrics()
     {
         $activeCompanies = Company::where('status', 'active')->count();
-        $pendingRequests = Request::where('status', 'pending')->count();
-        // $pendingPayments = Payment::where('status', 'pending')->count();
+        $occupiedRooms = Room::where('status', 'occupied')->count();
 
-
-        $occupationPercentage = 40;
-
-        return response()->json([
+        return $this->success([
             'active_companies' => $activeCompanies,
-            'pending_requests' => $pendingRequests,
-            'occupation' => $occupationPercentage,
-            // 'pending_payments' => $pendingPayments,
-        ]);
+            'occupation' =>  $occupiedRooms,
+
+        ], 'Dashboard metrics fetched successfully', 200);
     }
 }
