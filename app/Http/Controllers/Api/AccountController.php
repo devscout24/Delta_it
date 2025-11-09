@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Models\Account;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Traits\ApiResponse;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
 class AccountController extends Controller
@@ -26,6 +28,15 @@ class AccountController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
         $account = Account::create($request->all());
+        $user = User::create([
+            'first_name' => $request->first_name,
+            'last_name'  => $request->last_name,
+            'address'    => $request->address,
+            'email'      => $request->email,
+            'phone'      => $request->phone,
+            'zipcode'    => $request->zipcode,
+            'password'   => Hash::make($request->password),
+        ]);
         return $this->success($account, 'Account created successfully', 201);
     }
 

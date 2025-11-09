@@ -44,7 +44,6 @@ class CollaboratorController extends Controller
 
         try {
 
-
             Collaborator::create([
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
@@ -55,6 +54,7 @@ class CollaboratorController extends Controller
                 'access_card_number' => $request->access_card_number ?? null,
                 'parking_card' => $request->parking_card,
             ]);
+
             return $this->success((object)[], 'Collaborator Added Successful');
         } catch (\Exception $e) {
             return $this->error($e->getMessage(), 'Error in server', 500);
