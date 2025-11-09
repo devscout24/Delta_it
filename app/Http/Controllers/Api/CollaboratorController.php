@@ -7,6 +7,7 @@ use App\Models\Collaborator;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class CollaboratorController extends Controller
 {
@@ -26,20 +27,22 @@ class CollaboratorController extends Controller
     public function store(Request $request)
     {
 
+        $validate = Validator::make($request->all(), [
+            'first_name' => 'required|string|max:255',
+            'last_name'  => 'required|string|max:255',
+            'job_position' => 'nullable|string|max:255',
+            'email' => 'nullable|email|unique:collaborators,email',
+            'phone_extension' => 'nullable|string|max:20',
+            'phone_number' => 'nullable|string|max:20',
+            'access_card_number' => 'nullable|numeric',
+            'parking_card' => 'nullable|boolean',
+        ]);
+
+        if ($validate->fails()) {
+            return $this->error($validate->errors(), 'Validation Error', 404);
+        }
+
         try {
-            $validated = $request->validate([
-                'first_name' => 'required|string|max:255',
-                'last_name'  => 'required|string|max:255',
-                'job_position' => 'nullable|string|max:255',
-                'email' => 'nullable|email|unique:collaborators,email',
-                'phone_extension' => 'nullable|string|max:20',
-                'phone_number' => 'nullable|string|max:20',
-                'access_card_number' => 'nullable|numeric',
-                'parking_card' => 'nullable|boolean',
-            ]);
-
-
-            $validated['parking_card'] = $request->has('parking_card');
 
 
             Collaborator::create([
