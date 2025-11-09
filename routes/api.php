@@ -24,7 +24,7 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('/user-logout', 'logout');
     // user otp verify
     Route::post('/send-otp', 'sendOtp');
-    Route::post('/verify-otp', 'verifyOtp');
+    Route::post('/verify-otp', 'verifyOtp'); 
     Route::post('/reset-password', 'resetPassword');
     Route::post('/verify/email_otp', 'verifyEmailOtp');
     // user profile
@@ -32,7 +32,7 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('/delete-account', 'deleteSelfAccount')->middleware('auth:api');
     Route::post('/user/profile/reset-password', 'userResetPassword')->middleware('auth:api');
 
-    // Account create 
+    // Account create
     Route::post('/create-account', 'createAccount');
 });
 
@@ -46,10 +46,10 @@ Route::controller(CompanyController::class)->middleware('auth:api')->group(funct
 
 
 
-    // logo 
+    // logo
     Route::post('/upload_logo', 'uploadLogo');
     Route::post('/upload-delete', 'deleteLogo');
-    // mobile api 
+    // mobile api
     Route::get('/show-company/{id}', 'show');
     Route::post('/update-company', 'update');
 });
@@ -110,7 +110,7 @@ Route::controller(ArchiveController::class)->middleware('auth:api')->group(funct
 
 Route::controller(AccessCardController::class)->middleware('auth:api')->group(function () {
     Route::post('/access_card/update', 'updateAccessCode');
-    // mobile api 
+    // mobile api
 
     Route::get('/get-cards', 'getCardStats');
 });
@@ -134,7 +134,7 @@ Route::controller(MeetingController::class)->middleware('auth:api')->group(funct
     Route::get('/get-all-events', 'getAllEvents');
     Route::get('/get-all-meeting-request', 'getmeetingRequest');
 
-    // meeting request api 
+    // meeting request api
     Route::post('/add/request', 'StoreMeeting');
 });
 
