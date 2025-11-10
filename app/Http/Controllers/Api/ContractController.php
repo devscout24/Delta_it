@@ -100,6 +100,15 @@ class ContractController extends Controller
             $data['company'] = null;
         }
 
+        $data = [
+            'name' => $data['name'],
+            'type' => $data['type'],
+            'start_date' => $data['start_date'],
+            'end_date' => $data['end_date'],
+            'renewal_date' => $data['renewal_date'],
+            'status' => $data['status'],
+        ];
+
         return $this->success($data, 'Contract details', 200);
     }
 }

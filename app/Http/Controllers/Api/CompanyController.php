@@ -56,26 +56,47 @@ class CompanyController extends Controller
     {
 
         $validator = Validator::make($request->all(), [
-            'commercial_name' => 'required',
-            'company_email' => 'required|email',
-            'fiscal_name' => 'nullable',
-            'nif' => 'nullable',
-            'phone_number' => 'nullable',
-            'incubation_type' => 'nullable',
-            'occupied_office' => 'nullable',
-            'occupied_area' => 'nullable',
-            'bussiness_area' => 'nullable',
-            'company_manager' => 'nullable',
-            'description' => 'nullable',
-            'logo' => 'nullable',
+            'logo'            => 'nullable|image|mimes:jpg,jpeg,png,svg|max:2048',
+            'commercial_name' => 'required|string|max:255',
+            'fiscal_name'     => 'nullable|string|max:255',
+            'company_email'   => 'required|email|unique:companies,company_email',
+            'nif'             => 'nullable|integer',
+            'phone_number'    => 'nullable|string|max:11',
+            'incubation_type' => 'required|in:virtual,on-site,cowork,colab',
+            'occupied_office' => 'nullable|string',
+            'occupied_area'   => 'nullable|string|max:11',
+            'bussiness_area'  => 'nullable|string',
+            'company_manager' => 'nullable|string|max:100',
+            'description'     => 'nullable|string|max:255',
+            // 'status'          => 'required|in:active,archive',
+        ], [
+            'logo.image'               => 'The logo must be an image file.',
+            'logo.mimes'               => 'The logo must be a JPG, JPEG, PNG, or SVG file.',
+            'logo.max'                 => 'The logo must not be larger than 2MB.',
+            'commercial_name.required' => 'The commercial name is required.',
+            'commercial_name.max'      => 'The commercial name cannot exceed 255 characters.',
+            'fiscal_name.max'          => 'The fiscal name cannot exceed 255 characters.',
+            'company_email.required'   => 'The company email is required.',
+            'company_email.email'      => 'Please enter a valid email address.',
+            'company_email.unique'     => 'This email is already registered.',
+            'nif.integer'              => 'The NIF must be a valid number.',
+            'phone_number.max'         => 'The phone number cannot exceed 11 digits.',
+            'incubation_type.required' => 'Please select an incubation type.',
+            'incubation_type.in'       => 'The selected incubation type is invalid.',
+            'occupied_office.string'   => 'The occupied office field must be text.',
+            'occupied_area.max'        => 'The occupied area cannot exceed 11 characters.',
+            'company_manager.max'      => 'The company manager name cannot exceed 100 characters.',
+            'description.max'          => 'The description cannot exceed 255 characters.',
+            'status.required'          => 'The company status is required.',
+            'status.in'                => 'The selected status is invalid.',
         ]);
 
         if ($validator->fails()) {
-            return $this->error($validator->errors(), 'Validation error', 422);
+            return $this->error($validator->errors(), $validator->errors()->first(), 200);
         }
 
         if (!$request->id) {
-            return $this->error('', 'Id not sent', 404);
+            return $this->error('', 'Id not sent', 200);
         }
 
         $occpaied_office = json_encode($request->occupied_office);
@@ -92,22 +113,26 @@ class CompanyController extends Controller
             $uploadPath = $company->logo ?? null;
         }
 
-        Company::Where('id', $request->id)->update([
-            'commercial_name' => $request->commercial_name,
-            'company_email' => $request->company_email,
-            'fiscal_name' => $request->fiscal_name,
-            'nif' => $request->nif,
-            'phone_number' => $request->phone_number,
-            'incubation_type' => $request->incubation_type,
-            'occupied_office' => $occpaied_office,
-            'occupied_area' => $request->occupied_area,
-            'bussiness_area' => $bussiness_area,
-            'company_manager' => $request->company_manager,
-            'description' => $request->description,
-            'logo' => $uploadPath,
-        ]);
+        try {
+            Company::Where('id', $request->id)->update([
+                'commercial_name' => $request->commercial_name,
+                'company_email'   => $request->company_email,
+                'fiscal_name'     => $request->fiscal_name,
+                'nif'             => $request->nif,
+                'phone_number'    => $request->phone_number,
+                'incubation_type' => $request->incubation_type,
+                'occupied_office' => $occpaied_office,
+                'occupied_area'   => $request->occupied_area,
+                'bussiness_area'  => $bussiness_area,
+                'company_manager' => $request->company_manager,
+                'description'     => $request->description,
+                'logo'            => $uploadPath,
+            ]);
 
-        return $this->success((object)[], 'Company General Data updated', 201);
+            return $this->success((object)[], 'Company General Data updated', 200);
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage(), 'Something went wrong', 500);
+        }
     }
 
 
@@ -236,7 +261,7 @@ class CompanyController extends Controller
         return $this->error(null, 'Company Logo not found', 201);
     }
 
-    // mobile api 
+    // mobile api
 
     public function show(Request $request, $id)
     {
