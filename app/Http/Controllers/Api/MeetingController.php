@@ -138,7 +138,7 @@ class MeetingController extends Controller
             $query->where('meeting_type', $request->meeting_type);
         }
 
-        // Room name 
+        // Room name
         if ($request->has('room_name') && !empty($request->room_name)) {
             $query->whereHas('room', function ($q) use ($request) {
                 $q->where('room_name', 'like', '%' . $request->room_name . '%');
@@ -180,13 +180,24 @@ class MeetingController extends Controller
     function getAllMeeting()
     {
 
-        $meeting = Meeting::select('id', 'meeting_name', 'date', 'start_time', 'end_time', 'meeting_type')
-
-            ->get();
+        $meeting = Meeting::select('id', 'meeting_name', 'date', 'start_time', 'end_time', 'meeting_type')->get();
 
         if ($meeting->isEmpty()) {
             return $this->error('Meeting not found', 404);
         }
+
+        $meeting = $meeting->map(function ($item) {
+            return [
+                'id'           => $item->id,
+                'meeting_name' => $item->meeting_name,
+                'date'         => $item->date,
+                'start_time'   => $item->start_time,
+                'end_time'     => $item->end_time,
+                'meeting_type' => $item->meeting_type,
+            ];
+        });
+
+
         return $this->success($meeting, 'Meeting fetched successfully', 200);
     }
 
