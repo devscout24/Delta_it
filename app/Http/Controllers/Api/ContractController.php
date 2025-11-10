@@ -79,34 +79,25 @@ class ContractController extends Controller
     }
 
 
-    public function show(Request $request)
+    public function show()
     {
-        $contract = Contract::with('company')->find($request->id);
+        $contract = Contract::with('company')->first();
 
         if (!$contract) {
             return $this->error(null, 'Contract not found', 404);
         }
 
-        // Prepare contract data
-        $data = $contract->toArray();
-
-        // Include only required company fields (name + logo)
-        if ($contract->company) {
-            $data['company'] = [
-                'commercial_name' => $contract->company->commercial_name,
-                'logo' => $contract->company->logo ? asset($contract->company->logo) : null,
-            ];
-        } else {
-            $data['company'] = null;
-        }
-
         $data = [
-            'name' => $data['name'],
-            'type' => $data['type'],
-            'start_date' => $data['start_date'],
-            'end_date' => $data['end_date'],
-            'renewal_date' => $data['renewal_date'],
-            'status' => $data['status'],
+            'name'         => $contract->name,
+            'type'         => $contract->type,
+            'start_date'   => $contract->start_date,
+            'end_date'     => $contract->end_date,
+            'renewal_date' => $contract->renewal_date,
+            'status'       => $contract->status,
+            'company'      => $contract->company ? [
+                'commercial_name' => $contract->company->commercial_name,
+                'logo'            => $contract->company->logo ? asset($contract->company->logo) : null,
+            ] : null,
         ];
 
         return $this->success($data, 'Contract details', 200);

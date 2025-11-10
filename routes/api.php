@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\RoomBookController;
 use App\Http\Controllers\Api\AccessCardController;
 use App\Http\Controllers\Api\AppointmentController;
+use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\CollaboratorController;
 use App\Http\Controllers\Api\InternalNoteController;
 use App\Http\Controllers\Api\RoomAppointmentController;
@@ -32,7 +33,7 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('/delete-account', 'deleteSelfAccount')->middleware('auth:api');
     Route::post('/user/profile/reset-password', 'userResetPassword')->middleware('auth:api');
 
-    // Account create 
+    // Account create
     Route::post('/create-account', 'createAccount');
 });
 
@@ -46,10 +47,10 @@ Route::controller(CompanyController::class)->middleware('auth:api')->group(funct
 
 
 
-    // logo 
+    // logo
     Route::post('/upload_logo', 'uploadLogo');
     Route::post('/upload-delete', 'deleteLogo');
-    // mobile api 
+    // mobile api
     Route::get('/show-company/{id}', 'show');
     Route::post('/update-company', 'update');
 });
@@ -65,7 +66,7 @@ Route::controller(CollaboratorController::class)->middleware('auth:api')->group(
 
 Route::controller(ContractController::class)->middleware('auth:api')->group(function () {
     Route::post('/contracts-add', 'store');
-    Route::post('/get-single/contract', 'show');
+    Route::get('/get-single/contract', 'show');
     Route::post('/contracts-update', 'update');
     Route::post('/contracts-delete', 'destroy');
     Route::post('/contracts-singleFile-delete', 'deleteSingleFile');
@@ -75,6 +76,10 @@ Route::controller(DocumentController::class)->middleware('auth:api')->group(func
     Route::post('/add-documents', 'store');
     Route::post('/delete-document', 'deleteDocument');
     Route::get('/get-all-documents', 'allDocuments');
+});
+
+Route::controller(BookingController::class)->middleware('auth:api')->group(function () {
+    Route::get('/get-all-booking-room', 'index');
 });
 
 
@@ -110,7 +115,7 @@ Route::controller(ArchiveController::class)->middleware('auth:api')->group(funct
 
 Route::controller(AccessCardController::class)->middleware('auth:api')->group(function () {
     Route::post('/access_card/update', 'updateAccessCode');
-    // mobile api 
+    // mobile api
 
     Route::get('/get-cards', 'getCardStats');
 });
@@ -134,7 +139,7 @@ Route::controller(MeetingController::class)->middleware('auth:api')->group(funct
     Route::get('/get-all-events', 'getAllEvents');
     Route::get('/get-all-meeting-request', 'getmeetingRequest');
 
-    // meeting request api 
+    // meeting request api
     Route::post('/add/request', 'StoreMeeting');
 });
 

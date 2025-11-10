@@ -94,6 +94,18 @@ class DocumentController extends Controller
     {
         $documents = Document::all();
 
+        $documents = $documents->map(function ($document) {
+            return [
+                'id'            => $document->id,
+                'document_name' => $document->document_name,
+                'document_type' => $document->document_type,
+                'document_path' => asset($document->document_path),
+                'tags'          => $document->tags->pluck('tag')->toArray(),
+                'created_at'    => $document->created_at->toDateTimeString(),
+                'updated_at'    => $document->updated_at->toDateTimeString(),
+            ];
+        });
+
         if ($documents->isEmpty()) {
             return $this->error(
                 [],
