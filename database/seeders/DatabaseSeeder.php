@@ -6,6 +6,7 @@ use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -65,6 +66,46 @@ class DatabaseSeeder extends Seeder
                 'description' => 'Investing in high-potential startups across multiple sectors.',
                 'logo' => 'logos/bluesky.png',
                 'status' => 'archived',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
+
+
+        DB::table('users')->insert([
+            [
+                'company_id' => null,
+                'username' => 'admin',
+                'name' => 'System',
+                'last_name' => 'Admin',
+                'email' => 'admin@example.com',
+                'phone' => '+10000000000',
+                'address' => '123 Admin Street',
+                'zipcode' => '00000',
+                'password' => Hash::make('12345678'),
+                'profile_photo' => null,
+                'user_type' => 'admin',
+                'email_verified_at' => now(),
+                'status' => 'active',
+                'terms_and_conditions' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'company_id' => 1,
+                'username' => 'companyuser',
+                'name' => 'Jane',
+                'last_name' => 'Doe',
+                'email' => 'jane.doe@technova.com',
+                'phone' => '+15551234567',
+                'address' => '456 Company Road',
+                'zipcode' => '12345',
+                'password' => Hash::make('12345678'),
+                'profile_photo' => null,
+                'user_type' => 'company_user',
+                'email_verified_at' => now(),
+                'status' => 'active',
+                'terms_and_conditions' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
