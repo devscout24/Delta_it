@@ -122,5 +122,15 @@ class DatabaseSeeder extends Seeder
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+
+        DB::table('access_cards')->insert([
+            'company_id' => 1,
+            'active_card' => 25,
+            'lost_damage_card' => 2,
+            'active_parking_card' => 10,
+            'max_parking_card' => 15,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
     }
 }
