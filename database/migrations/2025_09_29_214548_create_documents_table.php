@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('documents', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('contract_id')->constrained('contracts')->onDelete('cascade');
+            $table->foreignId('company_id')->constrained('companies')->onDelete('cascade');
             $table->string('document_name')->nullable();
             $table->enum('document_type', ['pdf', 'word', 'image', 'other'])->nullable();
             $table->string('document_path')->nullable();

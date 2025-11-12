@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\Document;
+use App\Models\Tag;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -132,5 +134,48 @@ class DatabaseSeeder extends Seeder
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+
+        $documents = [
+            [
+                'company_id' => 1,
+                'document_name' => 'Company Policy Handbook',
+                'document_type' => 'pdf',
+                'document_path' => 'uploads/documents/company_policy.pdf',
+            ],
+            [
+                'company_id' => 1,
+                'document_name' => 'Employee Contract Template',
+                'document_type' => 'pdf',
+                'document_path' => 'uploads/documents/employee_contract.pdf',
+            ],
+            [
+                'company_id' => 1,
+                'document_name' => 'Office Layout Plan',
+                'document_type' => 'pdf',
+                'document_path' => 'uploads/documents/office_layout.pdf',
+            ],
+        ];
+
+        foreach ($documents as $document) {
+            Document::create($document);
+        }
+
+        $tags = [
+            ['document_id' => 1, 'tag' => 'company-policy'],
+            ['document_id' => 1, 'tag' => 'hr'],
+            ['document_id' => 1, 'tag' => 'internal'],
+
+            ['document_id' => 2, 'tag' => 'contract'],
+            ['document_id' => 2, 'tag' => 'employee'],
+            ['document_id' => 2, 'tag' => 'template'],
+
+            ['document_id' => 3, 'tag' => 'office'],
+            ['document_id' => 3, 'tag' => 'layout'],
+            ['document_id' => 3, 'tag' => 'floor-plan'],
+        ];
+
+        foreach ($tags as $tag) {
+            Tag::create($tag);
+        }
     }
 }
