@@ -48,15 +48,15 @@ class CollaboratorController extends Controller
             }
 
             Collaborator::create([
-                'company_id' => $user->company_id,
-                'first_name' => $request->first_name,
-                'last_name' => $request->last_name,
-                'job_position' => $request->job_position,
-                'email' => $request->email,
-                'phone_extension' => $request->phone_extension,
-                'phone_number' => $request->phone_number,
+                'company_id'         => $user->company_id,
+                'first_name'         => $request->first_name,
+                'last_name'          => $request->last_name,
+                'job_position'       => $request->job_position,
+                'email'              => $request->email,
+                'phone_extension'    => $request->phone_extension,
+                'phone_number'       => $request->phone_number,
                 'access_card_number' => $request->access_card_number,
-                'parking_card' => $request->parking_card ?? false,
+                'parking_card'       => $request->parking_card ?? false,
             ]);
 
             return $this->success([], 'Collaborator added successfully', 201);
