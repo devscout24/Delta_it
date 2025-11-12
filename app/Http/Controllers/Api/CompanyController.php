@@ -278,8 +278,8 @@ class CompanyController extends Controller
     public function update(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name'            => 'required|string|max:255',
-            'email'           => 'required|email|max:255',
+            'name'            => 'nullable|string|max:255',
+            'email'           => 'nullable|email|max:255',
             'fiscal_name'     => 'nullable|string|max:255',
             'nif'             => 'nullable|string|max:50',
             'phone'           => 'nullable|string|max:20',
