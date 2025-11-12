@@ -6,6 +6,7 @@ use App\Models\AccessCard;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Traits\ApiResponse;
+use Illuminate\Support\Facades\Auth;
 
 class AccessCardController extends Controller
 {
@@ -48,12 +49,21 @@ class AccessCardController extends Controller
     }
 
 
-    // mobile api 
+    // mobile api
     public function getCardStats()
     {
-        $data = AccessCard::select('active_card', 'lost_damage_card', 'active_parking_card', 'max_parking_card')->first();
+        $user = Auth::guard('api')->user();
+
+        if (!$user || !$user->company_id) {
+            return $this->error(null, 'User not associated with any company', 403);
+        }
+
+        $data = AccessCard::where('company_id', $user->company_id)
+            ->select('active_card', 'lost_damage_card', 'active_parking_card', 'max_parking_card')
+            ->first();
+
         if (!$data) {
-            return $this->error(null, 'Data not found', 404);
+            return $this->error(null, 'Access card data not found', 404);
         }
 
         return $this->success(
