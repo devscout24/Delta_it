@@ -66,37 +66,59 @@ class CollaboratorController extends Controller
     }
 
 
-    // Update data
     public function update(Request $request)
     {
         try {
-            $validated = $request->validate([
+            $user = Auth::guard('api')->user();
+
+            if (!$user || !$user->company_id) {
+                return $this->error([], 'User not associated with any company', 403);
+            }
+
+            $validator = Validator::make($request->all(), [
+                'id' => 'required|integer|exists:collaborators,id',
                 'first_name' => 'required|string|max:255',
                 'last_name'  => 'required|string|max:255',
                 'job_position' => 'nullable|string|max:255',
-                'email' => 'nullable|email',
+                'email' => 'nullable|email|unique:collaborators,email,' . $request->id,
                 'phone_extension' => 'nullable|string|max:20',
                 'phone_number' => 'nullable|string|max:20',
                 'access_card_number' => 'nullable|string|max:50',
+                'parking_card' => 'nullable|boolean',
             ]);
 
-            $validated['parking_card'] = $request->has('parking_card');
+            if ($validator->fails()) {
+                return $this->error($validator->errors(), 'Validation Error', 422);
+            }
 
-            $collaborator = Collaborator::find($request->id)->update([
-                'first_name' => $request->first_name,
-                'last_name' => $request->last_name,
-                'job_position' => $request->job_position  ?? null,
-                'email' => $request->email ?? null,
-                'phone_extension' => $request->phone_extension ?? null,
-                'phone_number' => $request->phone_number ?? null,
-                'access_card_number' => $request->access_card_number ?? null,
-                'parking_card' => $request->parking_card,
+            $validated = $validator->validated();
+
+            $collaborator = Collaborator::where('id', $validated['id'])
+                ->where('company_id', $user->company_id)
+                ->first();
+
+            if (!$collaborator) {
+                return $this->error([], 'Collaborator not found', 404);
+            }
+
+            $collaborator->update([
+                'first_name' => $validated['first_name'],
+                'last_name' => $validated['last_name'],
+                'job_position' => $validated['job_position'] ?? null,
+                'email' => $validated['email'] ?? null,
+                'phone_extension' => $validated['phone_extension'] ?? null,
+                'phone_number' => $validated['phone_number'] ?? null,
+                'access_card_number' => $validated['access_card_number'] ?? null,
+                'parking_card' => $validated['parking_card'] ?? false,
             ]);
-            return $this->success((object)[], 'Collaborator Updated Successful');
+
+            return $this->success([], 'Collaborator updated successfully', 200);
         } catch (\Exception $e) {
-            return $this->error($e->getMessage(), 'Error in server', 500);
+            return $this->error($e->getMessage(), 'Server error', 500);
         }
     }
+
+
 
     // Delete
     public function destroy(Request $request)
