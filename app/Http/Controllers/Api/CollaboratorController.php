@@ -22,7 +22,6 @@ class CollaboratorController extends Controller
         return $this->success($collaborators, 'Collaborators fetched successful', 200);
     }
 
-
     // Store data
     public function store(Request $request)
     {
@@ -60,8 +59,6 @@ class CollaboratorController extends Controller
             return $this->error($e->getMessage(), 'Error in server', 500);
         }
     }
-
-
 
     // Update data
     public function update(Request $request)

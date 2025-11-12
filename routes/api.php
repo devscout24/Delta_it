@@ -21,21 +21,32 @@ use App\Http\Controllers\Api\RoomAppointmentController;
 Route::controller(AuthController::class)->group(function () {
     // user login and logout
     Route::post('/user-login', 'login');
-    Route::post('/user-signup', 'signup');
     Route::post('/user-logout', 'logout');
-    // user otp verify
+    // OTP verify
     Route::post('/send-otp', 'sendOtp');
     Route::post('/verify-otp', 'verifyOtp');
-    Route::post('/reset-password', 'resetPassword');
-    Route::post('/verify/email_otp', 'verifyEmailOtp');
+    Route::post('reset-password', 'resetPassword');
+    // Store FCM Token
+    Route::post('/store-user-fcm-token', 'storeFcmToken');
+    Route::post('/delete-user-fcm-token', 'deleteFcmToken');
+
     // user profile
     Route::post('/update-user', 'updateUser');
     Route::post('/delete-account', 'deleteSelfAccount')->middleware('auth:api');
     Route::post('/user/profile/reset-password', 'userResetPassword')->middleware('auth:api');
-
     // Account create
     Route::post('/create-account', 'createAccount');
 });
+
+Route::controller(RoomController::class)->middleware('auth:api')->group(function () {
+    Route::post('/add-room', 'addRoom');
+    Route::get('/map/rooms',  'index');
+    Route::post('/assign-associate_company', 'assignCompany');
+    Route::post('/show-room-details/{id}', 'showRoomDetails');
+    Route::get('/room-status-change/{status}/{id}', 'roomStatusChange');
+    Route::post('/map/rooms/remove-company',  'removeCompany');
+});
+
 
 Route::controller(CompanyController::class)->middleware('auth:api')->group(function () {
     Route::post('/add-company', 'addCompany');
@@ -44,9 +55,6 @@ Route::controller(CompanyController::class)->middleware('auth:api')->group(funct
     Route::post('/delete-company', 'deleteCompany');
     Route::get('/list-companies', 'getAllCompanies');
     Route::get('/list-incubation-types-for_filter', 'getIncubationTypes');;
-
-
-
     // logo
     Route::post('/upload_logo', 'uploadLogo');
     Route::post('/upload-delete', 'deleteLogo');
@@ -120,14 +128,7 @@ Route::controller(AccessCardController::class)->middleware('auth:api')->group(fu
     Route::get('/get-cards', 'getCardStats');
 });
 
-Route::controller(RoomController::class)->middleware('auth:api')->group(function () {
-    Route::post('/add-room', 'addRoom');
-    Route::get('/map/rooms',  'index');
-    Route::post('/assign-associate_company', 'assignCompany');
-    Route::post('/show-room-details/{id}', 'showRoomDetails');
-    Route::get('/room-status-change/{status}/{id}', 'roomStatusChange');
-    Route::post('/map/rooms/remove-company',  'removeCompany');
-});
+
 
 
 Route::controller(MeetingController::class)->middleware('auth:api')->group(function () {
