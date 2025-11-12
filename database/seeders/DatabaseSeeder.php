@@ -110,5 +110,17 @@ class DatabaseSeeder extends Seeder
                 'updated_at' => now(),
             ],
         ]);
+
+        DB::table('contracts')->insert([
+            'company_id' => 1,
+            'name' => 'TechNova Employment Agreement',
+            'type' => 'full-time',
+            'start_date' => '2025-01-01',
+            'end_date' => '2025-12-31',
+            'renewal_date' => '2026-01-01',
+            'status' => 'active',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
     }
 }
