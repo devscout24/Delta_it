@@ -25,7 +25,6 @@ class CollaboratorController extends Controller
     // Store data
     public function store(Request $request)
     {
-
         $validate = Validator::make($request->all(), [
             'first_name' => 'required|string|max:255',
             'last_name'  => 'required|string|max:255',
@@ -33,32 +32,39 @@ class CollaboratorController extends Controller
             'email' => 'nullable|email|unique:collaborators,email',
             'phone_extension' => 'nullable|string|max:20',
             'phone_number' => 'nullable|string|max:20',
-            'access_card_number' => 'nullable|numeric',
+            'access_card_number' => 'nullable|string|max:50',
             'parking_card' => 'nullable|boolean',
         ]);
 
         if ($validate->fails()) {
-            return $this->error($validate->errors(), 'Validation Error', 404);
+            return $this->error($validate->errors(), 'Validation Error', 422);
         }
 
         try {
+            $user = Auth::guard('api')->user();
+
+            if (!$user || !$user->company_id) {
+                return $this->error('', 'User not associated with any company', 403);
+            }
 
             Collaborator::create([
+                'company_id' => $user->company_id,
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
-                'job_position' => $request->job_position  ?? null,
-                'email' => $request->email ?? null,
-                'phone_extension' => $request->phone_extension ?? null,
-                'phone_number' => $request->phone_number ?? null,
-                'access_card_number' => $request->access_card_number ?? null,
-                'parking_card' => $request->parking_card,
+                'job_position' => $request->job_position,
+                'email' => $request->email,
+                'phone_extension' => $request->phone_extension,
+                'phone_number' => $request->phone_number,
+                'access_card_number' => $request->access_card_number,
+                'parking_card' => $request->parking_card ?? false,
             ]);
 
-            return $this->success((object)[], 'Collaborator Added Successful');
+            return $this->success([], 'Collaborator added successfully', 201);
         } catch (\Exception $e) {
-            return $this->error($e->getMessage(), 'Error in server', 500);
+            return $this->error($e->getMessage(), 'Server error', 500);
         }
     }
+
 
     // Update data
     public function update(Request $request)
