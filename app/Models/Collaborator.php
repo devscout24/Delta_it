@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Collaborator extends Model
 {
     protected $fillable = [
+        'company_id',
         'first_name',
         'last_name',
         'job_position',

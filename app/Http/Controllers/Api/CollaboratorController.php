@@ -47,8 +47,6 @@ class CollaboratorController extends Controller
                 return $this->error('', 'User not associated with any company', 403);
             }
 
-            dd($user->company_id);
-
             Collaborator::create([
                 'company_id'         => $user->company_id,
                 'first_name'         => $request->first_name,
