@@ -6,6 +6,7 @@ use App\Models\Company;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class CompanyController extends Controller
@@ -277,57 +278,52 @@ class CompanyController extends Controller
     public function update(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'commercial_name' => 'required',
-            'company_email' => 'required|email',
-            'fiscal_name' => 'nullable',
-            'nif' => 'nullable',
-            'phone_number' => 'nullable',
-            'incubation_type' => 'nullable',
-            'occupied_office' => 'nullable',
-            'occupied_area' => 'nullable',
-            'bussiness_area' => 'nullable',
-            'company_manager' => 'nullable',
-            'description' => 'nullable',
-            'logo' => 'nullable',
+            'name'            => 'required|string|max:255',
+            'email'           => 'required|email|max:255',
+            'fiscal_name'     => 'nullable|string|max:255',
+            'nif'             => 'nullable|string|max:50',
+            'phone'           => 'nullable|string|max:20',
+            'incubation_type' => 'nullable|in:virtual,on-site,cowork,colab',
+            'business_area'   => 'nullable|string|max:255',
+            'manager'         => 'nullable|string|max:100',
+            'description'     => 'nullable|string',
+            'logo'            => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         if ($validator->fails()) {
             return $this->error($validator->errors(), 'Validation error', 422);
         }
 
-        if (!$request->id) {
-            return $this->error('', 'Id not sent', 404);
+        // Get logged-in user and their company
+        $user = Auth::guard('api')->user();
+        $company = Company::find($user->company_id);
+
+        if (!$company) {
+            return $this->error('', 'Company not found', 404);
         }
 
-        $occpaied_office = json_encode($request->occupied_office);
-        $bussiness_area = json_encode($request->bussiness_area);
-
-        if ($request->id) {
-            $company = Company::where('id', $request->id)->first();
-        }
-
+        // Handle logo upload
         if ($request->hasFile('logo')) {
             $file = $request->file('logo');
-            $uploadPath =  $this->uploadImage($file, $company->logo, 'uploads/companyLogo', 150, 150);
+            $uploadPath = $this->uploadImage($file, $company->logo, 'uploads/companyLogo', 150, 150);
         } else {
-            $uploadPath = $company->logo ?? null;
+            $uploadPath = $company->logo;
         }
 
-        Company::Where('id', $request->id)->update([
-            'commercial_name' => $request->commercial_name,
-            'company_email' => $request->company_email,
-            'fiscal_name' => $request->fiscal_name,
-            'nif' => $request->nif,
-            'phone_number' => $request->phone_number,
+        // Update company data
+        $company->update([
+            'name'            => $request->name,
+            'email'           => $request->email,
+            'fiscal_name'     => $request->fiscal_name,
+            'nif'             => $request->nif,
+            'phone'           => $request->phone,
             'incubation_type' => $request->incubation_type,
-            'occupied_office' => $occpaied_office,
-            'occupied_area' => $request->occupied_area,
-            'bussiness_area' => $bussiness_area,
-            'company_manager' => $request->company_manager,
-            'description' => $request->description,
-            'logo' => $uploadPath,
+            'business_area'   => $request->business_area,
+            'manager'         => $request->manager,
+            'description'     => $request->description,
+            'logo'            => $uploadPath,
         ]);
 
-        return $this->success((object)[], 'Company General Data updated', 201);
+        return $this->success([], 'Company information updated successfully', 200);
     }
 }
