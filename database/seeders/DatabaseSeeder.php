@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
@@ -19,6 +20,54 @@ class DatabaseSeeder extends Seeder
             // DaySeeder::class,
             // RoomSeeder::class,
             // MeetingSeeder::class,
+        ]);
+
+        DB::table('companies')->insert([
+            [
+                'name' => 'TechNova Solutions',
+                'email' => 'info@technova.com',
+                'fiscal_name' => 'TechNova S.A.',
+                'nif' => 'TNX-12345',
+                'phone' => '+1234567890',
+                'incubation_type' => 'virtual',
+                'business_area' => 'Software Development',
+                'manager' => 'John Doe',
+                'description' => 'A company focused on building innovative SaaS platforms.',
+                'logo' => 'logos/technova.png',
+                'status' => 'active',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'GreenField Labs',
+                'email' => 'contact@greenfieldlabs.io',
+                'fiscal_name' => 'GreenField Innovations Ltd.',
+                'nif' => 'GFL-67890',
+                'phone' => '+1987654321',
+                'incubation_type' => 'on-site',
+                'business_area' => 'Agritech',
+                'manager' => 'Sarah Johnson',
+                'description' => 'Developing sustainable agricultural technology solutions.',
+                'logo' => 'logos/greenfield.png',
+                'status' => 'active',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'BlueSky Ventures',
+                'email' => 'hello@bluesky.com',
+                'fiscal_name' => 'BlueSky Global Inc.',
+                'nif' => 'BSV-33445',
+                'phone' => '+44123456789',
+                'incubation_type' => 'cowork',
+                'business_area' => 'Venture Capital',
+                'manager' => 'Michael Smith',
+                'description' => 'Investing in high-potential startups across multiple sectors.',
+                'logo' => 'logos/bluesky.png',
+                'status' => 'archived',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
         ]);
     }
 }
