@@ -13,10 +13,8 @@ return new class extends Migration
     {
         Schema::create('contract_files', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('contract_id')
-                ->constrained('contracts')
-                ->onDelete('cascade');
-            $table->string('file_path');
+            $table->foreignId('contract_id')->constrained('contracts')->onDelete('cascade');
+            $table->string('file_path')->nullable();
             $table->timestamps();
         });
     }

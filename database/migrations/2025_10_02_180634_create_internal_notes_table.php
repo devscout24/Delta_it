@@ -13,8 +13,9 @@ return new class extends Migration
     {
         Schema::create('internal_notes', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('company_id')->constrained('companies')->onDelete('cascade');
             $table->text('title');
-            $table->text('note');
+            $table->text('note')->nullable();
             $table->timestamps();
         });
     }

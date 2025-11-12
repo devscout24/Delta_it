@@ -13,21 +13,13 @@ return new class extends Migration
     {
         Schema::create('contracts', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('company_id')->constrained('companies')->onDelete('cascade');
             $table->string('name')->index();
             $table->enum('type', ['full-time', 'part-time', 'contractor'])->index();
-
             $table->date('start_date');
             $table->date('end_date')->nullable();
             $table->date('renewal_date')->nullable();
-
-            $table->enum('status', ['active', 'inactive', 'terminated', 'expired'])
-                ->default('active')
-                ->comment('contract status');
-
-            $table->foreignId('company_id')
-                ->constrained('companies')
-                ->onDelete('cascade');
-
+            $table->enum('status', ['active', 'inactive', 'terminated', 'expired'])->default('active');
             $table->timestamps();
         });
     }

@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('user_requests', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('company_id')->constrained('companies')->onDelete('cascade');
+            $table->string('subject')->nullable();
             $table->text('description');
-            $table->string('requested_by');
-            $table->enum('status',['pending','solved'])->default('pending');
-            $table->date('date');
+            $table->enum('status', ['pending', 'in_progress', 'solved', 'rejected'])->default('pending');
             $table->timestamps();
         });
     }

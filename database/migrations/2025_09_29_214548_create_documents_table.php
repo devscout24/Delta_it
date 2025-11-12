@@ -13,14 +13,10 @@ return new class extends Migration
     {
         Schema::create('documents', function (Blueprint $table) {
             $table->id();
-
-            $table->string('document_name');
-            $table->string('document_type');
-            $table->string('document_path');
-
-            $table->unsignedBigInteger('company_id')->nullable(); // Optional association
-            $table->foreign('company_id')->references('id')->on('companies')->onDelete('set null');
-
+            $table->foreignId('contract_id')->constrained('contracts')->onDelete('cascade');
+            $table->string('document_name')->nullable();
+            $table->enum('document_type', ['pdf', 'word', 'image', 'other'])->nullable();
+            $table->string('document_path')->nullable();
             $table->timestamps();
         });
     }
