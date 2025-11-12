@@ -76,15 +76,15 @@ class CollaboratorController extends Controller
             }
 
             $validator = Validator::make($request->all(), [
-                'id' => 'required|integer|exists:collaborators,id',
-                'first_name' => 'required|string|max:255',
-                'last_name'  => 'required|string|max:255',
-                'job_position' => 'nullable|string|max:255',
-                'email' => 'nullable|email|unique:collaborators,email,' . $request->id,
-                'phone_extension' => 'nullable|string|max:20',
-                'phone_number' => 'nullable|string|max:20',
+                'id'                 => 'required|integer|exists:collaborators,id',
+                'first_name'         => 'required|string|max:255',
+                'last_name'          => 'required|string|max:255',
+                'job_position'       => 'nullable|string|max:255',
+                'email'              => 'nullable|email|unique:collaborators,email,' . $request->id,
+                'phone_extension'    => 'nullable|string|max:20',
+                'phone_number'       => 'nullable|string|max:20',
                 'access_card_number' => 'nullable|string|max:50',
-                'parking_card' => 'nullable|boolean',
+                'parking_card'       => 'nullable|boolean',
             ]);
 
             if ($validator->fails()) {
@@ -102,14 +102,14 @@ class CollaboratorController extends Controller
             }
 
             $collaborator->update([
-                'first_name' => $validated['first_name'],
-                'last_name' => $validated['last_name'],
-                'job_position' => $validated['job_position'] ?? null,
-                'email' => $validated['email'] ?? null,
-                'phone_extension' => $validated['phone_extension'] ?? null,
-                'phone_number' => $validated['phone_number'] ?? null,
+                'first_name'         => $validated['first_name'],
+                'last_name'          => $validated['last_name'],
+                'job_position'       => $validated['job_position'] ?? null,
+                'email'              => $validated['email'] ?? null,
+                'phone_extension'    => $validated['phone_extension'] ?? null,
+                'phone_number'       => $validated['phone_number'] ?? null,
                 'access_card_number' => $validated['access_card_number'] ?? null,
-                'parking_card' => $validated['parking_card'] ?? false,
+                'parking_card'       => $validated['parking_card'] ?? false,
             ]);
 
             return $this->success([], 'Collaborator updated successfully', 200);
