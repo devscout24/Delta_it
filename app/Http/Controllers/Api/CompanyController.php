@@ -276,7 +276,6 @@ class CompanyController extends Controller
 
     public function update(Request $request)
     {
-
         $validator = Validator::make($request->all(), [
             'commercial_name' => 'required',
             'company_email' => 'required|email',

@@ -64,7 +64,7 @@ Route::controller(CompanyController::class)->middleware('auth:api')->group(funct
 });
 
 
-Route::controller(CollaboratorController::class)->middleware('auth:api')->group(function () {
+Route::controller(CollaboratorController::class)->group(function () {
     Route::get('/collaborators-list', 'index');
     Route::post('/collaborators-add', 'store');
     Route::post('/collaborators-update', 'update');
