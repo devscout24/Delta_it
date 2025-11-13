@@ -111,7 +111,6 @@ class MeetingController extends Controller
     }
 
 
-
     public function singleMeeting($id)
     {
         if (!$id) {
@@ -177,29 +176,56 @@ class MeetingController extends Controller
         );
     }
 
-    function getAllMeeting()
+    public function getAllMeeting(Request $request)
     {
+        try {
+            $type = $request->query('type');
 
-        $meeting = Meeting::select('id', 'meeting_name', 'date', 'start_time', 'end_time', 'meeting_type')->get();
+            $query = Meeting::with(['room:id,floor,room_name,area,status'])
+                ->select('id', 'meeting_name', 'date', 'start_time', 'end_time', 'meeting_type', 'room_id', 'online_link');
 
-        if ($meeting->isEmpty()) {
-            return $this->error('Meeting not found', 404);
+            if (in_array($type, ['virtual', 'office'])) {
+                $query->where('meeting_type', $type);
+            }
+
+            $meetings = $query->get();
+
+            if ($meetings->isEmpty()) {
+                return $this->error([], 'No meetings found', 404);
+            }
+
+            // Transform data
+            $meetings = $meetings->map(function ($item) {
+                $data = [
+                    'id'           => $item->id,
+                    'meeting_name' => $item->meeting_name,
+                    'date'         => $item->date,
+                    'start_time'   => $item->start_time,
+                    'end_time'     => $item->end_time,
+                    'meeting_type' => $item->meeting_type,
+                ];
+
+                if ($item->meeting_type === 'virtual') {
+                    $data['online_link'] = $item->online_link;
+                } else {
+                    $data['room'] = $item->room ? [
+                        'room_id'   => $item->room->id,
+                        'floor'     => $item->room->floor,
+                        'room_name' => $item->room->room_name,
+                        'area'      => $item->room->area,
+                        'status'    => $item->room->status,
+                    ] : null;
+                }
+
+                return $data;
+            });
+
+            return $this->success($meetings, 'Meetings fetched successfully', 200);
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage(), 'Server Error', 500);
         }
-
-        $meeting = $meeting->map(function ($item) {
-            return [
-                'id'           => $item->id,
-                'meeting_name' => $item->meeting_name,
-                'date'         => $item->date,
-                'start_time'   => $item->start_time,
-                'end_time'     => $item->end_time,
-                'meeting_type' => $item->meeting_type,
-            ];
-        });
-
-
-        return $this->success($meeting, 'Meeting fetched successfully', 200);
     }
+
 
     function getAllEvents()
     {

@@ -3,6 +3,8 @@
 namespace Database\Seeders;
 
 use App\Models\Document;
+use App\Models\Meeting;
+use App\Models\Room;
 use App\Models\Tag;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -176,6 +178,84 @@ class DatabaseSeeder extends Seeder
 
         foreach ($tags as $tag) {
             Tag::create($tag);
+        }
+
+        $rooms = [
+            [
+                'floor' => 1,
+                'room_name' => 'Conference Room A',
+                'area' => 35.50,
+                'polygon_points' => json_encode([[0, 0], [5, 0], [5, 7], [0, 7]]),
+                'status' => 'available',
+            ],
+            [
+                'floor' => 1,
+                'room_name' => 'Meeting Room B',
+                'area' => 20.75,
+                'polygon_points' => json_encode([[0, 0], [4, 0], [4, 5], [0, 5]]),
+                'status' => 'occupied',
+            ],
+            [
+                'floor' => 2,
+                'room_name' => 'Office 201',
+                'area' => 15.00,
+                'polygon_points' => json_encode([[0, 0], [3, 0], [3, 5], [0, 5]]),
+                'status' => 'maintenance',
+            ],
+            [
+                'floor' => 2,
+                'room_name' => 'Office 202',
+                'area' => 18.25,
+                'polygon_points' => json_encode([[0, 0], [4, 0], [4, 4.5], [0, 4.5]]),
+                'status' => 'available',
+            ],
+        ];
+
+        foreach ($rooms as $room) {
+            Room::create($room);
+        }
+
+        $meetings = [
+            [
+                'room_id' => 1,
+                'company_id' => 1,
+                'created_by' => 1,
+                'meeting_name' => 'Project Kickoff Meeting',
+                'date' => now()->toDateString(),
+                'start_time' => '10:00:00',
+                'end_time' => '11:30:00',
+                'meeting_type' => 'office',
+                'online_link' => null,
+                'add_emails' => json_encode(['team1@company.com', 'team2@company.com']),
+            ],
+            [
+                'room_id' => 2,
+                'company_id' => 1,
+                'created_by' => 1,
+                'meeting_name' => 'Quarterly Strategy Call',
+                'date' => now()->addDays(2)->toDateString(),
+                'start_time' => '14:00:00',
+                'end_time' => '15:30:00',
+                'meeting_type' => 'virtual',
+                'online_link' => 'https://meet.google.com/abc-defg-hij',
+                'add_emails' => json_encode(['ceo@company.com', 'manager@company.com']),
+            ],
+            [
+                'room_id' => 3,
+                'company_id' => 1,
+                'created_by' => 1,
+                'meeting_name' => 'Design Review Session',
+                'date' => now()->addDays(5)->toDateString(),
+                'start_time' => '09:30:00',
+                'end_time' => '11:00:00',
+                'meeting_type' => 'office',
+                'online_link' => null,
+                'add_emails' => json_encode(['design@company.com', 'qa@company.com']),
+            ],
+        ];
+
+        foreach ($meetings as $meeting) {
+            Meeting::create($meeting);
         }
     }
 }

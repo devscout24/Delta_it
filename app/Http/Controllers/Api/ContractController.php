@@ -38,8 +38,6 @@ class ContractController extends Controller
     }
 
 
-
-
     public function update(Request $request)
     {
         $validated  = app(ContractRequest::class)->validated();

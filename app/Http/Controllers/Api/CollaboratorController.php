@@ -12,17 +12,25 @@ use Illuminate\Support\Facades\Validator;
 class CollaboratorController extends Controller
 {
     use ApiResponse;
-    // Show list
     public function index()
     {
-        $collaborators = Collaborator::all();
-        if ($collaborators->isEmpty()) {
-            return $this->error('', 'No collaborator found', 404);
+        $user = Auth::guard('api')->user();
+
+        if (!$user || !$user->company_id) {
+            return $this->error([], 'User not associated with any company', 403);
         }
-        return $this->success($collaborators, 'Collaborators fetched successful', 200);
+
+        $collaborators = Collaborator::where('company_id', $user->company_id)
+            ->select('id', 'first_name', 'last_name', 'job_position', 'email', 'phone_number', 'parking_card')
+            ->get();
+
+        if ($collaborators->isEmpty()) {
+            return $this->error([], 'No collaborators found', 404);
+        }
+
+        return $this->success($collaborators, 'Collaborators fetched successfully', 200);
     }
 
-    // Store data
     public function store(Request $request)
     {
         $validate = Validator::make($request->all(), [
@@ -64,7 +72,6 @@ class CollaboratorController extends Controller
             return $this->error($e->getMessage(), 'Server error', 500);
         }
     }
-
 
     public function update(Request $request)
     {
@@ -118,16 +125,28 @@ class CollaboratorController extends Controller
         }
     }
 
-
-
-    // Delete
     public function destroy(Request $request)
     {
-        $collaborator  =  Collaborator::find($request->id);
-        if (!$collaborator) {
-            return $this->error('', 'No collaborator found', 404);
+        $user = Auth::guard('api')->user();
+
+        if (!$user || !$user->company_id) {
+            return $this->error([], 'User not associated with any company', 403);
         }
+
+        $request->validate([
+            'id' => 'required|integer|exists:collaborators,id',
+        ]);
+
+        $collaborator = Collaborator::where('id', $request->id)
+            ->where('company_id', $user->company_id)
+            ->first();
+
+        if (!$collaborator) {
+            return $this->error([], 'Collaborator not found', 404);
+        }
+
         $collaborator->delete();
-        return $this->success((object)[], 'Collaborator Deleted Successful');
+
+        return $this->success((object)[], 'Collaborator deleted successfully', 200);
     }
 }
