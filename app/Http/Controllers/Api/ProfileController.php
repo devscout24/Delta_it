@@ -17,11 +17,27 @@ class ProfileController extends Controller
         $user = Auth::guard('api')->user();
 
         if (!$user) {
-            return $this->error('', 'User not found', 404);
+            return $this->error([], 'User not found', 404);
         }
 
-        return $this->success($user, 'User profile retrieved successfully', 200);
+        // Eager-load the company name (if exists)
+        $companyName = null;
+        if ($user->company_id) {
+            $companyName = \App\Models\Company::where('id', $user->company_id)->value('name');
+        }
+
+        $profile = [
+            'name'         => $user->name,
+            'email'        => $user->email,
+            'phone'        => $user->phone,
+            'company_id'   => $user->company_id,
+            'company_name' => $companyName,
+            'profile_photo' => $user->profile_photo ? asset($user->profile_photo) : null,
+        ];
+
+        return $this->success($profile, 'User profile retrieved successfully', 200);
     }
+
 
     public function updateProfile(Request $request)
     {
