@@ -13,23 +13,47 @@ class BookingController extends Controller
 {
     // Get Booking Room
     use \App\Traits\ApiResponse;
+
     public function index()
     {
-        $bookingRooms = Appointment::with('room', 'meeting')->latest()->get();
+        $user = Auth::guard('api')->user();
 
-        $bookingRooms = $bookingRooms->map(function ($booking) {
+        if (!$user || !$user->company_id) {
+            return $this->error([], 'User not associated with any company', 403);
+        }
+
+        // Fetch bookings for the user's company with related room info
+        $bookings = RoomBookings::where('company_id', $user->company_id)
+            ->with(['room:id,name,location']) // adjust fields as per your rooms table
+            ->select('id', 'room_id', 'booking_name', 'date', 'start_time', 'end_time', 'status')
+            ->orderBy('date', 'desc')
+            ->get();
+
+        if ($bookings->isEmpty()) {
+            return $this->error([], 'No bookings found for this company', 404);
+        }
+
+        // Transform data for a clean API response
+        $data = $bookings->map(function ($item) {
             return [
-                'id' => $booking->id,
-                'date'
+                'id'           => $item->id,
+                'booking_name' => $item->booking_name,
+                'date'         => $item->date,
+                'start_time'   => $item->start_time,
+                'end_time'     => $item->end_time,
+                'status'       => $item->status,
+                'room'         => $item->room ? [
+                    'id'       => $item->room->id,
+                    'name'     => $item->room->name,
+                    'location' => $item->room->location ?? null,
+                ] : null,
             ];
         });
 
-        return response()->json([
-            'success' => true,
-            'data' => $bookingRooms,
-            'message' => 'Booking rooms retrieved successfully'
-        ], 200);
+        return $this->success($data, 'Company bookings fetched successfully');
     }
+
+
     // Book Room
 
     public function bookRoom(Request $request)

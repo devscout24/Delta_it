@@ -100,7 +100,7 @@ Route::controller(DocumentController::class)->middleware('auth:api')->group(func
 });
 
 Route::controller(BookingController::class)->group(function () {
-    Route::get('/get-all-booking-room', 'index');
+    Route::get('/get-room-bookings', 'index');
     Route::post('/book-room', 'bookRoom'); // Mobile
 });
 
