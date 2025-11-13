@@ -21,4 +21,9 @@ class RoomBookings extends Model
     protected $casts = [
         'add_emails' => 'array',
     ];
+
+    public function room()
+    {
+        return $this->belongsTo(Room::class);
+    }
 }
