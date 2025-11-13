@@ -96,7 +96,7 @@ class BookingController extends Controller
             $booking = RoomBookings::create([
                 'room_id'      => $request->room_id,
                 'company_id'   => $user->company_id,
-                'date'         => $request->date,
+                'date'         => \Carbon\Carbon::createFromFormat('d-m-Y', $request->date)->format('Y-m-d'),
                 'booking_name' => $request->booking_name,
                 'start_time'   => $request->start_time,
                 'end_time'     => $request->end_time,
