@@ -28,4 +28,29 @@ class BookingController extends Controller
             'message' => 'Booking rooms retrieved successfully'
         ], 200);
     }
+    // Book Room
+
+    public function bookRoom(Request $request)
+    {
+        $request->validate([
+            'room_id' => 'required|exists:rooms,id',
+            'date' => 'required|date',
+            'start_time' => 'required',
+            'end_time' => 'required',
+        ]);
+
+        $booking = RoomBookings::create([
+            'room_id' => $request->room_id,
+            'date' => $request->date,
+            'start_time' => $request->start_time,
+            'end_time' => $request->end_time,
+            'booked_by' => auth()->id(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'data' => $booking,
+            'message' => 'Room booked successfully'
+        ], 201);
+    }
 }
