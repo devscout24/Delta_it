@@ -16,8 +16,8 @@ use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\CollaboratorController;
 use App\Http\Controllers\Api\InternalNoteController;
+use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\RoomAppointmentController;
-use App\Http\Controllers\ProfileController;
 
 Route::controller(AuthController::class)->group(function () {
     // user login and logout
