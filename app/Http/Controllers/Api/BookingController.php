@@ -25,7 +25,7 @@ class BookingController extends Controller
 
         // Fetch bookings for the user's company with related room info
         $bookings = RoomBookings::where('company_id', $user->company_id)
-            ->with(['room:id,name,location']) // adjust fields as per your rooms table
+            ->with(['room:id,room_name,area']) // adjust fields as per your rooms table
             ->select('id', 'room_id', 'booking_name', 'date', 'start_time', 'end_time', 'status')
             ->orderBy('date', 'desc')
             ->get();
@@ -45,8 +45,8 @@ class BookingController extends Controller
                 'status'       => $item->status,
                 'room'         => $item->room ? [
                     'id'       => $item->room->id,
-                    'name'     => $item->room->name,
-                    'location' => $item->room->location ?? null,
+                    'name'     => $item->room->room_name,
+                    'area' => $item->room->area ?? null,
                 ] : null,
             ];
         });
