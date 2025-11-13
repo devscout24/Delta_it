@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\RoomBookings;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -96,7 +97,7 @@ class BookingController extends Controller
             $booking = RoomBookings::create([
                 'room_id'      => $request->room_id,
                 'company_id'   => $user->company_id,
-                'date'         => \Carbon\Carbon::createFromFormat('d-m-Y', $request->date)->format('Y-m-d'),
+                'date'         => Carbon::parse($request->date)->format('Y-m-d'),
                 'booking_name' => $request->booking_name,
                 'start_time'   => $request->start_time,
                 'end_time'     => $request->end_time,
