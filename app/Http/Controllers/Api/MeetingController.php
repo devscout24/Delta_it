@@ -181,8 +181,8 @@ class MeetingController extends Controller
         try {
             $type = $request->query('type');
 
-            $query = Meeting::with(['room:id,floor,room_name,area,status'])
-                ->select('id', 'meeting_name', 'date', 'start_time', 'end_time', 'meeting_type', 'room_id', 'online_link');
+            $query =  Meeting::with(['room:id,floor,room_name,area,status', 'creator:id,profile_photo'])
+                ->select('id', 'meeting_name', 'date', 'start_time', 'end_time', 'meeting_type', 'room_id', 'online_link', 'created_by');
 
             if (in_array($type, ['virtual', 'office'])) {
                 $query->where('meeting_type', $type);
@@ -203,6 +203,7 @@ class MeetingController extends Controller
                     'start_time'   => $item->start_time,
                     'end_time'     => $item->end_time,
                     'meeting_type' => $item->meeting_type,
+                    'admin_avatar' => $item->creator->profile_photo == null ? asset('default/avatar.png') : asset($item->creator->profile_photo),
                 ];
 
                 if ($item->meeting_type === 'virtual') {
