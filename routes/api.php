@@ -61,8 +61,20 @@ Route::controller(RoomController::class)->middleware('auth:api')->group(function
 });
 
 
-Route::controller(CompanyController::class)->middleware('auth:api')->group(function () {
+Route::controller(CompanyController::class)->group(function () {
+    Route::get('/get-company', 'getCompany');
     Route::post('/add-company', 'addCompany');
+
+
+
+
+
+
+
+
+
+
+
     Route::post('/get-specific-company', 'getSpecificCompanies');
     Route::post('/add-company/general-data', 'updateCompanyGeneralData');
     Route::post('/delete-company', 'deleteCompany');

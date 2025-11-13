@@ -12,11 +12,38 @@ use Illuminate\Support\Facades\Validator;
 class CompanyController extends Controller
 {
     use ApiResponse;
+    public function getCompany()
+    {
+        $companies = Company::select(
+            'id',
+            'name',
+            'email',
+            'fiscal_name',
+            'nif',
+            'phone',
+            'incubation_type',
+            'business_area',
+            'manager',
+            'description',
+            'logo',
+            'status'
+        )->get()
+            ->map(function ($company) {
+                if ($company->logo) {
+                    $company->logo = $company->logo ? asset($company->logo) : asset('default/default.png');
+                }
+                return $company;
+            });
+
+        return $this->success($companies, 'Companies fetched successfully', 200);
+    }
+
+
     public function addCompany(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'commercial_name' => 'required',
-            'company_email' => 'required|email|unique:companies,company_email'
+            'name' => 'required',
+            'email' => 'required|email|unique:companies,email',
         ]);
 
         if ($validator->fails()) {
@@ -24,8 +51,8 @@ class CompanyController extends Controller
         }
 
         Company::create([
-            'commercial_name' => $request->commercial_name,
-            'company_email' => $request->company_email,
+            'name' => $request->name,
+            'email' => $request->email,
         ]);
 
         return $this->success((object)[], 'Company Added Successful');

@@ -69,8 +69,8 @@ class BookingController extends Controller
                 'room_id'     => 'required|exists:rooms,id',
                 'date'        => 'required|date',
                 'booking_name' => 'required|string|max:255',
-                'start_time'  => 'required|date_format:H:i',
-                'end_time'    => 'required|date_format:H:i|after:start_time',
+                'start_time'  => 'required',
+                'end_time'    => 'required|after:start_time',
                 'description' => 'nullable|string',
                 'add_emails'  => 'nullable|string', // could be CSV or JSON
             ]);
