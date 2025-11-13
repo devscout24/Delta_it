@@ -32,7 +32,7 @@ class ProfileController extends Controller
             'phone'        => $user->phone,
             'company_id'   => $user->company_id,
             'company_name' => $companyName,
-            'profile_photo' => $user->profile_photo ? asset($user->profile_photo) : null,
+            'profile_photo' => $user->profile_photo ? asset($user->profile_photo) : asset('default/avatar.png'),
         ];
 
         return $this->success($profile, 'User profile retrieved successfully', 200);
