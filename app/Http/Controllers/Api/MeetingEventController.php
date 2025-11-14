@@ -1,0 +1,221 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\MeetingEvent;
+use App\Models\MeetingEventAvailabilities;
+use App\Models\MeetingEventAvailabilitySlot;
+use App\Models\MeetingEventSchedule;
+use App\Traits\ApiResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+
+class MeetingEventController extends Controller
+{
+    use ApiResponse;
+    // ---------------------------------------------
+    // GET ALL EVENTS
+    // ---------------------------------------------
+    public function index()
+    {
+        $events = MeetingEvent::with([
+            'schedule.availabilities.slots'
+        ])->orderBy('id', 'desc')->get();
+
+        return response()->json([
+            'status' => true,
+            'data' => $events
+        ]);
+    }
+
+    // ---------------------------------------------
+    // GET SINGLE EVENT
+    // ---------------------------------------------
+    public function show($id)
+    {
+        $event = MeetingEvent::with([
+            'schedule.availabilities.slots'
+        ])->findOrFail($id);
+
+        return response()->json([
+            'status' => true,
+            'data' => $event
+        ]);
+    }
+
+    // ---------------------------------------------
+    // CREATE EVENT + SCHEDULE + AVAILABILITY
+    // ---------------------------------------------
+    public function store(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'room_id'       => 'required',
+            'company_id'    => 'required',
+            'event_name'    => 'required',
+            'event_date'    => 'required',
+            'event_color'   => 'required',
+            'online_link'   => 'nullable',
+            'max_invitees'  => 'required',
+            'description'   => 'required',
+            'duration'      => 'required',
+            'timezone'      => 'required',
+            'schedule_mode' => 'required',
+            'future_days'   => 'required',
+            'start_time'    => 'required',
+            'end_time'      => 'required',
+            'availabilities' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'errors' => $validator->errors()
+            ]);
+        }
+
+        DB::beginTransaction();
+        try {
+            // 1. Create Event
+            $event = MeetingEvent::create([
+                'room_id'       => $request->room_id,
+                'company_id'    => $request->company_id,
+                'created_by'    => Auth::guard('api')->id(),
+                'event_name'    => $request->event_name,
+                'event_date'    => $request->event_date,
+                'event_color'   => $request->event_color,
+                'online_link'   => $request->online_link,
+                'max_invitees'  => $request->max_invitees,
+                'description'   => $request->description,
+                'status'        => 'pending',
+            ]);
+
+            // 2. Create Schedule
+            $schedule = MeetingEventSchedule::create([
+                'meeting_event_id' => $event->id,
+                'duration'         => $request->duration,
+                'timezone'         => $request->timezone,
+                'schedule_mode'    => $request->schedule_mode,
+                'future_days'      => $request->future_days,
+                'date_from'        => $request->date_from,
+                'date_to'          => $request->date_to,
+            ]);
+
+            // 3. Create availability for each day
+            foreach ($request->availabilities as $dayItem) {
+
+                $availability = MeetingEventAvailabilities::create([
+                    'schedule_id'  => $schedule->id,
+                    'day'          => $dayItem['day'],
+                    'is_available' => $dayItem['is_available'],
+                ]);
+
+                // Add slots only if available
+                if (!empty($dayItem['slots'])) {
+                    foreach ($dayItem['slots'] as $slot) {
+                        MeetingEventAvailabilitySlot::create([
+                            'availability_id' => $availability->id,
+                            'start_time'       => $slot['start_time'],
+                            'end_time'         => $slot['end_time'],
+                        ]);
+                    }
+                }
+            }
+
+            DB::commit();
+            return response()->json([
+                'status' => true,
+                'message' => "Meeting event created successfully",
+                'data' => $event->load('schedule.availabilities.slots')
+            ]);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
+        }
+    }
+
+    // ---------------------------------------------
+    // UPDATE EVENT + SCHEDULE + AVAILABILITY + SLOTS
+    // ---------------------------------------------
+    public function update(Request $request, $id)
+    {
+        DB::beginTransaction();
+        try {
+            $event = MeetingEvent::findOrFail($id);
+
+            // Update event info
+            $event->update([
+                'room_id'       => $request->room_id,
+                'company_id'    => $request->company_id,
+                'event_name'    => $request->event_name,
+                'event_date'    => $request->event_date,
+                'event_color'   => $request->event_color,
+                'online_link'   => $request->online_link,
+                'max_invitees'  => $request->max_invitees,
+                'description'   => $request->description,
+                'status'        => $request->status ?? $event->status,
+            ]);
+
+            // Update schedule
+            $schedule = $event->schedule;
+            $schedule->update([
+                'duration'      => $request->duration,
+                'timezone'      => $request->timezone,
+                'schedule_mode' => $request->schedule_mode,
+                'future_days'   => $request->future_days,
+                'date_from'     => $request->date_from,
+                'date_to'       => $request->date_to,
+            ]);
+
+            // Remove old availability & slots
+            foreach ($schedule->availabilities as $availability) {
+                $availability->slots()->delete();
+            }
+            $schedule->availabilities()->delete();
+
+            // Insert new availability
+            foreach ($request->availabilities as $dayItem)
+                $availability = MeetingEventAvailabilities::create([
+                    'schedule_id'  => $schedule->id,
+                    'day'          => $dayItem['day'],
+                    'is_available' => $dayItem['is_available'],
+                ]);
+
+                if (!empty($dayItem['slots'])) {
+                    foreach ($dayItem['slots'] as $slot) {
+                        MeetingEventAvailabilitySlot::create([
+                            'availability_id' => $availability->id,
+                            'start_time'       => $slot['start_time'],
+                            'end_time'         => $slot['end_time'],
+                        ]);
+                    }
+                }
+            }
+
+            DB::commit();
+            return response()->json([
+                'status' => true,
+                'message' => "Meeting event updated successfully",
+                'data' => $event->load('schedule.availabilities.slots')
+            ]);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
+        }
+    }
+
+    // ---------------------------------------------
+    // DELETE EVENT (CASCADE deletes all schedule+slots)
+    // ---------------------------------------------
+    public function destroy($id)
+    {
+        $event = MeetingEvent::findOrFail($id);
+        $event->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => "Meeting event deleted successfully"
+        ]);
+    }
+}

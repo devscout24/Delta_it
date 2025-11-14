@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\CollaboratorController;
 use App\Http\Controllers\Api\InternalNoteController;
+use App\Http\Controllers\Api\MeetingEventController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\RoomAppointmentController;
@@ -156,11 +157,11 @@ Route::controller(MeetingController::class)->group(function () {
 });
 
 Route::controller(MeetingEventController::class)->group(function () {
-    Route::get('/meeting-events', 'index');                // Get all events
-    Route::get('/meeting-events/{id}', 'show');            // Get single event
-    Route::post('/meeting-events/create', 'store');        // Create full event
-    Route::post('/meeting-events/update/{id}', 'update');  // Update full event
-    Route::delete('/meeting-events/delete/{id}', 'destroy'); // Delete event
+    Route::get('/meeting-events', 'index');
+    Route::get('/meeting-events/{id}', 'show');
+    Route::post('/meeting-events/create', 'store');
+    Route::post('/meeting-events/update/{id}', 'update');
+    Route::delete('/meeting-events/delete/{id}', 'destroy');
 });
 
 
