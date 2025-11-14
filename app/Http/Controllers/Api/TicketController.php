@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Ticket;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
 class TicketController extends Controller
@@ -24,18 +26,22 @@ class TicketController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $validated = Validator::make($request->all(), [
             'subject' => 'required',
             'company_id' => 'required|exists:companies,id',
             'type' => 'required',
         ]);
 
+        if ($validated->fails()) {
+            return $this->error(null, $validated->errors()->first(), 422);
+        }
+
         $ticket = Ticket::create([
             'unique_id'    => 'TIC-' . uniqid(),
-            'subject'      => $validated['subject'],
-            'company_id'   => $validated['company_id'],
-            'requester_id' => auth()->id(),
-            'type'         => $validated['type'],
+            'subject'      => $request->subject,
+            'company_id'   => $request->company_id,
+            'requester_id' => Auth::guard('api')->id(),
+            'type'         => $request->type,
             'status'       => 'pending',
             'room_id'      => null,
             'action'       => 'created'
