@@ -101,7 +101,7 @@ Route::controller(DocumentController::class)->middleware('auth:api')->group(func
 });
 
 Route::controller(AccountController::class)->middleware('auth:api')->group(function () {
-    Route::post('/get-company-user', 'get');
+    Route::get('/get-company-user', 'get');
     Route::post('/add-company-user', 'store');
     Route::post('/update-company-account', 'update');
     Route::get('/delete-company-account/{id}', 'destroy');
