@@ -54,7 +54,6 @@ class BookingController extends Controller
         return $this->success($data, 'Company bookings fetched successfully');
     }
 
-
     // Book Room
 
     public function bookRoom(Request $request)

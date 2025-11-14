@@ -12,9 +12,18 @@ use Illuminate\Support\Facades\Validator;
 class CompanyController extends Controller
 {
     use ApiResponse;
-    public function getCompany()
+    public function getCompany(Request $request)
     {
-        $companies = Company::select(
+        // Validate filters
+        $request->validate([
+            'status' => 'nullable|in:active,archived,all',
+            'name'   => 'nullable|string',
+            'incubation_type' => 'nullable|in:virtual,on-site,cowork,colab'
+        ]);
+
+        $status = $request->status ?? 'all';
+
+        $query = Company::select(
             'id',
             'name',
             'email',
@@ -27,18 +36,39 @@ class CompanyController extends Controller
             'description',
             'logo',
             'status'
-        )->get()
-            ->map(function ($company) {
-                if ($company->logo) {
-                    $company->logo = $company->logo ? asset($company->logo) : asset('default/default.png');
-                }
-                return $company;
-            });
+        );
+
+        /** -------------------------
+         *  Apply Filters Dynamically
+         *  ------------------------- */
+
+        // Filter by status
+        if ($status !== 'all') {
+            $query->where('status', $status);
+        }
+
+        // Filter by name (LIKE %search%)
+        if ($request->filled('name')) {
+            $query->where('name', 'like', '%' . $request->name . '%');
+        }
+
+        // Filter by incubation_type
+        if ($request->filled('incubation_type')) {
+            $query->where('incubation_type', $request->incubation_type);
+        }
+
+        /** -------------------------------------
+         *  Fetch and process the results
+         *  ------------------------------------- */
+        $companies = $query->get()->map(function ($company) {
+            $company->logo = $company->logo
+                ? asset($company->logo)
+                : asset('default/default.png');
+            return $company;
+        });
 
         return $this->success($companies, 'Companies fetched successfully', 200);
     }
-
-
     public function addCompany(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -57,28 +87,6 @@ class CompanyController extends Controller
 
         return $this->success((object)[], 'Company Added Successful');
     }
-
-
-    public function getSpecificCompanies(Request $request)
-    {
-        if (!$request->id) {
-            return $this->error('', 'Id not sent', 404);
-        }
-
-        $company = Company::where('id', $request->id)->first();
-
-        if (!$company) {
-            return $this->error('', 'No company found', 404);
-        }
-
-        $company = [
-            'id' => $company->id,
-            'commercial_name' => $company->commercial_name,
-            'company_email' => $company->company_email,
-        ];
-        return $this->success($company, 'Company fetched successful', 200);
-    }
-
 
     public function updateCompanyGeneralData(Request $request)
     {
@@ -162,73 +170,6 @@ class CompanyController extends Controller
             return $this->error($e->getMessage(), 'Something went wrong', 500);
         }
     }
-
-
-    public function deleteCompany(Request $request)
-    {
-        if (!$request->id) {
-            return $this->error('', 'Id not sent', 404);
-        }
-
-        $company = Company::where('id', $request->id)->first();
-
-        if (!$company) {
-            return $this->error('', 'No company found', 404);
-        }
-
-        $company->delete();
-
-        return $this->success((object)[], 'Company deleted successfully', 200);
-    }
-
-    public function getAllCompanies(Request $request)
-    {
-        // Get filter from request, default to all
-        $status = $request->query('status'); // 'active' or 'archive'
-
-        // Build query
-        $query = Company::with('room', 'contract');
-
-        if ($status) {
-            $query->where('status', $status);
-        }
-
-        $companies = $query->get();
-
-        $data = [];
-        foreach ($companies as $company) {
-            $data[] = [
-                'id' => $company->id,
-                'commercial_name' => $company->commercial_name,
-                'incubation_type' => $company->incubation_type,
-                'logo' => asset($company->logo),
-                'contract' => $company->contract ? [
-                    'id' => $company->contract->id,
-                    'start_date' => $company->contract->start_date,
-                    'end_date' => $company->contract->end_date,
-                ] : null,
-            ];
-        }
-
-
-        return $this->success($data, 'Companies fetched successfully', 200);
-    }
-
-
-    public function getIncubationTypes()
-    {
-        $companies = Company::all();
-        $data = [];
-        foreach ($companies as $company) {
-            $data[] = [
-                'id' => $company->id,
-                'incubation_type' => $company->incubation_type,
-            ];
-        }
-
-        return $this->success($data, 'Incubation types fetched successfully', 200);
-    }
-
     public function uploadLogo(Request $request)
     {
 
@@ -265,7 +206,6 @@ class CompanyController extends Controller
 
         return $this->error(null, 'Comapany Logo not fond', 201);
     }
-
     public function deleteLogo(Request $request)
     {
         $request->validate([
@@ -288,19 +228,74 @@ class CompanyController extends Controller
 
         return $this->error(null, 'Company Logo not found', 201);
     }
-
-    // mobile api
-
-    public function show(Request $request, $id)
+    public function deleteCompany(Request $request)
     {
-        $company  = Company::where('id', $id)->first();
-
-        if (!$company) {
-            return $this->error($company, 'Comapany fetched successfully', 201);
+        if (!$request->id) {
+            return $this->error('', 'Id not sent', 404);
         }
 
-        return $this->success($company, 'Comapany fetched successfully', 201);
+        $company = Company::where('id', $request->id)->first();
+
+        if (!$company) {
+            return $this->error('', 'No company found', 404);
+        }
+
+        $company->delete();
+
+        return $this->success((object)[], 'Company deleted successfully', 200);
     }
+    public function show($id)
+    {
+        $company = Company::select(
+            'id',
+            'name',
+            'email',
+            'fiscal_name',
+            'nif',
+            'phone',
+            'incubation_type',
+            'business_area',
+            'manager',
+            'description',
+            'logo',
+            'status'
+        )->where('id', $id)->first();
+
+        if (!$company) {
+            return $this->error(null, 'Company not found', 404);
+        }
+
+        // Format logo
+        $company->logo = $company->logo
+            ? asset($company->logo)
+            : asset('default/default.png');
+
+        return $this->success($company, 'Company fetched successfully', 200);
+    }
+    public function getSpecificCompanies(Request $request)
+    {
+        if (!$request->id) {
+            return $this->error('', 'Id not sent', 404);
+        }
+
+        $company = Company::where('id', $request->id)->first();
+
+        if (!$company) {
+            return $this->error('', 'No company found', 404);
+        }
+
+        $company = [
+            'id' => $company->id,
+            'commercial_name' => $company->commercial_name,
+            'company_email' => $company->company_email,
+        ];
+        return $this->success($company, 'Company fetched successful', 200);
+    }
+
+
+
+
+    // For Mobile Api
 
     public function update(Request $request)
     {

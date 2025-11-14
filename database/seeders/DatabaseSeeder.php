@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\CompanyPayment;
 use App\Models\Document;
 use App\Models\Meeting;
 use App\Models\Room;
@@ -256,6 +257,17 @@ class DatabaseSeeder extends Seeder
 
         foreach ($meetings as $meeting) {
             Meeting::create($meeting);
+        }
+
+        $companyId = 1; // test company
+        $year = 2025;
+
+        for ($month = 1; $month <= 12; $month++) {
+            CompanyPayment::create([
+                'company_id' => $companyId,
+                'year'       => $year,
+                'month'      => $month,
+            ]);
         }
     }
 }

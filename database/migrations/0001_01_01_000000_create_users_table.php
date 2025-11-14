@@ -15,28 +15,35 @@ return new class extends Migration
             // user personal info
             $table->id();
             $table->integer('company_id')->nullable();
+            $table->string('job_position')->nullable();
+
+            $table->string('profile_photo')->nullable();
             $table->string('username', 50)->nullable()->unique();
             $table->string('name', 100);
             $table->string('last_name')->nullable();
             $table->string('email', 100)->unique();
             $table->string('phone', 20)->nullable();
-            $table->string('address', 255)->nullable();
-            $table->string('zipcode', 20)->nullable();
             $table->string('password');
-            $table->string('profile_photo')->nullable();
             $table->string('user_type', 255);
+
             $table->timestamp('email_verified_at')->nullable();
             $table->string('email_otp')->nullable();
             $table->timestamp('email_otp_expires_at')->nullable();
+
             $table->string('password_otp', 10)->nullable();
             $table->timestamp('password_otp_expired_at')->nullable();
             $table->timestamp('password_otp_verified_at')->nullable();
             $table->string('password_reset_token')->nullable();
             $table->timestamp('password_reset_token_expires_at')->nullable();
+
             $table->enum('status', ['active', 'inactive', 'banned'])->default('active');
+
             $table->timestamp('last_login_at')->nullable();
+
             $table->string('account_delete_reason', 255)->nullable();
+
             $table->boolean('terms_and_conditions')->default(false);
+
             $table->softDeletes();
             $table->rememberToken();
             $table->timestamps();

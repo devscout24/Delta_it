@@ -16,8 +16,12 @@ use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\CollaboratorController;
 use App\Http\Controllers\Api\InternalNoteController;
+use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\RoomAppointmentController;
+use App\Http\Controllers\Api\TicketAttachmentController;
+use App\Http\Controllers\Api\TicketController;
+use App\Http\Controllers\Api\TicketMessageController;
 
 Route::controller(AuthController::class)->group(function () {
     // user login and logout
@@ -51,7 +55,7 @@ Route::controller(RoomController::class)->middleware('auth:api')->group(function
     Route::post('/add-room', 'addRoom');
 
 
-
+    // No Idea
     Route::post('/assign-associate_company', 'assignCompany');
     Route::post('/show-room-details/{id}', 'showRoomDetails');
     Route::get('/room-status-change/{status}/{id}', 'roomStatusChange');
@@ -64,28 +68,22 @@ Route::controller(RoomController::class)->middleware('auth:api')->group(function
 Route::controller(CompanyController::class)->group(function () {
     Route::get('/get-company', 'getCompany');
     Route::post('/add-company', 'addCompany');
-
-
-
-
-
-
-
-
-
-
-
-    Route::post('/get-specific-company', 'getSpecificCompanies');
-    Route::post('/add-company/general-data', 'updateCompanyGeneralData');
-    Route::post('/delete-company', 'deleteCompany');
-    Route::get('/list-companies', 'getAllCompanies');
-    Route::get('/list-incubation-types-for_filter', 'getIncubationTypes');;
-    // logo
+    Route::post('/update-company', 'update'); // For Mobile
+    Route::post('/update-general-company', 'updateCompanyGeneralData');
     Route::post('/upload_logo', 'uploadLogo');
     Route::post('/upload-delete', 'deleteLogo');
-    // mobile api
+    Route::post('/delete-company', 'deleteCompany');
+    Route::post('/get-specific-company', 'getSpecificCompanies');
     Route::get('/show-company/{id}', 'show');
-    Route::post('/update-company', 'update'); // Mobile Using
+});
+
+Route::controller(PaymentController::class)->group(function () {
+    Route::get('/company-payments-get', 'index');
+    Route::post('/company-payments-add', 'store');
+    Route::post('/company-payments-update', 'update');
+    Route::get('/company-payments-yearly-info', 'dataInfo');
+
+    Route::get('/get-all-company-payments-info', 'allPaymentsInfo');
 });
 
 
@@ -96,20 +94,85 @@ Route::controller(CollaboratorController::class)->group(function () {
     Route::post('/collaborators-delete', 'destroy');
 });
 
-
-Route::controller(ContractController::class)->middleware('auth:api')->group(function () {
-    Route::post('/contracts-add', 'store');
-    Route::get('/get-single/contract', 'show');
-    Route::post('/contracts-update', 'update');
-    Route::post('/contracts-delete', 'destroy');
-    Route::post('/contracts-singleFile-delete', 'deleteSingleFile');
-});
-
 Route::controller(DocumentController::class)->middleware('auth:api')->group(function () {
     Route::post('/add-documents', 'store');
     Route::post('/delete-document', 'deleteDocument');
     Route::get('/get-all-documents', 'allDocuments');
 });
+
+Route::controller(AccountController::class)->middleware('auth:api')->group(function () {
+    Route::post('/get-company-user', 'get');
+    Route::post('/add-company-user', 'store');
+    Route::post('/update-company-account', 'update');
+    Route::get('/delete-company-account/{id}', 'destroy');
+});
+
+Route::controller(AccessCardController::class)->middleware('auth:api')->group(function () {
+    Route::get('/get-cards', 'getCardStats');
+    Route::post('/access_card/update', 'updateAccessCode');
+});
+
+Route::controller(InternalNoteController::class)->middleware('auth:api')->group(function () {
+    Route::post('/add-note', 'store');
+    Route::post('/update-note/{id}', 'update');
+    Route::get('/delete-note/{id}', 'd     estroy');
+});
+
+Route::controller(ContractController::class)->middleware('auth:api')->group(function () {
+    Route::get('/get-company-contracts', 'index');
+    Route::post('/update-contract-info', 'update');
+    Route::get('/add-contract-file', 'storeFile');
+    Route::post('/remove-contract-file', 'destroy');
+
+    Route::get('/get-all-company-contracts', 'allContracts');
+});
+
+Route::middleware('')->group(function () {
+
+    // Ticket Controller
+    Route::controller(TicketController::class)->group(function () {
+        Route::post('/tickets/create', 'store');
+        Route::get('/tickets/list', 'index');
+        Route::get('/tickets/show/{id}', 'show');
+        Route::post('/tickets/update/{id}', 'updateStatus');
+    });
+
+    // Ticket Message Controller (Chat)
+    Route::controller(TicketMessageController::class)->group(function () {
+        Route::get('/tickets/{ticket_id}/messages', 'index');
+        Route::post('/tickets/{ticket_id}/messages/send', 'store');
+    });
+
+    // Ticket File Controller (Attachments)
+    Route::controller(TicketAttachmentController::class)->group(function () {
+        Route::post('/tickets/messages/{message_id}/upload-file', ' ');
+        Route::delete('/tickets/messages/{message_id}/delete-file', 'destroy');
+    });
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 Route::controller(BookingController::class)->group(function () {
     Route::get('/get-room-bookings', 'index');
@@ -127,18 +190,10 @@ Route::controller(RoomAppointmentController::class)->middleware('auth:api')->gro
 });
 
 
-Route::controller(AccountController::class)->middleware('auth:api')->group(function () {
-    Route::post('/add-account', 'store');
-    Route::get('/delete-account/{id}', 'destroy');
-    Route::post('/update-account', 'update');
-});
 
 
-Route::controller(InternalNoteController::class)->middleware('auth:api')->group(function () {
-    Route::post('/add-note', 'store');
-    Route::get('/delete-note/{id}', 'destroy');
-    Route::post('/update-note/{id}', 'update');
-});
+
+
 
 
 Route::controller(ArchiveController::class)->middleware('auth:api')->group(function () {
@@ -147,12 +202,7 @@ Route::controller(ArchiveController::class)->middleware('auth:api')->group(funct
 });
 
 
-Route::controller(AccessCardController::class)->middleware('auth:api')->group(function () {
-    Route::post('/access_card/update', 'updateAccessCode');
-    // mobile api
 
-    Route::get('/get-cards', 'getCardStats');
-});
 
 
 

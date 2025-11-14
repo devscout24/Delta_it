@@ -14,15 +14,22 @@ return new class extends Migration
         Schema::create('company_payments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('company_id')->constrained('companies')->onDelete('cascade');
-            $table->string('month', 20);
+
+            $table->year('year');
+            $table->unsignedTinyInteger('month');
+
             $table->decimal('value_non_vat', 10, 2)->default(0);
             $table->decimal('value_vat', 10, 2)->default(0);
             $table->decimal('printings_non_vat', 10, 2)->default(0);
             $table->decimal('printings_vat', 10, 2)->default(0);
+
             $table->decimal('total_vat', 10, 2)->default(0);
             $table->decimal('total_amount', 10, 2)->default(0);
-            $table->enum('status', ['pending', 'paid', 'cancelled'])->default('pending');
+
+            $table->enum('status', ['unpaid', 'paid'])->default('unpaid');
             $table->timestamps();
+
+            $table->unique(['company_id', 'year', 'month']);
         });
     }
 
