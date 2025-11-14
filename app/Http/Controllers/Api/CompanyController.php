@@ -101,7 +101,7 @@ class CompanyController extends Controller
             'logo'            => 'nullable|image|mimes:jpg,jpeg,png,svg|max:2048',
             'name'            => 'required|string|max:255',
             'fiscal_name'     => 'nullable|string|max:255',
-            'email'           => 'required|email|unique:companies,company_email',
+            'email'           => 'required|email|unique:companies,email,' . $request->company_id,
             'nif'             => 'nullable|integer',
             'phone_number'    => 'nullable|string|max:11',
             'incubation_type' => 'required|in:virtual,on-site,cowork,colab',
