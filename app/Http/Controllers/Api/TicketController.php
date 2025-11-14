@@ -27,9 +27,10 @@ class TicketController extends Controller
     public function store(Request $request)
     {
         $validated = Validator::make($request->all(), [
-            'subject' => 'required',
+            'subject'    => 'required',
             'company_id' => 'required|exists:companies,id',
-            'type' => 'required',
+            'type'       => 'required',
+            'room_id'    => 'nullable|exists:rooms,id',
         ]);
 
         if ($validated->fails()) {
@@ -43,7 +44,7 @@ class TicketController extends Controller
             'requester_id' => Auth::guard('api')->id(),
             'type'         => $request->type,
             'status'       => 'pending',
-            'room_id'      => null,
+            'room_id'      => $request->room_id,
             'action'       => 'created',
             'date' => now()->toDateString(),
         ]);

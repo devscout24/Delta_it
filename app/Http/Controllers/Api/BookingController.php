@@ -31,7 +31,7 @@ class BookingController extends Controller
             ->get();
 
         if ($bookings->isEmpty()) {
-            return $this->error([], 'No bookings found for this company', 404);
+            return $this->error([], 'No bookings found for this company', 200);
         }
 
         // Transform data for a clean API response
@@ -62,7 +62,7 @@ class BookingController extends Controller
             $user = Auth::guard('api')->user();
 
             if (!$user || !$user->company_id) {
-                return $this->error([], 'User not associated with any company', 403);
+                return $this->error([], 'User not associated with any company', 200);
             }
 
             $validator = Validator::make($request->all(), [

@@ -155,6 +155,14 @@ Route::controller(MeetingController::class)->group(function () {
     // Events
 });
 
+Route::controller(MeetingEventController::class)->group(function () {
+    Route::get('/meeting-events', 'index');                // Get all events
+    Route::get('/meeting-events/{id}', 'show');            // Get single event
+    Route::post('/meeting-events/create', 'store');        // Create full event
+    Route::post('/meeting-events/update/{id}', 'update');  // Update full event
+    Route::delete('/meeting-events/delete/{id}', 'destroy'); // Delete event
+});
+
 
 
 

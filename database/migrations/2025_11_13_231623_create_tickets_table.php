@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('company_id')->constrained('companies')->onDelete('cascade');
 
             $table->string('subject');
-            $table->enum('type', ['general', 'technical', 'billing', 'other'])->nullable();
+            $table->string('type')->nullable();
             $table->foreignId('room_id')->nullable()->constrained('rooms')->nullOnDelete();
 
             $table->foreignId('requester_id')->constrained('users')->onDelete('cascade');
