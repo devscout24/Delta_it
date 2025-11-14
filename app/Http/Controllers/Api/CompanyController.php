@@ -85,7 +85,14 @@ class CompanyController extends Controller
             'email' => $request->email,
         ]);
 
-        return $this->success((object)[], 'Company Added Successful');
+        $data = Company::where('email', $request->email)->first();
+        $data = [
+            'id' => $data->id,
+            'name' => $data->name,
+            'email' => $data->email,
+        ];
+
+        return $this->success($data, 'Company Added Successful');
     }
 
     public function updateCompanyGeneralData(Request $request)
