@@ -24,7 +24,8 @@ return new class extends Migration
             $table->foreignId('requester_id')->constrained('users')->onDelete('cascade');
             $table->enum('requester_role', ['admin', 'user']);
 
-            $table->date('date');
+            $table->date('date')->nullable();
+
             $table->string('action')->nullable();
 
             $table->enum('status', ['pending', 'in-progress', 'unsolved', 'solved'])->default('pending');
