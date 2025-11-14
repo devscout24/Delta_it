@@ -44,7 +44,8 @@ class TicketController extends Controller
             'type'         => $request->type,
             'status'       => 'pending',
             'room_id'      => null,
-            'action'       => 'created'
+            'action'       => 'created',
+            'date' => now()->toDateString(),
         ]);
 
         return $this->success($ticket, "Ticket created successfully");
