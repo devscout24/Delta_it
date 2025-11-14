@@ -12,10 +12,204 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Models\MettingBookRequest;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Validator;
 
 class MeetingController extends Controller
 {
     use ApiResponse;
+
+    public function index(Request $request)
+    {
+        // Auto-complete old meetings
+        Meeting::whereDate('date', '<', Carbon::today())
+            ->where('status', 'pending')
+            ->update(['status' => 'completed']);
+
+        $query = Meeting::query();
+
+        // Filter: Company
+        if ($request->company_id) {
+            $query->where('company_id', $request->company_id);
+        }
+
+        // Filter: Status (pending, completed, cancelled)
+        if ($request->status) {
+            $query->where('status', $request->status);
+        }
+
+        // Filter: Meeting type (virtual, office)
+        if ($request->meeting_type) {
+            $query->where('meeting_type', $request->meeting_type);
+        }
+
+        // Filter: Room (only office meetings have room)
+        if ($request->room_id) {
+            $query->where('room_id', $request->room_id);
+        }
+
+        $meetings = $query->orderBy('date', 'desc')->get();
+
+        return $this->success($meetings, "Meetings fetched successfully", 200);
+    }
+
+    public function create(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'company_id'   => 'required|exists:companies,id',
+            'room_id'      => 'nullable|exists:rooms,id',
+            'meeting_name' => 'required|string',
+            'date'         => 'required|date',
+            'start_time'   => 'required',
+            'end_time'     => 'required',
+            'meeting_type' => 'required|in:virtual,office',
+            'online_link'  => 'nullable|string',
+            'add_emails'   => 'nullable|array',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->error([], $validator->errors()->first(), 422);
+        }
+
+        // Virtual meeting must have link
+        if ($request->meeting_type === 'virtual' && !$request->online_link) {
+            return $this->error([], "Online meeting link is required for virtual meetings", 422);
+        }
+
+        $meeting = Meeting::create([
+            'company_id'   => $request->company_id,
+            'room_id'      => $request->meeting_type == 'office' ? $request->room_id : null,
+            'created_by'   => auth()->id(),
+            'meeting_name' => $request->meeting_name,
+            'date'         => $request->date,
+            'start_time'   => $request->start_time,
+            'end_time'     => $request->end_time,
+            'meeting_type' => $request->meeting_type,
+            'online_link'  => $request->meeting_type == 'virtual' ? $request->online_link : null,
+            'add_emails'   => json_encode($request->add_emails),
+            'status'       => 'pending',
+        ]);
+
+        return $this->success($meeting, "Meeting created successfully", 201);
+    }
+
+    /**
+     * UPDATE MEETING
+     */
+    public function update(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id'           => 'required|exists:meetings,id',
+            'company_id'   => 'nullable|exists:companies,id',
+            'room_id'      => 'nullable|exists:rooms,id',
+            'meeting_name' => 'required|string',
+            'date'         => 'required|date',
+            'start_time'   => 'required',
+            'end_time'     => 'required',
+            'meeting_type' => 'required|in:virtual,office',
+            'online_link'  => 'nullable|string',
+            'add_emails'   => 'nullable|array',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->error([], $validator->errors()->first(), 422);
+        }
+
+        $meeting = Meeting::find($request->id);
+
+        // Check meeting type logic
+        if ($request->meeting_type === 'virtual' && !$request->online_link) {
+            return $this->error([], "Online meeting link is required for virtual meetings", 422);
+        }
+
+        $meeting->update([
+            'company_id'   => $request->company_id,
+            'room_id'      => $request->meeting_type == 'office' ? $request->room_id : null,
+            'meeting_name' => $request->meeting_name,
+            'date'         => $request->date,
+            'start_time'   => $request->start_time,
+            'end_time'     => $request->end_time,
+            'meeting_type' => $request->meeting_type,
+            'online_link'  => $request->meeting_type == 'virtual' ? $request->online_link : null,
+            'add_emails'   => json_encode($request->add_emails),
+        ]);
+
+        return $this->success($meeting, "Meeting updated successfully", 200);
+    }
+
+    /**
+     * UPDATE MEETING STATUS
+     */
+    public function updateStatus(Request $request)
+    {
+        $request->validate([
+            'id'     => 'required|exists:meetings,id',
+            'status' => 'required|in:pending,completed,cancelled'
+        ]);
+
+        $meeting = Meeting::find($request->id);
+        $meeting->status = $request->status;
+        $meeting->save();
+
+        return $this->success($meeting, "Meeting status updated", 200);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     public function store(Request $request)
     {
         try {
