@@ -127,27 +127,24 @@ Route::controller(ContractController::class)->middleware('auth:api')->group(func
     Route::get('/get-all-company-contracts', 'allContracts');
 });
 
-Route::middleware('')->group(function () {
+// Ticket Controller
+Route::controller(TicketController::class)->group(function () {
+    Route::get('/tickets/list', 'index');
+    Route::post('/tickets/create', 'store');
+    Route::get('/tickets/show/{id}', 'show');
+    Route::post('/tickets/update/{id}', 'updateStatus');
+});
 
-    // Ticket Controller
-    Route::controller(TicketController::class)->group(function () {
-        Route::post('/tickets/create', 'store');
-        Route::get('/tickets/list', 'index');
-        Route::get('/tickets/show/{id}', 'show');
-        Route::post('/tickets/update/{id}', 'updateStatus');
-    });
+// Ticket Message Controller (Chat)
+Route::controller(TicketMessageController::class)->group(function () {
+    Route::get('/tickets/{ticket_id}/messages', 'index');
+    Route::post('/tickets/{ticket_id}/messages/send', 'store');
+});
 
-    // Ticket Message Controller (Chat)
-    Route::controller(TicketMessageController::class)->group(function () {
-        Route::get('/tickets/{ticket_id}/messages', 'index');
-        Route::post('/tickets/{ticket_id}/messages/send', 'store');
-    });
-
-    // Ticket File Controller (Attachments)
-    Route::controller(TicketAttachmentController::class)->group(function () {
-        Route::post('/tickets/messages/{message_id}/upload-file', ' ');
-        Route::delete('/tickets/messages/{message_id}/delete-file', 'destroy');
-    });
+// Ticket File Controller (Attachments)
+Route::controller(TicketAttachmentController::class)->group(function () {
+    Route::post('/tickets/messages/{message_id}/upload-file', ' ');
+    Route::delete('/tickets/messages/{message_id}/delete-file', 'destroy');
 });
 
 Route::controller(MeetingController::class)->group(function () {
