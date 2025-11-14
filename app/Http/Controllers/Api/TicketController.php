@@ -31,14 +31,14 @@ class TicketController extends Controller
         ]);
 
         $ticket = Ticket::create([
-            'unique_id' => 'TIC-' . strtoupper(Str::random(8)),
-            'subject' => $validated['subject'],
-            'company_id' => $validated['company_id'],
+            'unique_id'    => 'TIC-' . uniqid(),
+            'subject'      => $validated['subject'],
+            'company_id'   => $validated['company_id'],
             'requester_id' => auth()->id(),
-            'type' => $validated['type'],
-            'status' => 'pending',
-            'room_id' => null,
-            'action' => 'created'
+            'type'         => $validated['type'],
+            'status'       => 'pending',
+            'room_id'      => null,
+            'action'       => 'created'
         ]);
 
         return $this->success($ticket, "Ticket created successfully");
