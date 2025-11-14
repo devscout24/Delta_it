@@ -148,6 +148,32 @@ Route::controller(TicketAttachmentController::class)->group(function () {
 });
 
 Route::controller(MeetingController::class)->group(function () {
+    Route::get('/get-meeting', 'index');
+    Route::post('/create-meetings', 'create');
+    Route::post('/update-meetings', 'update');
+    Route::post('/update-meeting-status', 'updateStatus');
+    // Events
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Route::controller(MeetingController::class)->group(function () {
     Route::post('/add-meeting', 'store');
     Route::get('/filter-meetings', 'filter');
     Route::post('/filter-meetings-type-room', 'filterMeetingBytype');
@@ -159,34 +185,6 @@ Route::controller(MeetingController::class)->group(function () {
     // meeting request api
     Route::post('/add/request', 'StoreMeeting');
 });
-
-Route::controller(MeetingController::class)->group(function () {
-    Route::get('/get-meeting', 'index');
-    Route::post('/create-meetings', 'create');
-    Route::post('/update-meetings', 'update');
-    Route::post('/update-meeting-status', 'updateStatus');
-});
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
