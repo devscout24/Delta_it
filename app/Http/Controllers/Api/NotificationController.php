@@ -8,6 +8,7 @@ use App\Notifications\NewSystemNotification;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class NotificationController extends Controller
 {
@@ -62,9 +63,14 @@ class NotificationController extends Controller
 
     public function markRead(Request $request)
     {
-        $request->validate([
-            'id' => 'required|string'
+        $validation = Validator::make($request->all(), [
+             'id' => 'required|string'
         ]);
+
+        if($validation->fails()) {
+            return $this->error($validation->errors(), 'Error in Validation', 422);
+        }
+
 
         $user = Auth::guard('api')->user();
 
