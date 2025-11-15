@@ -24,32 +24,35 @@ class RoomController extends Controller
 
     public function addRoom(Request $request)
     {
-        $validate = Validator::make($request->all(), [
+        $validator = Validator::make($request->all(), [
             'floor'           => 'required|integer',
             'room_name'       => 'required|string|max:255',
             'area'            => 'required|numeric',
             'polygon_points'  => 'required|array',
         ]);
 
-        if ($validate->fails()) {
-            return $this->error($validate->errors(), $validate->errors()->first(), 422);
+        if ($validator->fails()) {
+            return $this->error($validator->errors(), $validator->errors()->first(), 422);
         }
 
+        // store validated input
+        $data = $validator->validated();
+
         try {
-            // Check for uniqueness on the same floor
-            if (Room::where('floor', $validate->validated()['floor'])
-                ->where('room_name', $validate->validated()['room_name'])
+            // Check for uniqueness on same floor
+            if (Room::where('floor', $data['floor'])
+                ->where('room_name', $data['room_name'])
                 ->exists()
             ) {
                 return $this->error([], 'Room name already exists on this floor', 422);
             }
 
             $room = Room::create([
-                'floor'           => $validate['floor'],
-                'room_name'       => $validate['room_name'],
-                'area'            => $validate['area'],
-                'polygon_points'  => json_encode($validate['polygon_points']),
-                'status'          => 'available',
+                'floor'          => $data['floor'],
+                'room_name'      => $data['room_name'],
+                'area'           => $data['area'],
+                'polygon_points' => json_encode($data['polygon_points']),
+                'status'         => 'available',
             ]);
 
             return $this->success($room, 'Room added successfully', 201);
@@ -57,6 +60,7 @@ class RoomController extends Controller
             return $this->error([], $e->getMessage(), 500);
         }
     }
+
 
     // ================================================
 
