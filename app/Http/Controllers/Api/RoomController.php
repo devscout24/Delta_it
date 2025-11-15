@@ -47,11 +47,23 @@ class RoomController extends Controller
                 return $this->error([], 'Room name already exists on this floor', 422);
             }
 
+            // Convert flat array to coordinate pairs (added newly)
+            $points = $data['polygon_points'];
+            $converted = [];
+            for ($i = 0; $i < count($points); $i += 2) {
+                $converted[] = [
+                    (float)$points[$i],
+                    (float)$points[$i + 1]
+                ];
+            }
+            // newly added end
+
             $room = Room::create([
                 'floor'          => $data['floor'],
                 'room_name'      => $data['room_name'],
                 'area'           => $data['area'],
-                'polygon_points' => json_encode($data['polygon_points']),
+                // 'polygon_points' => json_encode($data['polygon_points']),
+                'polygon_points' => json_encode($converted),
                 'status'         => 'available',
             ]);
 
