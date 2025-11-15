@@ -39,10 +39,10 @@ class TicketMessageController extends Controller
         $message = TicketMessage::create([
             'ticket_id' => $ticket_id,
             'sender_id' => auth()->id(),
-            'message' => $validated['message'],
-            'type' => $validated['type'],
+            'message' => $request->message,
+            'type' => $request->type,
         ]);
 
-        return $this->success($message, "Message sent");
+        return $this->success($message, "Message sent", 200);
     }
 }
