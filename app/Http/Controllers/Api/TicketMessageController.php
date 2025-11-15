@@ -29,7 +29,7 @@ class TicketMessageController extends Controller
     {
         $validated = Validator::make($request->all(), [
             'message' => 'nullable|string',
-            'type' => 'required|in:text,emoji,link,attachment'
+            'type' => 'required|'
         ]);
 
         if ($validated->fails()) {
@@ -39,8 +39,8 @@ class TicketMessageController extends Controller
         $message = TicketMessage::create([
             'ticket_id' => $ticket_id,
             'sender_id' => auth()->id(),
-            'message' => $validated['message'],
-            'type' => $validated['type'],
+            'message' => $request->message,
+            'type' =>  $request->type,
         ]);
 
         return $this->success($message, "Message sent");
