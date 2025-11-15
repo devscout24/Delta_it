@@ -47,7 +47,7 @@ class TicketMessageController extends Controller
             'ticket_id' => $ticket_id,
             'sender_id' => $user->id,
             'message_text' => $request->message,
-            'type' => $request->type,
+            'message_type' => $request->type,
         ]);
 
         return $this->success($message, "Message sent", 200);
