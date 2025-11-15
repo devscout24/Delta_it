@@ -170,7 +170,7 @@ Route::controller(NotificationController::class)->group(function () {
     Route::get('/notifications/unread', 'unread');
     Route::post('/notifications/create', 'create');
     Route::post('/notifications/read', 'markRead');
-    Route::delete('/notifications/delete', 'delete');
+    Route::post('/notifications/delete', 'delete');
 });
 
 
