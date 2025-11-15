@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('rooms', function (Blueprint $table) {
             $table->id();
-            $table->integer('floor');
+            $table->string('floor');
             $table->string('room_name');
             $table->decimal('area', 8, 2);
             $table->json('polygon_points');
