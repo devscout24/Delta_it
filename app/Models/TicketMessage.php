@@ -7,11 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class TicketMessage extends Model
 {
     // fillable
-    protected $fillable = [
-        'ticket_id',
-        'user_id',
-        'message',
-    ];
+    protected $guarded = [];
 
     public function sender()
     {
