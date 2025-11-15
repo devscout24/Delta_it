@@ -14,6 +14,13 @@ class NotificationController extends Controller
     use ApiResponse;
     public function create(Request $request)
     {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'time' => 'required'
+        ]);
+
         $user = User::find($request->user_id);
 
         $user->notify(new NewSystemNotification(
@@ -24,6 +31,8 @@ class NotificationController extends Controller
 
         return $this->success([], "Notification sent", 201);
     }
+
+
 
     public function getNotifications(Request $request)
     {
@@ -36,22 +45,34 @@ class NotificationController extends Controller
         return $this->success($user->notifications, "Notifications fetched", 200);
     }
 
-    public function unread(Request $request)
-    {
-        return $this->success(Auth::guard('api')->user()->unreadNotifications, "Unread notifications", 200);
-    }
 
-    public function markRead(Request $request)
+
+    public function unread(Request $request)
     {
         $user = Auth::guard('api')->user();
 
         if (!$user) {
             return $this->error([], "User not found", 404);
         }
-        $notification = Auth::guard('api')->user()
-            ->notifications()
-            ->where('id', $request->id)
-            ->first();
+
+        return $this->success($user->unreadNotifications, "Unread notifications", 200);
+    }
+
+
+
+    public function markRead(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|string'
+        ]);
+
+        $user = Auth::guard('api')->user();
+
+        if (!$user) {
+            return $this->error([], "User not found", 404);
+        }
+
+        $notification = $user->notifications()->where('id', $request->id)->first();
 
         if (!$notification) {
             return $this->error([], "Notification not found", 404);
@@ -61,22 +82,26 @@ class NotificationController extends Controller
 
         return $this->success([], "Marked as read", 200);
     }
+
+
+
     public function delete(Request $request)
     {
+        $request->validate([
+            'id' => 'required|string'
+        ]);
+
         $user = Auth::guard('api')->user();
 
         if (!$user) {
             return $this->error([], "User not found", 404);
         }
 
-        if (!$request->id) {
-            return $this->error([], "Notification id not found", 404);
-        }
+        $deleted = $user->notifications()->where('id', $request->id)->delete();
 
-        Auth::guard('api')->user()
-            ->notifications()
-            ->where('id', $request->id)
-            ->delete();
+        if (!$deleted) {
+            return $this->error([], "Notification not found", 404);
+        }
 
         return $this->success([], "Notification deleted", 200);
     }
