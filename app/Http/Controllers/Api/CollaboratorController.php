@@ -16,11 +16,11 @@ class CollaboratorController extends Controller
     {
         $user = Auth::guard('api')->user();
 
-        if (!$user || !$user->company_id) {
-            return $this->error([], 'User not associated with any company', 403);
+        if (!$user) {
+            return $this->error([], 'User not authenticated', 403);
         }
 
-        $collaborators = Collaborator::where('company_id', $user->company_id)
+        $collaborators = Collaborator::latest()
             ->select('id','company_id', 'first_name', 'last_name', 'job_position', 'email', 'phone_number', 'parking_card')
             ->get();
 
