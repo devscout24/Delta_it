@@ -87,33 +87,49 @@ class NotificationController extends Controller
 
 
 
+    // public function markRead(Request $request)
+    // {
+    //     $validation = Validator::make($request->all(), [
+    //         'id' => 'required|string'
+    //     ]);
+
+    //     if ($validation->fails()) {
+    //         return $this->error($validation->errors(), 'Error in Validation', 422);
+    //     }
+
+
+    //     $user = Auth::guard('api')->user();
+
+    //     if (!$user) {
+    //         return $this->error([], "User not found", 404);
+    //     }
+
+    //     $notification = $user->notifications()->where('id', $request->id)->first();
+
+    //     if (!$notification) {
+    //         return $this->error([], "Notification not found", 404);
+    //     }
+
+    //     $notification->markAsRead();
+
+    //     return $this->success([], "Marked as read", 200);
+    // }
+
+
     public function markRead(Request $request)
     {
-        $validation = Validator::make($request->all(), [
-            'id' => 'required|string'
-        ]);
-
-        if ($validation->fails()) {
-            return $this->error($validation->errors(), 'Error in Validation', 422);
-        }
-
-
         $user = Auth::guard('api')->user();
 
         if (!$user) {
             return $this->error([], "User not found", 404);
         }
 
-        $notification = $user->notifications()->where('id', $request->id)->first();
+        // Mark all unread notifications
+        $user->unreadNotifications->markAsRead();
 
-        if (!$notification) {
-            return $this->error([], "Notification not found", 404);
-        }
-
-        $notification->markAsRead();
-
-        return $this->success([], "Marked as read", 200);
+        return $this->success([], "All notifications marked as read", 200);
     }
+
 
 
 

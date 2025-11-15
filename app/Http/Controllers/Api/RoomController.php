@@ -25,7 +25,7 @@ class RoomController extends Controller
     public function addRoom(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'floor'           => 'required|integer',
+            'floor'           => 'required|string',
             'room_name'       => 'required|string|max:255',
             'area'            => 'required|numeric',
             'polygon_points'  => 'required|array',
