@@ -8,10 +8,12 @@ use App\Models\Meeting;
 use App\Models\Room;
 use App\Models\Tag;
 use App\Models\User;
+use Carbon\Carbon;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
@@ -265,5 +267,52 @@ class DatabaseSeeder extends Seeder
                 'month'      => $month,
             ]);
         }
+
+        $now = Carbon::now();
+
+        DB::table('notifications')->insert([
+            [
+                'id' => Str::uuid(),
+                'type' => 'App\Notifications<SystemAlertNotification>',
+                'notifiable_type' => 'App\Models\User',
+                'notifiable_id' => 1,
+                'data' => json_encode([
+                    'title' => 'Welcome to the system',
+                    'description' => 'Your account has been successfully created.',
+                    'time' => $now->toDateTimeString(),
+                ]),
+                'read_at' => null,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'id' => Str::uuid(),
+                'type' => 'App\Notifications<SystemAlertNotification>',
+                'notifiable_type' => 'App\Models\User',
+                'notifiable_id' => 1,
+                'data' => json_encode([
+                    'title' => 'Meeting Reminder',
+                    'description' => 'You have a meeting scheduled tomorrow.',
+                    'time' => $now->subDay()->toDateTimeString(),
+                ]),
+                'read_at' => $now, // marked read
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'id' => Str::uuid(),
+                'type' => 'App\Notifications<SystemAlertNotification>',
+                'notifiable_type' => 'App\Models\User',
+                'notifiable_id' => 2,
+                'data' => json_encode([
+                    'title' => 'Document Approved',
+                    'description' => 'Your document has been reviewed and approved.',
+                    'time' => $now->subHours(5)->toDateTimeString(),
+                ]),
+                'read_at' => null,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+        ]);
     }
 }
