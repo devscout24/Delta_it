@@ -21,7 +21,7 @@ class CollaboratorController extends Controller
         }
 
         $collaborators = Collaborator::latest()
-            ->select('id','company_id', 'first_name', 'last_name', 'job_position', 'email', 'phone_number', 'parking_card')
+            ->select('id', 'company_id', 'first_name', 'last_name', 'job_position', 'email', 'phone_number', 'parking_card')
             ->get();
 
         if ($collaborators->isEmpty()) {
@@ -42,6 +42,7 @@ class CollaboratorController extends Controller
             'phone_number' => 'nullable|string|max:20',
             'access_card_number' => 'nullable|string|max:50',
             'parking_card' => 'nullable|boolean',
+            'company_id' => 'required|exists:companies,id',
         ]);
 
         if ($validate->fails()) {
@@ -51,12 +52,12 @@ class CollaboratorController extends Controller
         try {
             $user = Auth::guard('api')->user();
 
-            if (!$user || !$user->company_id) {
-                return $this->error('', 'User not associated with any company', 403);
+            if (!$user) {
+                return $this->error([], 'User not authenticated', 403);
             }
 
             Collaborator::create([
-                'company_id'         => $user->company_id,
+                'company_id'         => $request->company_id,
                 'first_name'         => $request->first_name,
                 'last_name'          => $request->last_name,
                 'job_position'       => $request->job_position,
@@ -78,8 +79,8 @@ class CollaboratorController extends Controller
         try {
             $user = Auth::guard('api')->user();
 
-            if (!$user || !$user->company_id) {
-                return $this->error([], 'User not associated with any company', 403);
+            if (!$user) {
+                return $this->error([], 'User not authenticated', 403);
             }
 
             $validator = Validator::make($request->all(), [
@@ -129,8 +130,8 @@ class CollaboratorController extends Controller
     {
         $user = Auth::guard('api')->user();
 
-        if (!$user || !$user->company_id) {
-            return $this->error([], 'User not associated with any company', 403);
+        if (!$user) {
+            return $this->error([], 'User not authenticated', 403);
         }
 
         $request->validate([
@@ -138,7 +139,6 @@ class CollaboratorController extends Controller
         ]);
 
         $collaborator = Collaborator::where('id', $request->id)
-            ->where('company_id', $user->company_id)
             ->first();
 
         if (!$collaborator) {
