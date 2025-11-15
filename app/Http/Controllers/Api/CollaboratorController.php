@@ -21,7 +21,7 @@ class CollaboratorController extends Controller
         }
 
         $collaborators = Collaborator::where('company_id', $user->company_id)
-            ->select('id', 'first_name', 'last_name', 'job_position', 'email', 'phone_number', 'parking_card')
+            ->select('id','company_id', 'first_name', 'last_name', 'job_position', 'email', 'phone_number', 'parking_card')
             ->get();
 
         if ($collaborators->isEmpty()) {
