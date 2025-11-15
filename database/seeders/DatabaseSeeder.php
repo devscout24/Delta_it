@@ -273,7 +273,7 @@ class DatabaseSeeder extends Seeder
         DB::table('notifications')->insert([
             [
                 'id' => Str::uuid(),
-                'type' => 'App\Notifications<SystemAlertNotification>',
+                'type' => 'App\Notifications\NewSystemNotification',
                 'notifiable_type' => 'App\Models\User',
                 'notifiable_id' => 2,
                 'data' => json_encode([
@@ -287,7 +287,7 @@ class DatabaseSeeder extends Seeder
             ],
             [
                 'id' => Str::uuid(),
-                'type' => 'App\Notifications<SystemAlertNotification>',
+                'type' => 'App\Notifications\NewSystemNotification',
                 'notifiable_type' => 'App\Models\User',
                 'notifiable_id' => 2,
                 'data' => json_encode([
@@ -301,7 +301,7 @@ class DatabaseSeeder extends Seeder
             ],
             [
                 'id' => Str::uuid(),
-                'type' => 'App\Notifications<SystemAlertNotification>',
+                'type' => 'App\Notifications\NewSystemNotification',
                 'notifiable_type' => 'App\Models\User',
                 'notifiable_id' => 2,
                 'data' => json_encode([
