@@ -29,7 +29,7 @@ class TicketMessageController extends Controller
     {
         $validated = Validator::make($request->all(), [
             'message' => 'nullable|string',
-            'type' => 'required|'
+            'type' => 'required'
         ]);
 
         if ($validated->fails()) {
