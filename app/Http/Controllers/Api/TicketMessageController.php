@@ -36,10 +36,16 @@ class TicketMessageController extends Controller
         if ($validated->fails()) {
             return $this->error($validated->errors(), 'Validation error', 422);
         }
+
+        $user = Auth::guard('api')->user();
+
+        if(!$user) {
+            return $this->error([], "User not found", 404);
+        }
         // store validated input
         $message = TicketMessage::create([
             'ticket_id' => $ticket_id,
-            'sender_id' => Auth::guard('api')->id(),
+            'sender_id' => $user->id,
             'message_text' => $request->message,
             'type' => $request->type,
         ]);
