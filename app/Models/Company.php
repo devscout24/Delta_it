@@ -8,8 +8,8 @@ class Company extends Model
 {
     protected $fillable = [
         'logo',
-        'commercial_name',
-        'company_email',
+        'name',
+        'email',
         'fiscal_name',
         'nif',
         'phone_number',

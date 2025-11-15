@@ -15,7 +15,6 @@ class MeetingSeeder extends Seeder
      */
     public function run(): void
     {
-
         DB::table('meetings')->insert([
             [
                 'meeting_name' => 'Weekly Team Sync',

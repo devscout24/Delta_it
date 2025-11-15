@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('access_cards', function (Blueprint $table) {
-               $table->id();
+            $table->id();
+            $table->foreignId('company_id')->constrained('companies')->onDelete('cascade');
             $table->integer('active_card')->default(0);
             $table->integer('lost_damage_card')->default(0);
             $table->integer('active_parking_card')->default(0);

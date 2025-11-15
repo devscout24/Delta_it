@@ -6,22 +6,16 @@ use App\Models\Room;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Validator;
 
 class RoomController extends Controller
 {
     use ApiResponse;
 
-    // Get all room data for the map
     public function index()
     {
         try {
-            $rooms = Room::with('company')->get();
-            $rooms->each(function ($room) {
-                if ($room->company && $room->company->logo) {
-                    $room->company->logo = asset($room->company->logo);
-                }
-            });
-
+            $rooms = Room::select('id', 'floor', 'room_name', 'area', 'polygon_points', 'status')->get();
             return $this->success($rooms, 'Rooms fetched successfully', 200);
         } catch (\Exception $e) {
             return $this->error([], $e->getMessage(), 500);
@@ -30,28 +24,32 @@ class RoomController extends Controller
 
     public function addRoom(Request $request)
     {
+        $validate = Validator::make($request->all(), [
+            'floor'           => 'required|integer',
+            'room_name'       => 'required|string|max:255',
+            'area'            => 'required|numeric',
+            'polygon_points'  => 'required|array',
+        ]);
+
+        if ($validate->fails()) {
+            return $this->error($validate->errors(), $validate->errors()->first(), 422);
+        }
+
         try {
-            $validated = $request->validate([
-                'room_name'      => 'required|string|max:255',
-                'area'           => 'required|numeric',
-                'polygon_points' => 'required|array',
-                'company_id'     => 'nullable|exists:companies,id',
-            ]);
-
-            if (Room::where('room_name', $validated['room_name'])->exists()) {
-                return $this->error([], 'Room name already exists', 422);
-            }
-
-            if (Room::where('area', $validated['area'])->exists()) {
-                return $this->error([], 'Area already exists', 422);
+            // Check for uniqueness on the same floor
+            if (Room::where('floor', $validate->validated()['floor'])
+                ->where('room_name', $validate->validated()['room_name'])
+                ->exists()
+            ) {
+                return $this->error([], 'Room name already exists on this floor', 422);
             }
 
             $room = Room::create([
-                'room_name'      => $validated['room_name'],
-                'area'           => $validated['area'],
-                'polygon_points' => json_encode($validated['polygon_points']),
-                'company_id'     => $validated['company_id'] ?? null,
-                'status'         => 'available',
+                'floor'           => $validate['floor'],
+                'room_name'       => $validate['room_name'],
+                'area'            => $validate['area'],
+                'polygon_points'  => json_encode($validate['polygon_points']),
+                'status'          => 'available',
             ]);
 
             return $this->success($room, 'Room added successfully', 201);
@@ -59,6 +57,8 @@ class RoomController extends Controller
             return $this->error([], $e->getMessage(), 500);
         }
     }
+
+    // ================================================
 
     public function assignCompany(Request $request)
     {

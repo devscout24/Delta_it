@@ -13,13 +13,14 @@ return new class extends Migration
     {
         Schema::create('collaborators', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('company_id')->constrained('companies')->onDelete('cascade');
             $table->string('first_name');
             $table->string('last_name');
             $table->string('job_position')->nullable();
-            $table->string('email')->nullable()->unique();
+            $table->string('email')->nullable();
             $table->string('phone_extension')->nullable();
-            $table->string('phone_number')->nullable();
-            $table->bigInteger('access_card_number')->nullable();
+            $table->string('phone_number', 20)->nullable();
+            $table->string('access_card_number', 50)->nullable();
             $table->boolean('parking_card')->default(false);
             $table->timestamps();
         });

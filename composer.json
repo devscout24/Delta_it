@@ -9,7 +9,7 @@
         "intervention/image": "2.7",
         "laravel/framework": "^11.0",
         "laravel/tinker": "^2.9",
-        "spatie/laravel-permission": "^6.21",
+        "spatie/laravel-permission": "^6.23",
         "tymon/jwt-auth": "^2.2",
         "yajra/laravel-datatables-oracle": "^11.0"
     },

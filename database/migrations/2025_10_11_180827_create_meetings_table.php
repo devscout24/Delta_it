@@ -13,15 +13,17 @@ return new class extends Migration
     {
         Schema::create('meetings', function (Blueprint $table) {
             $table->id();
-            $table->foreign('room_id')->references('id')->on('rooms')->onDelete('cascade');
+            $table->foreignId('room_id')->nullable()->constrained('rooms')->onDelete('cascade');
+            $table->foreignId('company_id')->nullable()->constrained('companies')->onDelete('cascade');
+            $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
             $table->string('meeting_name');
             $table->date('date');
             $table->time('start_time');
             $table->time('end_time');
-            $table->unsignedBigInteger('room_id');
-            $table->string('meeting_type');
+            $table->enum('meeting_type', ['virtual', 'office'])->default('virtual');
             $table->string('online_link')->nullable();
             $table->json('add_emails')->nullable();
+            $table->enum('status', ['pending','completed', 'cancelled'])->default('pending');
             $table->timestamps();
         });
     }

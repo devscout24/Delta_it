@@ -8,6 +8,9 @@ class RoomBookings extends Model
 {
     protected $fillable = [
         'booking_name',
+        'date',
+        'start_time',
+        'end_time',
         'company_id',
         'room_id',
         'start_date',
@@ -18,4 +21,9 @@ class RoomBookings extends Model
     protected $casts = [
         'add_emails' => 'array',
     ];
+
+    public function room()
+    {
+        return $this->belongsTo(Room::class);
+    }
 }

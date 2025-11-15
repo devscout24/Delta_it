@@ -8,6 +8,8 @@ use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
 
 class DocumentController extends Controller
@@ -92,20 +94,35 @@ class DocumentController extends Controller
 
     public function allDocuments()
     {
-        $documents = Document::all();
+        $user = Auth::guard('api')->user();
 
-        if ($documents->isEmpty()) {
-            return $this->error(
-                [],
-                'No documents available.',
-                404
-            );
+        if (!$user || !$user->company_id) {
+            return $this->error([], 'User not associated with any company.', 403);
         }
 
-        return $this->success(
-            $documents,
-            'All documents retrieved successfully.',
-            200
-        );
+        $documents = Document::where('company_id', $user->company_id)->get();
+
+        if ($documents->isEmpty()) {
+            return $this->error([], 'No documents available.', 404);
+        }
+
+        $documents = $documents->map(function ($document) {
+            $filePath = public_path($document->document_path);
+            $fileSizeMB = null;
+
+            if (File::exists($filePath)) {
+                $fileSizeMB = number_format(File::size($filePath) / 1048576, 2); // bytes → MB
+            }
+
+            return [
+                'id'             => $document->id,
+                'document_name'  => $document->document_name,
+                'document_type'  => $document->document_type,
+                'document_path'  => asset($document->document_path),
+                'file_size_mb'   => $fileSizeMB ? "{$fileSizeMB} MB" : 'N/A',
+            ];
+        });
+
+        return $this->success($documents, 'Documents fetched successfully.', 200);
     }
 }

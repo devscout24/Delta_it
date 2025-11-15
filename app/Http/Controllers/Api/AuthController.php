@@ -3,76 +3,123 @@
 namespace App\Http\Controllers\Api;
 
 
-use Carbon\Carbon;
 use App\Models\User;
 use App\Mail\OtpSend;
-use App\Traits\ApiResponse;
-use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Http\Controllers\Controller;
-use App\Models\ShippingAddress;
+use App\Models\UserPreference;
+use App\Traits\ApiResponse;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rules\Password;
 use Tymon\JWTAuth\Exceptions\JWTException;
+use Carbon\Carbon;
+use Illuminate\Support\Str;
+
 
 class AuthController extends Controller
 {
     use ApiResponse;
 
-    //user login and logout
-    public function login(Request $request)
+    // ================
+    // Auth Methods
+    // ================
+
+    public function signup(Request $request)
     {
-
-
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'password' => 'required|min:6|max:8'
-        ]);
+        $validator = Validator::make($request->all(),
+            [
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|max:255|unique:users,email',
+                'password' => 'required|string|min:6|confirmed',
+            ],
+            [
+                'name.required' => 'Name is required',
+                'email.required' => 'Email is required',
+                'email.email' => 'Email must be a valid email address',
+                'email.unique' => 'Email already exists',
+                'password.required' => 'Password is required',
+                'password.min' => 'Password must be at least 6 characters',
+                'password.confirmed' => 'Password and confirmation password do not match',
+            ]
+        );
 
         if ($validator->fails()) {
-            return $this->error($validator->errors(), 'Validation error', 422);
+            return $this->error($validator->errors(), $validator->errors()->first(), 422);
         }
 
-        //  get all user include (soft delete)
-        $user = User::withTrashed()->where('email', $request->email)->first();
-        if (!$user) {
-            return $this->error((object) [], 'No user account found for the provided email.', 404);
-        }
+        // Create the user
+        $user = User::create([
+            'name'          => $request->name,
+            'email'         => $request->email,
+            'password'      => bcrypt($request->password),
+            'last_login_at' => now()
+        ]);
 
-        //  Restore user if soft-deleted
-        if ($user->trashed()) {
-            $user->restore();
-        }
+        // Attempt token-based login (JWT)
+        $credentials = $request->only('email', 'password');
+        $token = Auth::guard('api')->attempt($credentials);
 
-        //  Verify password
-        if (!Hash::check($request->password, $user->password)) {
-            return $this->error((object) [], 'Invalid entered password', 401);
-        }
-
-        //  Attempt login & generate token
-        $token = Auth::guard('api')->attempt($request->only('email', 'password'));
         if (!$token) {
-            return $this->error((object) [], 'Unauthorized User', 401);
+            return $this->error([], 'Registration successful but token generation failed.', 500);
         }
 
-        //  Update last login time
-        $user->update(['last_login_at' => now()]);
-
-        //  Prepare response data
+        // Format user data
         $userData = [
-            'id'            => $user->id,
-            'email'         => $user->email,
-            'profile_photo' => asset($user->profile_photo ?? 'uploads/user.png'),
-            'token'         => $token,
+            'id'     => $user->id,
+            'token'  => $token,
+            'name'   => $user->name,
+            'email'  => $user->email,
+            'avatar' => asset($user->avatar == null ? asset('user.png') : asset($user->avatar)),
         ];
 
-        //  Success response
-        return $this->success($userData, 'Successfully Logged In', 200);
+        return $this->success($userData, 'Registration and login successful', 200);
     }
+
+    public function login(Request $request)
+    {
+        // Validate request inputs
+        $validate = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'password' => 'required|string|min:6',
+        ]);
+
+        if ($validate->fails()) {
+            return $this->error($validate->errors(), $validate->errors()->first(), 422);
+        }
+
+        // Attempt login with email and password
+        $credentials = $request->only('email', 'password');
+        $token = Auth::guard('api')->attempt($credentials);
+
+        // Return error if credentials are invalid
+        if (!$token) {
+            return $this->error([], 'Hmm, that didn’t work. Double-check your login details', 401);
+        }
+
+        // Retrieve authenticated user
+        $user = Auth::guard('api')->user();
+
+        // Update last login timestamp
+        $user->last_login_at = now();
+        $user->save();
+
+        // Format user data
+        $userData = [
+            'id'            => $user->id,
+            'token'         => $token,
+            'name'          => $user->name == null ? '' : $user->name,
+            'last_name'     => $user->last_name == null ? '' : $user->last_name,
+            'email'         => $user->email,
+            'username'      => $user->username,
+            'avatar' => asset($user->avatar == null ? 'user.png' : $user->avatar),
+        ];
+
+
+        return $this->success($userData, 'Login Successful', 200);
+    }
+
 
     public function logout()
     {
@@ -93,191 +140,130 @@ class AuthController extends Controller
         }
     }
 
+    // ================
+    // User Preference Methods
+    // ================
 
-    // user signup
-    public function signup(Request $request)
+    public function getUserPreferences(Request $request)
+    {
+        $user = Auth::guard('api')->user();
+
+        $preferences = $user->preference ?? null;
+
+        if (!$preferences) {
+            return $this->error([], 'User preferences not set.', 200);
+        }
+
+        $data  = [
+            'travel_distance'   => $preferences->travel_distance,
+            'preferred_weather' => $preferences->preferred_weather,
+            'companion_type'    => $preferences->companion_type,
+            'spending_comfort'  => $preferences->spending_comfort,
+            'preferred_time'    => $preferences->preferred_time,
+        ];
+
+        return $this->success($data, 'User preferences retrieved successfully.', 200);
+    }
+
+    public function setUserPreferences(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'first_name' => 'required|string|max:255|min:3',
-            'last_name' => 'nullable',
-            'address' => 'nullable',
-            'phone' => 'nullable',
-            'zipcode' => 'nullable',
-            'email' => [
-                'required',
-                'unique:users,email',
-                'email:rfc,dns,filter',
-                'max:255',
-                'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/'
-            ],
-            'password' => [
-                'required',
-                'string',
-                'confirmed',
-                Password::min(8)
-                    ->mixedCase()
-                    ->letters()
-                    ->numbers()
-                    ->symbols()
-                    ->uncompromised(),
-            ],
+            'travel_distance'   => 'nullable|in:nearby,within_city,long_trip,doesnt_matter',
+            'preferred_weather' => 'nullable|in:sunny,rainy,winter,doesnt_matter',
+            'companion_type'    => 'nullable|in:alone,friends,family,partner',
+            'spending_comfort'  => 'nullable|in:low,medium,premium,doesnt_matter',
+            'preferred_time'    => 'nullable|in:morning,afternoon,evening,night',
         ]);
 
         if ($validator->fails()) {
-            return $this->error($validator->errors(), 'Validation Error', 422);
+            return $this->error($validator->errors(), $validator->errors()->first(), 422);
         }
 
+        $user = Auth::guard('api')->user();
 
-        $email = $request->email;
-        $userData = [
-            'first_name'     => $request->first_name,
-            'last_name'     => $request->last_name,
-            'address' => $request->address,
-            'email'    => $request->email,
-            'phone' => $request->phone,
-            'zipcode' => $request->zipcode,
-            'password' => Hash::make($request->password),
-        ];
-
-        // store pending data in cache
-        cache()->put("pending_user_{$email}", $userData, now()->addMinutes(5));
-        $otp = rand(100000, 999999);
-        cache()->put(
-            "otp_data_{$email}",
-            [
-                'otp' => $otp,
-                'used' => false
-            ],
-            now()->addMinutes(5)
-        );
-
-        Mail::to($email)->send(new OtpSend($otp));
-        return $this->success(null, 'OTP sent to your email, Please verify it.', 200);
-    }
-
-    public function verifyEmailOtp(Request $request)
-    {
-        $request->validate([
-            'otp' => 'required|digits:6',
-            'email' => 'required|email',
-        ]);
-
-        $email = $request->email;
-        $enteredOtp = $request->otp;
-
-        // Get OTP data from cache
-        $otpData = cache()->get("otp_data_{$email}");
-
-        if (!$otpData || $otpData == null) {
-            return $this->error([], 'OTP expired.', 400);
+        if (!$user) {
+            return $this->error([], 'Unauthenticated user.', 401);
         }
 
-        if ($otpData['used']) {
-            return $this->error([], 'OTP already used.', 400);
+        $preferences = $user->preference;
+
+        $data = $validator->validated();
+
+        if ($preferences) {
+            // Update existing preferences
+            $preferences->update($data);
+        } else {
+            // Create new preferences
+            $data['user_id'] = $user->id;
+            $preferences = UserPreference::create($data);
         }
 
-        if ($enteredOtp != $otpData['otp']) {
-            return $this->error([], 'OTP did not match.', 400);
-        }
-
-        // Get pending user
-        $pendingUser = cache()->get("pending_user_{$email}");
-        if (!$pendingUser) {
-            return $this->error([], 'User data not found.', 400);
-        }
-
-        // Create user
-        $user = User::create([
-            'name' => $pendingUser['first_name'] . ' ' . $pendingUser['last_name'],
-            'first_name'    => $pendingUser['first_name'],
-            'last_name'     => $pendingUser['last_name'],
-            'address'       => $pendingUser['address'],
-            'email'         => $pendingUser['email'],
-            'phone'         => $pendingUser['phone'],
-            'zipcode'       => $pendingUser['zipcode'],
-            'password'      => $pendingUser['password'],
-            'last_login_at' => now(),
-        ]);
-
-        cache()->put("otp_data_{$email}", [
-            'otp' => $otpData['otp'],
-            'used' => true
-        ], now()->addMinutes(1 / 2));
-
-        cache()->forget("pending_user_{$email}");
-        cache()->forget("otp_data_{$email}");
-
-        Auth::guard('api')->login($user);
-        return $this->success($user, 'OTP verified and user registered.', 200);
+        return $this->success($preferences, 'User preferences saved successfully.', 200);
     }
 
 
-    // forgot password
+    // OTP Methods
+    // ================
+
     public function sendOtp(Request $request)
     {
         // Validate incoming email
         $request->validate([
-            'email' => [
-                'required',
-                'max:255',
-            ]
+            'email' => 'required|email',
         ]);
 
         // Check if user exists
         $user = User::where('email', $request->email)->first();
+
         if (!$user) {
-            return $this->success((object)[], 'User with this email does not exist.', 200);
+            return $this->error([], 'User with this email does not exist.', 404);
         }
 
         // Generate OTP and expiry
-        $otp = rand(100000, 999999);
-        $expiresAt = Carbon::now()->addMinutes(5);
+        $otp = rand(1000, 9999);
+        $expiresAt = Carbon::now()->addMinutes(15);
 
         // Save OTP and expiry to user
         $user->update([
-            'password_otp' => $otp,
-            'password_otp_expired_at' => $expiresAt,
+            'otp' => $otp,
+            'otp_expired_at' => $expiresAt,
         ]);
+
         // Send OTP via email
         Mail::to($user->email)->send(new OtpSend($otp));
 
-        $expiresAt = now()->addMinutes(5)->format('H:i');
-
-
-        return $this->success(
-            [
-                'email' => $user->email,
-                'password_otp_expired_at' => $expiresAt,
-                // 'otp' => $otp, // Uncomment this line only in development mode
-            ],
-            'OTP sent successfully.',
-            200
-        );
+        // Return success response (without exposing OTP in production)
+        return $this->success([
+            'email' => $user->email,
+            'expires_at' => $expiresAt,
+            // 'otp' => $otp // ⚠️ Only return for testing/debug — remove in prod
+        ], 'OTP sent successfully.', 200);
     }
 
     public function verifyOtp(Request $request)
     {
 
         $request->validate([
-            'otp' => 'required|numeric|digits:6',
+            'otp' => 'required',
             'email' => 'required|email',
         ]);
 
-        $user = User::where('email', $request->email)->where('password_otp', $request->otp)->first();
+        $user = User::where('email', $request->email)->where('otp', $request->otp)->first();
 
         if (!$user) {
-            return $this->error([], 'User not available for this email', 400);
-        } else if ($user->password_otp_expired_at < Carbon::now()) {
+            return $this->error([], 'Invalid otp', 400);
+        } else if ($user->otp_expired_at < Carbon::now()) {
 
-            $user->password_otp = null;
-            $user->password_otp_expired_at = null;
+            $user->otp = null;
+            $user->otp_expired_at = null;
             $user->save();
-            return $this->success((object)[], 'OTP expired', 410);
+
+            return $this->error([], 'OTP expired', 400);
         }
 
-        $user->password_otp_expired_at                 = Carbon::now();
+        $user->otp_verified_at                 = Carbon::now();
         $user->password_reset_token            = Str::random(64);
-        $user->password_reset_token_expires_at = Carbon::now()->addMinutes(5);
+        $user->password_reset_token_expires_at = Carbon::now()->addMinutes(15);
         $user->save();
 
         return $this->success([
@@ -289,23 +275,9 @@ class AuthController extends Controller
     public function resetPassword(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'email' => [
-                'required',
-                'email',
-                'max:255',
-
-            ],
-            'password' => [
-                'required',
-                'string',
-                'confirmed',
-                Password::min(8)
-                    ->mixedCase()
-                    ->letters()
-                    ->numbers()
-                    ->symbols()
-                    ->uncompromised(),
-            ],
+            'email'       => 'required|email',
+            'password'    => 'required|string|min:6|confirmed',
+            'reset_token' => 'required|string',
         ]);
 
         if ($validator->fails()) {
@@ -313,38 +285,95 @@ class AuthController extends Controller
         }
 
         $user = User::where('email', $request->email)
+            ->where('password_reset_token', $request->reset_token)
             ->first();
-
 
         if (!$user) {
             return $this->error([], 'Invalid token or email.', 400);
         }
+
         if ($user->password_reset_token_expires_at < Carbon::now()) {
-            return $this->error((object)[], 'Token expired.', 200);
+            return $this->error([], 'Token expired.', 400);
         }
+
+        // ✅ Save new password first
         $user->password = bcrypt($request->password);
-
-
-        // Attempt login with email and password
-        $credentials = $request->only('email', 'password');
-        $token = Auth::guard('api')->attempt($credentials);
-
-        // Format user data
-        $userData = [
-            'id'            => $user->id,
-            'token'         => $token,
-            'name'          => $user->name == null ? '' : $user->name,
-            'email'         => $user->email,
-            'username'      => $user->username,
-            'profile_photo' => asset($user->profile_photo == null ? 'user.png' : $user->profile_photo),
-        ];
-
-        // Invalidate token after use
         $user->password_reset_token = null;
         $user->password_reset_token_expires_at = null;
         $user->save();
 
-        return $this->success($userData, 'Login Successfull', 200);
+        // ✅ Attempt login after saving new password
+        $credentials = $request->only('email', 'password');
+        if (!$token = Auth::guard('api')->attempt($credentials)) {
+            return $this->error([], 'Unable to login. Please try again.', 401);
+        }
+
+        // ✅ Prepare user data
+        $userData = [
+            'id'       => $user->id,
+            'token'    => $token,
+            'name'     => $user->name ?? 'User_name_' . uniqid(),
+            'email'    => $user->email,
+            'username' => $user->username,
+            'avatar'   => asset($user->avatar ?? 'user.png'),
+        ];
+
+        return $this->success($userData, 'Password reset & login successful', 200);
+    }
+
+    // ================
+    // Store FCM Token
+    // ================
+
+    public function storeFcmToken(Request $request)
+    {
+        // dd($request->all());
+        $validator = Validator::make($request->all(), [
+            'device_id' => 'required|string',
+            'token' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->error($validator->errors(), 'Error in Validation', 422);
+        }
+
+        $user = Auth::guard('api')->user();
+
+        // Check if device exists
+        $existing = $user->fcmTokens()->where('device_id', $request->device_id)->first();
+
+        if ($existing) {
+            $existing->update(['token' => $request->token]);
+        } else {
+            $user->fcmTokens()->create([
+                'device_id' => $request->device_id,
+                'token' => $request->token,
+            ]);
+        }
+
+        $response = [
+            'device_id' => $user->fcmTokens()->where('device_id', $request->device_id)->first()->device_id,
+            'token' =>  $user->fcmTokens()->where('device_id', $request->device_id)->first()->token,
+        ];
+
+        return $this->success($response, 'FCM token stored successfully', 200);
+    }
+
+    public function deleteFcmToken(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'device_id' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->error($validator->errors(), 'Error in Validation', 422);
+        }
+
+        $user = Auth::guard('api')->user();
+
+        $user->fcmTokens()->where('device_id', $request->device_id)->delete();
+
+        return $this->success([], 'FCM token deleted successfully', 200);
     }
 
 

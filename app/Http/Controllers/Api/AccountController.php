@@ -5,63 +5,123 @@ namespace App\Http\Controllers\Api;
 use App\Models\Account;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Traits\ApiResponse;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class AccountController extends Controller
 {
     use ApiResponse;
+    public function get(Request $request)
+    {
+        // Auth user has company_id
+        $companyId = $request->company_id;
+
+        $users = User::select(
+            'id',
+            'company_id',
+            'job_position',
+            'profile_photo',
+            'username',
+            'name',
+            'last_name',
+            'email',
+            'phone',
+            'user_type',
+            'status'
+        )
+        ->where('company_id', $companyId)
+        ->get()
+        ->map(function ($user) {
+            $user->profile_photo = $user->profile_photo
+                ? asset($user->profile_photo)
+                : asset('default/avatar.png');
+            return $user;
+        });
+
+        return $this->success($users, "Company users fetched successfully", 200);
+    }
+
+    /**
+     * ADD COMPANY USER
+     */
     public function store(Request $request)
     {
-
-        $validator = Validator::make($request->all(), [
-            'first_name' => 'required|string|max:255',
-            'last_name'  => 'required|string|max:255',
-            'job_position' => 'nullable|string|max:255',
-            'email'      => 'required|email|unique:accounts,email',
-            'password'   => 'required|string|min:6',
+        $request->validate([
+            'name'        => 'required|string|max:100',
+            'last_name'   => 'nullable|string|max:100',
+            'job_position'=> 'nullable|string|max:255',
+            'email'       => 'required|email|unique:users,email',
+            'password'    => 'required|min:6|confirmed'
         ]);
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-        $account = Account::create($request->all());
-        return $this->success($account, 'Account created successfully', 201);
+        $user = new User();
+        $user->company_id   = $request->company_id;
+        $user->name         = $request->name;
+        $user->last_name    = $request->last_name;
+        $user->job_position = $request->job_position;
+        $user->email        = $request->email;
+        $user->password     = Hash::make($request->password);
+        $user->user_type    = "company_user";
+        $user->status       = "active";
+
+        $user->save();
+
+        return $this->success($user, "Company user created successfully", 201);
     }
 
-    // Update account
+    /**
+     * UPDATE COMPANY USER
+     */
     public function update(Request $request)
     {
-        $account = Account::find($request->id);
-        if (!$account) {
-            return $this->error(null, 'Account not found', 404);
-        }
-
-        $validator = Validator::make($request->all(), [
-            'first_name' => 'sometimes|required|string|max:255',
-            'last_name'  => 'sometimes|required|string|max:255',
-            'job_position' => 'nullable|string|max:255',
-            'email'      => 'sometimes|required|email|unique:accounts,email,' . $request->id,
-            'password'   => 'sometimes|required|string|min:6',
+        $request->validate([
+            'id'          => 'required|exists:users,id',
+            'name'        => 'required|string|max:100',
+            'last_name'   => 'nullable|string|max:100',
+            'job_position'=> 'nullable|string|max:255',
+            'email'       => ['required','email', Rule::unique('users')->ignore($request->id)],
+            'password'    => 'nullable|min:6|confirmed'
         ]);
 
-        if ($validator->fails()) {
-            return $this->error(null, $validator->errors(), 422);
+        $user = User::where('company_id', $request->company_id)
+                    ->where('id', $request->id)
+                    ->first();
+
+        if (!$user) {
+            return $this->error(null, "User not found", 404);
         }
 
-        $account->update($request->all());
-        return $this->success($account, 'Account updated successfully', 200);
+        $user->name         = $request->name;
+        $user->last_name    = $request->last_name;
+        $user->job_position = $request->job_position;
+        $user->email        = $request->email;
+
+        if ($request->password) {
+            $user->password = Hash::make($request->password);
+        }
+
+        $user->save();
+
+        return $this->success($user, "Account updated successfully", 200);
     }
 
-    // Delete account
+    /**
+     * DELETE COMPANY USER
+     */
     public function destroy($id)
     {
-        $account = Account::find($id);
-        if (!$account) {
-            return $this->error(null, 'Account not found', 404);
+        $user = User::where('id', $id)
+                    ->first();
+
+        if (!$user) {
+            return $this->error(null, "User not found", 404);
         }
 
-        $account->delete();
-        return $this->success(null, 'Account deleted successfully', 200);
+        $user->delete();
+
+        return $this->success(null, "Company user deleted successfully", 200);
     }
 }

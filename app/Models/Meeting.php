@@ -13,7 +13,11 @@ class Meeting extends Model
         'end_time',
         'room_id',
         'meeting_type',
-        'online_link'
+        'online_link',
+        'created_by',
+        'status',
+        'company_id',
+        'add_emails',
     ];
     protected $hidden = [
         'created_at',
@@ -29,5 +33,10 @@ class Meeting extends Model
     public function room()
     {
         return $this->belongsTo(Room::class);
+    }
+
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 }
