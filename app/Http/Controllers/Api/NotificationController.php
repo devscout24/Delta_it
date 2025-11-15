@@ -43,8 +43,34 @@ class NotificationController extends Controller
             return $this->error([], "User not found", 404);
         }
 
-        return $this->success($user->notifications, "Notifications fetched", 200);
+        // Unread notifications
+        $new = $user->unreadNotifications->map(function ($n) {
+            return [
+                'id' => $n->id,
+                'title' => $n->data['title'] ?? null,
+                'description' => $n->data['description'] ?? null,
+                'time' => $n->data['time'] ?? null,
+                'read_at' => $n->read_at
+            ];
+        });
+
+        // Read notifications
+        $old = $user->readNotifications->map(function ($n) {
+            return [
+                'id' => $n->id,
+                'title' => $n->data['title'] ?? null,
+                'description' => $n->data['description'] ?? null,
+                'time' => $n->data['time'] ?? null,
+                'read_at' => $n->read_at
+            ];
+        });
+
+        return $this->success([
+            'new' => $new,
+            'old' => $old
+        ], "Notifications fetched", 200);
     }
+
 
 
 

@@ -271,20 +271,52 @@ class DatabaseSeeder extends Seeder
         $now = Carbon::now();
 
         DB::table('notifications')->insert([
+
+            // ---------------- NEW (Unread) ----------------
             [
                 'id' => Str::uuid(),
                 'type' => 'App\Notifications\NewSystemNotification',
                 'notifiable_type' => 'App\Models\User',
                 'notifiable_id' => 3,
                 'data' => json_encode([
-                    'title' => 'Welcome to the system',
-                    'description' => 'Your account has been successfully created.',
-                    'time' => $now->toDateTimeString(),
+                    'title' => 'Welcome to the System',
+                    'description' => 'Your account is created successfully.',
+                    'time' => $now->copy()->toDateTimeString(),
                 ]),
                 'read_at' => null,
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
+            [
+                'id' => Str::uuid(),
+                'type' => 'App\Notifications\NewSystemNotification',
+                'notifiable_type' => 'App\Models\User',
+                'notifiable_id' => 3,
+                'data' => json_encode([
+                    'title' => 'New Policy Update',
+                    'description' => 'Please read the latest policy update.',
+                    'time' => $now->copy()->subMinutes(30)->toDateTimeString(),
+                ]),
+                'read_at' => null,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'id' => Str::uuid(),
+                'type' => 'App\Notifications\NewSystemNotification',
+                'notifiable_type' => 'App\Models\User',
+                'notifiable_id' => 3,
+                'data' => json_encode([
+                    'title' => 'System Maintenance',
+                    'description' => 'Scheduled maintenance tonight at 11 PM.',
+                    'time' => $now->copy()->subHours(2)->toDateTimeString(),
+                ]),
+                'read_at' => null,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+
+            // ---------------- OLD (Read) ----------------
             [
                 'id' => Str::uuid(),
                 'type' => 'App\Notifications\NewSystemNotification',
@@ -292,10 +324,10 @@ class DatabaseSeeder extends Seeder
                 'notifiable_id' => 3,
                 'data' => json_encode([
                     'title' => 'Meeting Reminder',
-                    'description' => 'You have a meeting scheduled tomorrow.',
-                    'time' => $now->subDay()->toDateTimeString(),
+                    'description' => 'Your meeting is scheduled tomorrow.',
+                    'time' => $now->copy()->subDay()->toDateTimeString(),
                 ]),
-                'read_at' => $now, // marked read
+                'read_at' => $now,
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
@@ -305,14 +337,29 @@ class DatabaseSeeder extends Seeder
                 'notifiable_type' => 'App\Models\User',
                 'notifiable_id' => 3,
                 'data' => json_encode([
-                    'title' => 'Document Approved',
-                    'description' => 'Your document has been reviewed and approved.',
-                    'time' => $now->subHours(5)->toDateTimeString(),
+                    'title' => 'Task Completed',
+                    'description' => 'Your submitted task has been approved.',
+                    'time' => $now->copy()->subDays(2)->toDateTimeString(),
                 ]),
-                'read_at' => null,
+                'read_at' => $now,
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
+            [
+                'id' => Str::uuid(),
+                'type' => 'App\Notifications\NewSystemNotification',
+                'notifiable_type' => 'App\Models\User',
+                'notifiable_id' => 3,
+                'data' => json_encode([
+                    'title' => 'Invoice Paid',
+                    'description' => 'Your recent invoice has been successfully paid.',
+                    'time' => $now->copy()->subDays(3)->toDateTimeString(),
+                ]),
+                'read_at' => $now,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+
         ]);
     }
 }
