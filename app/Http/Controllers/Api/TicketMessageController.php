@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\TicketMessage;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class TicketMessageController extends Controller
@@ -35,11 +36,11 @@ class TicketMessageController extends Controller
         if ($validated->fails()) {
             return $this->error($validated->errors(), 'Validation error', 422);
         }
-
+        // store validated input
         $message = TicketMessage::create([
             'ticket_id' => $ticket_id,
-            'sender_id' => auth()->id(),
-            'message' => $request->message,
+            'sender_id' => Auth::guard('api')->id(),
+            'message_text' => $request->message,
             'type' => $request->type,
         ]);
 
