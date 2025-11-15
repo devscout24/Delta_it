@@ -12,6 +12,26 @@ use Illuminate\Support\Facades\Validator;
 class InternalNoteController extends Controller
 {
     use ApiResponse;
+    public function index()
+    {
+        try {
+            $notes = InternalNote::all();
+
+            $notes = $notes->map(function ($note) {
+                return [
+                    'id'    => $note->id,
+                    'title' => $note->title,
+                    'note'  => $note->note,
+                ];
+            });
+
+            return $this->success($notes, 'Internal Notes Retrieved Successfully', 200);
+        } catch (Exception $e) {
+            return $this->error('Server Error', $e->getMessage(), 500);
+        }
+    }
+
+
     public function store(Request $request)
     {
         $data = $request->all();
@@ -64,7 +84,7 @@ class InternalNoteController extends Controller
         if ($validator->fails()) {
             return $this->error('Validation Error', $validator->errors(), 422);
         }
-        
+
         try {
             // Update the note
             $note->update($validator->validated());
