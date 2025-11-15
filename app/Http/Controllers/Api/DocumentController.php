@@ -23,6 +23,7 @@ class DocumentController extends Controller
             'file' => 'required|file|max:2048', // 2MB max
             'tags' => 'nullable|array',
             'tags.*' => 'string|max:50|distinct',
+            'company_id' => 'nullable|exists:companies,id',
         ]);
 
         if ($validated->fails()) {
@@ -42,6 +43,7 @@ class DocumentController extends Controller
 
             // Create document
             $document = Document::create([
+                'company_id' => $request->company_id,
                 'document_name' => $request->document_name,
                 'document_type' => $request->document_type,
                 'document_path' => $filePath,
@@ -116,6 +118,11 @@ class DocumentController extends Controller
 
             return [
                 'id'             => $document->id,
+                'company' => [
+                    'id'     => $document->company_id,
+                    'name' => $document->company->name,
+                    'email' => $document->company->email
+                ],
                 'document_name'  => $document->document_name,
                 'document_type'  => $document->document_type,
                 'document_path'  => asset($document->document_path),
