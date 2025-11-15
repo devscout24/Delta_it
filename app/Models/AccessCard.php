@@ -8,6 +8,7 @@ class AccessCard extends Model
 {
    protected $fillable = [
       'id',
+      'company_id',
       "active_card",
       "active_parking_card",
       "max_parking_card",

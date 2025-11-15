@@ -13,43 +13,38 @@ class AccessCardController extends Controller
     use ApiResponse;
     public function updateAccessCode(Request $request)
     {
-        // Validate the request
+        // Validate request
         $request->validate([
-            'active_card' => 'sometimes|integer|min:0',
-            'lost_damage_card' => 'sometimes|integer|min:0',
+            'company_id'          => 'required|exists:companies,id',
+            'active_card'         => 'sometimes|integer|min:0',
+            'lost_damage_card'    => 'sometimes|integer|min:0',
             'active_parking_card' => 'sometimes|integer|min:0',
-            'max_parking_card' => 'sometimes|integer|min:0',
+            'max_parking_card'    => 'sometimes|integer|min:0',
         ]);
 
-        // Check if any access card row exists
-        $accessCard = AccessCard::first();
+        // Get or create specific company's access card row
+        $accessCard = AccessCard::firstOrNew([
+            'company_id' => $request->company_id
+        ]);
 
-        if ($accessCard) {
-            // Row exists → update it
-            $accessCard->update($request->only([
-                'active_card',
-                'lost_damage_card',
-                'active_parking_card',
-                'max_parking_card'
-            ]));
-            $message = 'Access card updated successfully';
-        } else {
-            // No row → create it
-            $accessCard = AccessCard::create($request->only([
-                'active_card',
-                'lost_damage_card',
-                'active_parking_card',
-                'max_parking_card'
-            ]));
-            $message = 'Access card created successfully';
-        }
-        $accessCard = AccessCard::first();
+        // Fill only valid updatable fields
+        $accessCard->fill($request->only([
+            'active_card',
+            'lost_damage_card',
+            'active_parking_card',
+            'max_parking_card',
+        ]));
+
+        // Save the row
+        $accessCard->save();
+
+        $message = $accessCard->wasRecentlyCreated
+            ? 'Access card created successfully'
+            : 'Access card updated successfully';
 
         return $this->success($accessCard, $message, 200);
     }
 
-
-    // mobile api
     public function getCardStats()
     {
         $user = Auth::guard('api')->user();
@@ -58,18 +53,14 @@ class AccessCardController extends Controller
             return $this->error(null, 'User not associated with any company', 403);
         }
 
-        $data = AccessCard::where('company_id', $user->company_id)
+        $card = AccessCard::where('company_id', $user->company_id)
             ->select('active_card', 'lost_damage_card', 'active_parking_card', 'max_parking_card')
             ->first();
 
-        if (!$data) {
+        if (!$card) {
             return $this->error(null, 'Access card data not found', 404);
         }
 
-        return $this->success(
-            $data,
-            'Access card data fetched successfully',
-            200
-        );
+        return $this->success($card, 'Access card data fetched successfully', 200);
     }
 }
