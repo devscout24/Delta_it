@@ -64,10 +64,10 @@ class NotificationController extends Controller
     public function markRead(Request $request)
     {
         $validation = Validator::make($request->all(), [
-             'id' => 'required|string'
+            'id' => 'required|string'
         ]);
 
-        if($validation->fails()) {
+        if ($validation->fails()) {
             return $this->error($validation->errors(), 'Error in Validation', 422);
         }
 
@@ -93,9 +93,13 @@ class NotificationController extends Controller
 
     public function delete(Request $request)
     {
-        $request->validate([
+        $validation = Validator::make($request->all(), [
             'id' => 'required|string'
         ]);
+
+        if ($validation->fails()) {
+            return $this->error($validation->errors(), 'Error in Validation', 422);
+        }
 
         $user = Auth::guard('api')->user();
 
