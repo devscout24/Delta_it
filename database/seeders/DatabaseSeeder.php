@@ -275,7 +275,7 @@ class DatabaseSeeder extends Seeder
                 'id' => Str::uuid(),
                 'type' => 'App\Notifications<SystemAlertNotification>',
                 'notifiable_type' => 'App\Models\User',
-                'notifiable_id' => 1,
+                'notifiable_id' => 2,
                 'data' => json_encode([
                     'title' => 'Welcome to the system',
                     'description' => 'Your account has been successfully created.',
@@ -289,7 +289,7 @@ class DatabaseSeeder extends Seeder
                 'id' => Str::uuid(),
                 'type' => 'App\Notifications<SystemAlertNotification>',
                 'notifiable_type' => 'App\Models\User',
-                'notifiable_id' => 1,
+                'notifiable_id' => 2,
                 'data' => json_encode([
                     'title' => 'Meeting Reminder',
                     'description' => 'You have a meeting scheduled tomorrow.',
