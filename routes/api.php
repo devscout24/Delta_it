@@ -185,25 +185,3 @@ Route::controller(NotificationController::class)->group(function () {
     Route::post('/notifications/delete', 'delete');
 });
 
-Route::controller(BookingController::class)->group(function () {
-    Route::get('/get-room-bookings', 'index');
-    Route::post('/book-room', 'bookRoom'); // Mobile
-});
-
-
-Route::controller(RoomBookController::class)->middleware('auth:api')->group(function () {
-    Route::post('/add-room-booking', 'RoomBook');
-});
-
-Route::controller(RoomAppointmentController::class)->middleware('auth:api')->group(function () {
-    Route::post('/add-room-appointment', 'RoomAppointment');
-});
-
-Route::controller(ArchiveController::class)->middleware('auth:api')->group(function () {
-    Route::post('/add-to-archive', 'addToArchive');
-    Route::post('/restore-comapany', 'restoreComapany');
-});
-
-Route::controller(AppointmentController::class)->middleware('auth:api')->group(function () {
-    Route::post('/add-appointment', 'addAppointment');
-});

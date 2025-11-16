@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Models\MettingBookRequest;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class MeetingController extends Controller
@@ -78,7 +79,7 @@ class MeetingController extends Controller
         $meeting = Meeting::create([
             'company_id'   => $request->company_id,
             'room_id'      => $request->meeting_type == 'office' ? $request->room_id : null,
-            'created_by'   => auth()->id(),
+            'created_by'   => Auth::gueard('api')->user()->id,
             'meeting_name' => $request->meeting_name,
             'date'         => $request->date,
             'start_time'   => $request->start_time,
