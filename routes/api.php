@@ -154,7 +154,11 @@ Route::controller(MeetingController::class)->group(function () {
     Route::post('/create-meetings', 'create');
     Route::post('/update-meetings', 'update');
     Route::post('/update-meeting-status', 'updateStatus');
-    // Events
+
+    Route::post('/meeting/request', 'requestMeeting');
+    Route::get('/meeting/{id}/accept', 'acceptMeeting');
+    Route::get('/meeting/{id}/reject', 'rejectMeeting');
+    Route::get('/meeting/{id}/cancel', 'cancelMeeting');
 });
 
 Route::controller(MeetingEventController::class)->group(function () {
@@ -165,6 +169,14 @@ Route::controller(MeetingEventController::class)->group(function () {
     Route::delete('/meeting-events/delete/{id}', 'destroy');
 });
 
+Route::controller(BookingController::class)->group(function () {
+    Route::get('/meeting-bookings', 'index');
+    Route::get('/meeting-bookings/{id}', 'show');
+    Route::post('/meeting-bookings/create', 'store');
+    Route::post('/meeting-bookings/update/{id}', 'update');
+    Route::delete('/meeting-bookings/delete/{id}', 'destroy');
+});
+
 Route::controller(NotificationController::class)->group(function () {
     Route::get('/notifications', 'getNotifications');
     Route::get('/notifications/unread', 'unread');
@@ -173,45 +185,10 @@ Route::controller(NotificationController::class)->group(function () {
     Route::post('/notifications/delete', 'delete');
 });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Route::controller(MeetingController::class)->group(function () {
-    Route::post('/add-meeting', 'store');
-    Route::get('/filter-meetings', 'filter');
-    Route::post('/filter-meetings-type-room', 'filterMeetingBytype');
-    Route::get('/show-single-meeting/{id}', 'singleMeeting');
-    Route::get('/get-all-meeting', 'getAllMeeting');
-    Route::get('/get-all-events', 'getAllEvents');
-    Route::get('/get-all-meeting-request', 'getmeetingRequest');
-
-    // meeting request api
-    Route::post('/add/request', 'StoreMeeting');
-});
-
-
-
-
 Route::controller(BookingController::class)->group(function () {
     Route::get('/get-room-bookings', 'index');
     Route::post('/book-room', 'bookRoom'); // Mobile
 });
-
 
 
 Route::controller(RoomBookController::class)->middleware('auth:api')->group(function () {
@@ -222,29 +199,10 @@ Route::controller(RoomAppointmentController::class)->middleware('auth:api')->gro
     Route::post('/add-room-appointment', 'RoomAppointment');
 });
 
-
-
-
-
-
-
-
 Route::controller(ArchiveController::class)->middleware('auth:api')->group(function () {
     Route::post('/add-to-archive', 'addToArchive');
     Route::post('/restore-comapany', 'restoreComapany');
 });
-
-
-
-
-
-
-
-
-
-
-
-
 
 Route::controller(AppointmentController::class)->middleware('auth:api')->group(function () {
     Route::post('/add-appointment', 'addAppointment');

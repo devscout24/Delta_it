@@ -4,111 +4,226 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
+use App\Models\MeetingBooking;
+use App\Models\MeetingBookingAvailabilities;
+use App\Models\MeetingBookingAvailabilitySlot;
+use App\Models\MeetingBookingSchedule;
 use App\Models\RoomBookings;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class BookingController extends Controller
 {
-    // Get Booking Room
-    use \App\Traits\ApiResponse;
-
+    // -------------------------------------------------
+    // GET ALL BOOKINGS
+    // -------------------------------------------------
     public function index()
     {
-        $user = Auth::guard('api')->user();
+        $bookings = MeetingBooking::with([
+            'schedule.availabilities.slots'
+        ])->orderBy('id', 'desc')->get();
 
-        if (!$user || !$user->company_id) {
-            return $this->error([], 'User not associated with any company', 403);
-        }
-
-        // Fetch bookings for the user's company with related room info
-        $bookings = RoomBookings::where('company_id', $user->company_id)
-            ->with(['room:id,room_name,area']) // adjust fields as per your rooms table
-            ->select('id', 'room_id', 'booking_name', 'date', 'start_time', 'end_time', 'status')
-            ->orderBy('date', 'desc')
-            ->get();
-
-        if ($bookings->isEmpty()) {
-            return $this->error([], 'No bookings found for this company', 200);
-        }
-
-        // Transform data for a clean API response
-        $data = $bookings->map(function ($item) {
-            return [
-                'id'           => $item->id,
-                'booking_name' => $item->booking_name,
-                'date'         => $item->date,
-                'start_time'   => $item->start_time,
-                'end_time'     => $item->end_time,
-                'status'       => $item->status,
-                'room'         => $item->room ? [
-                    'id'       => $item->room->id,
-                    'name'     => $item->room->room_name,
-                    'area' => $item->room->area ?? null,
-                ] : null,
-            ];
-        });
-
-        return $this->success($data, 'Company bookings fetched successfully');
+        return response()->json([
+            'status' => true,
+            'data' => $bookings
+        ]);
     }
 
-    // Book Room
-
-    public function bookRoom(Request $request)
+    // -------------------------------------------------
+    // GET SINGLE BOOKING
+    // -------------------------------------------------
+    public function show($id)
     {
-        try {
-            $user = Auth::guard('api')->user();
+        $booking = MeetingBooking::with([
+            'schedule.availabilities.slots'
+        ])->findOrFail($id);
 
-            if (!$user || !$user->company_id) {
-                return $this->error([], 'User not associated with any company', 200);
-            }
+        return response()->json([
+            'status' => true,
+            'data' => $booking
+        ]);
+    }
 
-            $validator = Validator::make($request->all(), [
-                'room_id'     => 'required|exists:rooms,id',
-                'date'        => 'required|date',
-                'booking_name' => 'required|string|max:255',
-                'start_time'  => 'required',
-                'end_time'    => 'required|after:start_time',
-                'description' => 'nullable|string',
-                'add_emails'  => 'nullable|string', // could be CSV or JSON
-            ]);
+    // -------------------------------------------------
+    // CREATE BOOKING + SCHEDULE + AVAILABILITY
+    // -------------------------------------------------
+    public function store(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'room_id'       => 'required',
+            'company_id'    => 'required',
+            'event_name'    => 'required',
+            'event_date'    => 'required',
+            'event_color'   => 'required',
+            'online_link'   => 'nullable',
+            'max_invitees'  => 'required',
+            'description'   => 'required',
+            'duration'      => 'required',
+            'timezone'      => 'required',
+            'schedule_mode' => 'required',
+            'future_days'   => 'required',
+            'start_time'    => 'required',
+            'end_time'      => 'required',
+            'availabilities' => 'required',
+        ]);
 
-            if ($validator->fails()) {
-                return $this->error($validator->errors(), 'Validation error', 422);
-            }
-
-            // Check if the room is already booked at the given time
-            $conflict = RoomBookings::where('room_id', $request->room_id)
-                ->where('date', $request->date)
-                ->where(function ($query) use ($request) {
-                    $query->whereBetween('start_time', [$request->start_time, $request->end_time])
-                        ->orWhereBetween('end_time', [$request->start_time, $request->end_time]);
-                })
-                ->exists();
-
-            if ($conflict) {
-                return $this->error([], 'Room already booked for the selected time slot', 409);
-            }
-
-            // Create booking
-            $booking = RoomBookings::create([
-                'room_id'      => $request->room_id,
-                'company_id'   => $user->company_id,
-                'date'         => Carbon::parse($request->date)->format('Y-m-d'),
-                'booking_name' => $request->booking_name,
-                'start_time'   => $request->start_time,
-                'end_time'     => $request->end_time,
-                'description'  => $request->description,
-                'add_emails'   => $request->add_emails,
-                'booked_by'    => $user->id,
-                'status'       => 'pending',
-            ]);
-
-            return $this->success($booking, 'Room booked successfully', 201);
-        } catch (\Exception $e) {
-            return $this->error($e->getMessage(), 'Server error', 500);
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'errors' => $validator->errors()
+            ], 422);
         }
+
+        DB::beginTransaction();
+
+        try {
+            // 1. Create booking
+            $booking = MeetingBooking::create([
+                'room_id'       => $request->room_id,
+                'company_id'    => $request->company_id,
+                'created_by'    => Auth::guard('api')->id(),
+                'event_name'    => $request->event_name,
+                'event_date'    => $request->event_date,
+                'event_color'   => $request->event_color,
+                'online_link'   => $request->online_link,
+                'max_invitees'  => $request->max_invitees,
+                'description'   => $request->description,
+                'status'        => 'pending',
+            ]);
+
+            // 2. Create schedule
+            $schedule = MeetingBookingSchedule::create([
+                'booking_id'     => $booking->id,
+                'duration'       => $request->duration,
+                'timezone'       => $request->timezone,
+                'schedule_mode'  => $request->schedule_mode,
+                'future_days'    => $request->future_days,
+                'date_from'      => $request->date_from,
+                'date_to'        => $request->date_to,
+            ]);
+
+            // 3. Create availability for each day
+            foreach ($request->availabilities as $dayItem) {
+                $availability = MeetingBookingAvailabilities::create([
+                    'schedule_id'  => $schedule->id,
+                    'day'          => $dayItem['day'],
+                    'is_available' => $dayItem['is_available'],
+                ]);
+
+                // Add slots only if available
+                if (!empty($dayItem['slots'])) {
+                    foreach ($dayItem['slots'] as $slot) {
+                        MeetingBookingAvailabilitySlot::create([
+                            'availability_id' => $availability->id,
+                            'start_time'      => $slot['start_time'],
+                            'end_time'        => $slot['end_time'],
+                        ]);
+                    }
+                }
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'status' => true,
+                'message' => "Booking created successfully",
+                'data' => $booking->load('schedule.availabilities.slots')
+            ]);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
+        }
+    }
+
+    // -------------------------------------------------
+    // UPDATE BOOKING
+    // -------------------------------------------------
+    public function update(Request $request, $id)
+    {
+        DB::beginTransaction();
+
+        try {
+            $booking = MeetingBooking::findOrFail($id);
+
+            // Update booking info
+            $booking->update([
+                'room_id'       => $request->room_id,
+                'company_id'    => $request->company_id,
+                'event_name'    => $request->event_name,
+                'event_date'    => $request->event_date,
+                'event_color'   => $request->event_color,
+                'online_link'   => $request->online_link,
+                'max_invitees'  => $request->max_invitees,
+                'description'   => $request->description,
+                'status'        => $request->status ?? $booking->status,
+            ]);
+
+            // Update schedule
+            $schedule = $booking->schedule;
+
+            $schedule->update([
+                'duration'       => $request->duration,
+                'timezone'       => $request->timezone,
+                'schedule_mode'  => $request->schedule_mode,
+                'future_days'    => $request->future_days,
+                'date_from'      => $request->date_from,
+                'date_to'        => $request->date_to,
+            ]);
+
+            // Remove old availability + slots
+            foreach ($schedule->availabilities as $availability) {
+                $availability->slots()->delete();
+            }
+
+            $schedule->availabilities()->delete();
+
+            // Insert new availability
+            foreach ($request->availabilities as $dayItem) {
+
+                $availability = MeetingBookingAvailabilities::create([
+                    'schedule_id'  => $schedule->id,
+                    'day'          => $dayItem['day'],
+                    'is_available' => $dayItem['is_available'],
+                ]);
+
+                if (!empty($dayItem['slots'])) {
+                    foreach ($dayItem['slots'] as $slot) {
+                        MeetingBookingAvailabilitySlot::create([
+                            'availability_id' => $availability->id,
+                            'start_time'      => $slot['start_time'],
+                            'end_time'        => $slot['end_time'],
+                        ]);
+                    }
+                }
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'status' => true,
+                'message' => "Booking updated successfully",
+                'data' => $booking->load('schedule.availabilities.slots')
+            ]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return response()->json(['status' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    // -------------------------------------------------
+    // DELETE BOOKING
+    // -------------------------------------------------
+    public function destroy($id)
+    {
+        $booking = MeetingBooking::findOrFail($id);
+        $booking->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => "Booking deleted successfully"
+        ]);
     }
 }

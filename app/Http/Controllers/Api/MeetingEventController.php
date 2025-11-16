@@ -8,6 +8,7 @@ use App\Models\MeetingEventAvailabilities;
 use App\Models\MeetingEventAvailabilitySlot;
 use App\Models\MeetingEventSchedule;
 use App\Traits\ApiResponse;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -175,7 +176,7 @@ class MeetingEventController extends Controller
             $schedule->availabilities()->delete();
 
             // Insert new availability
-            foreach ($request->availabilities as $dayItem)
+            foreach ($request->availabilities as $dayItem){
                 $availability = MeetingEventAvailabilities::create([
                     'schedule_id'  => $schedule->id,
                     'day'          => $dayItem['day'],
@@ -199,9 +200,10 @@ class MeetingEventController extends Controller
                 'message' => "Meeting event updated successfully",
                 'data' => $event->load('schedule.availabilities.slots')
             ]);
-        } catch (\Throwable $th) {
+
+        } catch (Exception $e) {
             DB::rollBack();
-            return response()->json(['status' => false, 'error' => $th->getMessage()], 500);
+            return response()->json(['status' => false, 'error' => $e->getMessage()], 500);
         }
     }
 

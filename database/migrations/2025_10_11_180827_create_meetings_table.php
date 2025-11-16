@@ -23,7 +23,7 @@ return new class extends Migration
             $table->enum('meeting_type', ['virtual', 'office'])->default('virtual');
             $table->string('online_link')->nullable();
             $table->json('add_emails')->nullable();
-            $table->enum('status', ['pending','completed', 'cancelled'])->default('pending');
+            $table->enum('status', ['pending','completed', 'cancelled','requested', 'approved', 'rejected'])->default('pending');
             $table->timestamps();
         });
     }

@@ -153,6 +153,96 @@ class MeetingController extends Controller
         return $this->success($meeting, "Meeting status updated", 200);
     }
 
+    public function requestMeeting(Request $request)
+    {
+        $validation = Validator::make($request->all(), [
+            'room_id'     => 'required|exists:rooms,id',
+            'company_id'  => 'required|exists:companies,id',
+            'date'        => 'required|date',
+            'start_time'  => 'required|date_format:H:i',
+            'end_time'    => 'required|date_format:H:i|after:start_time',
+            'status'      => 'nullable|string|in:pending,confirmed,cancelled',
+        ]);
+
+        if ($validation->fails()) {
+            return $this->error([], $validation->errors()->first(), 422);
+        }
+
+        //  Create meeting
+        $meeting = Meeting::create([
+            'room_id'     => $request->room_id,
+            'company_id'  => $request->company_id,
+            'date'        => $request->date,
+            'start_time'  => $request->start_time,
+            'end_time'    => $request->end_time,
+            'status'      => $request->status ?? 'requested',
+        ]);
+
+        //  Return response
+        return $this->success($meeting, "Meeting Requested submitted successfully.", 201);
+    }
+
+    public function acceptMeeting($id)
+    {
+        $meeting = Meeting::find($id);
+
+        if (!$meeting) {
+            return $this->error([], "Meeting not found.", 404);
+        }
+
+        if (!in_array($meeting->status, ['requested', 'pending'])) {
+            return $this->error([], "Only requested or pending meetings can be approved.", 422);
+        }
+
+        $meeting->update([
+            'status' => 'approved'
+        ]);
+
+        return $this->success($meeting, "Meeting request approved successfully.", 200);
+    }
+
+    public function rejectMeeting($id)
+    {
+        $meeting = Meeting::find($id);
+
+        if (!$meeting) {
+            return $this->error([], "Meeting not found.", 404);
+        }
+
+        if (!in_array($meeting->status, ['requested', 'pending'])) {
+            return $this->error([], "Only requested or pending meetings can be rejected.", 422);
+        }
+
+        $meeting->update([
+            'status' => 'rejected'
+        ]);
+
+        return $this->success($meeting, "Meeting request rejected successfully.", 200);
+    }
+
+    public function cancelMeeting($id)
+    {
+        $meeting = Meeting::find($id);
+
+        if (!$meeting) {
+            return $this->error([], "Meeting not found.", 404);
+        }
+
+        // Allowed statuses before cancellation
+        if (!in_array($meeting->status, ['approved', 'requested', 'pending'])) {
+            return $this->error([], "Only approved, requested, or pending meetings can be cancelled.", 422);
+        }
+
+        $meeting->update([
+            'status' => 'cancelled'
+        ]);
+
+        return $this->success($meeting, "Meeting cancelled successfully.", 200);
+    }
+
+
+
+
 
 
 
