@@ -22,7 +22,7 @@ class MeetingBookingController extends Controller
     public function details($id)
     {
         $booking = MeetingBooking::with([
-            'room:id,name',
+            'room:id,room_name',
             'schedules:id,meeting_booking_id,duration,schedule_mode,future_days,date_from,date_to',
             'schedules.availabilitySlots:id,schedule_id,day,is_available',
             'schedules.availabilitySlots.timeRanges:id,availability_id,start_time,end_time',
@@ -33,7 +33,7 @@ class MeetingBookingController extends Controller
             'booking_name' => $booking->booking_name,
             'room' => [
                 'id' => $booking->room->id,
-                'name' => $booking->room->name,
+                'name' => $booking->room->room_name,
             ],
             'max_invitees' => $booking->max_invitees,
             'description' => $booking->description,
