@@ -74,6 +74,7 @@ Route::controller(CompanyController::class)->group(function () {
     Route::post('/delete-company', 'deleteCompany');
     Route::post('/get-specific-company', 'getSpecificCompanies');
     Route::get('/show-company/{id}', 'show');
+    Route::get('/archive-company/{id}', 'archiveCompany');
 });
 
 Route::controller(PaymentController::class)->group(function () {

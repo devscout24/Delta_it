@@ -340,4 +340,12 @@ class CompanyController extends Controller
 
         return $this->success([], 'Company information updated successfully', 200);
     }
+
+    public function archiveCompany(Request $request)
+    {
+        $company = Company::find($request->id);
+        $company->status = 'archived';
+        $company->save();
+        return $this->success([], 'Company archived successfully', 200);
+    }
 }
