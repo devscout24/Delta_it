@@ -90,7 +90,7 @@ class ContractController extends Controller
     public function storeFile(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'file'       => 'required|file|max:5120',
+            'file'       => 'required|file',
             'company_id' => 'required|exists:companies,id'
         ]);
 
@@ -111,7 +111,7 @@ class ContractController extends Controller
         // Save in DB
         $file = ContractFile::create([
             'contract_id' => $contract->id,
-            'file_path'   => 'storage/' . $path,
+            'file_path'   => $path,
         ]);
 
         $file->file_url = asset($file->file_path);
