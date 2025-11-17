@@ -96,19 +96,20 @@ class MeetingBookingController extends Controller
     {
         $bookings = MeetingBookingCreates::with('meetingBooking.room')
             ->where('user_id', Auth::guard('api')->id())
+            ->where('status', 'pending')
             ->get();
 
         // Map the response to match the Flutter model
         $response = $bookings->map(function ($booking) {
             return [
-                'id' => $booking->id,
+                'id'           => $booking->id,
                 'booking_name' => $booking->meetingBooking->booking_name ?? null,
-                'date' => $booking->date ? $booking->date->format('Y-m-d') : null,
-                'start_time' => $booking->start_time,
-                'end_time' => $booking->end_time,
-                'status' => $booking->status,
-                'room' => $booking->meetingBooking && $booking->meetingBooking->room ? [
-                    'id' => $booking->meetingBooking->room->id,
+                'date'         => $booking->date,
+                'start_time'   => $booking->start_time,
+                'end_time'     => $booking->end_time,
+                'status'       => $booking->status,
+                'room'         => $booking->meetingBooking && $booking->meetingBooking->room ? [
+                    'id'   => $booking->meetingBooking->room->id,
                     'name' => $booking->meetingBooking->room->name,
                     'area' => $booking->meetingBooking->room->area ?? null,
                 ] : null,
