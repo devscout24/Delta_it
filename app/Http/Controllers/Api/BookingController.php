@@ -162,7 +162,7 @@ class BookingController extends Controller
             ]);
 
             // Update schedule
-            $schedule = $booking->schedule;
+            $schedule = $booking->schedules;
 
             $schedule->update([
                 'duration'       => $request->duration,

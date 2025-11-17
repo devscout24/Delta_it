@@ -57,6 +57,10 @@ class MeetingBooking extends Model
     {
         return $this->hasMany(MeetingBookingSchedule::class);
     }
+    public function schedule()
+    {
+        return $this->hasMany(MeetingBookingSchedule::class);
+    }
 
     /*
     |--------------------------------------------------------------------------
