@@ -91,4 +91,45 @@ class MeetingBookingController extends Controller
 
         return $this->success($booking, 'Booking created successfully', 201);
     }
+
+    public function requestList()
+    {
+        $bookings = MeetingBookingCreates::with('meetingBooking.room')
+            ->where('user_id', Auth::guard('api')->id())
+            ->get();
+
+        // Map the response to match the Flutter model
+        $response = $bookings->map(function ($booking) {
+            return [
+                'id' => $booking->id,
+                'booking_name' => $booking->meetingBooking->booking_name ?? null,
+                'date' => $booking->date ? $booking->date->format('Y-m-d') : null,
+                'start_time' => $booking->start_time,
+                'end_time' => $booking->end_time,
+                'status' => $booking->status,
+                'room' => $booking->meetingBooking && $booking->meetingBooking->room ? [
+                    'id' => $booking->meetingBooking->room->id,
+                    'name' => $booking->meetingBooking->room->name,
+                    'area' => $booking->meetingBooking->room->area ?? null,
+                ] : null,
+            ];
+        });
+
+        return $this->success($response, 'Bookings fetched successfully', 200);
+    }
+
+
+    public function cancelBooking($id)
+    {
+        $booking = MeetingBookingCreates::find($id);
+
+        if (!$booking) {
+            return $this->error('Booking not found', 200);
+        }
+
+        $booking->status = 'cancelled';
+        $booking->save();
+
+        return $this->success($booking, 'Booking cancelled successfully', 200);
+    }
 }

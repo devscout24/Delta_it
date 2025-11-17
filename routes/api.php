@@ -178,7 +178,8 @@ Route::controller(MeetingBookingController::class)->group(function () {
     Route::get('/bookings/list', 'index');
     Route::get('/bookings/details/{id}', 'details');
     Route::post('/bookings/create', 'createBooking');
-
+    Route::get('/bookings/request/list', 'requestList');
+    Route::get('/bookings/cancel/{id}', 'cancelBooking');
 });
 
 
