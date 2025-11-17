@@ -27,8 +27,9 @@ class InternalNoteController extends Controller
             foreach ($data as $item) {
                 // Validate each note
                 $validator = Validator::make($item, [
-                    'title' => 'required|string|max:255',
-                    'note'  => 'required|string',
+                    'company_id' => 'required|exists:companies,id',
+                    'title'      => 'required|string|max:255',
+                    'note'       => 'required|string',
                 ]);
 
                 if ($validator->fails()) {
@@ -64,7 +65,7 @@ class InternalNoteController extends Controller
         if ($validator->fails()) {
             return $this->error('Validation Error', $validator->errors(), 422);
         }
-        
+
         try {
             // Update the note
             $note->update($validator->validated());
