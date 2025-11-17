@@ -90,7 +90,7 @@ class ContractController extends Controller
     public function storeFile(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'file'       => 'required|file',
+            'file'       => 'required',
             'company_id' => 'required|exists:companies,id'
         ]);
 
