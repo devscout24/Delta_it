@@ -21,7 +21,7 @@ class CollaboratorController extends Controller
         }
 
         $collaborators = Collaborator::latest()
-            ->select('id', 'company_id', 'first_name', 'last_name', 'job_position', 'email', 'phone_number', 'parking_card')
+            ->select('id', 'company_id', 'first_name', 'last_name', 'job_position', 'email', 'phone_number', 'parking_card', 'phone_extension', 'access_card_number')
             ->get();
 
         if ($collaborators->isEmpty()) {
@@ -66,6 +66,7 @@ class CollaboratorController extends Controller
                 'phone_number'       => $request->phone_number,
                 'access_card_number' => $request->access_card_number,
                 'parking_card'       => $request->parking_card ?? false,
+
             ]);
 
             return $this->success([], 'Collaborator added successfully', 201);
