@@ -22,13 +22,51 @@ class MeetingBookingController extends Controller
     public function details($id)
     {
         $booking = MeetingBooking::with([
-            'room',
-            'schedules.availabilitySlots',
-            'schedules.availabilitySlots.timeRanges'
+            'room:id,name',
+            'schedules:id,meeting_booking_id,duration,schedule_mode,future_days,date_from,date_to',
+            'schedules.availabilitySlots:id,schedule_id,day,is_available',
+            'schedules.availabilitySlots.timeRanges:id,availability_id,start_time,end_time',
         ])->findOrFail($id);
 
-        return $this->success($booking, 'Booking details fetched successfully', 200);
+        $formatted = [
+            'id' => $booking->id,
+            'booking_name' => $booking->booking_name,
+            'room' => [
+                'id' => $booking->room->id,
+                'name' => $booking->room->name,
+            ],
+            'max_invitees' => $booking->max_invitees,
+            'description' => $booking->description,
+            'color' => $booking->booking_color,
+            'online_link' => $booking->online_link,
+
+            'schedule' => $booking->schedules->map(function ($schedule) {
+                return [
+                    'duration' => $schedule->duration,
+                    'schedule_mode' => $schedule->schedule_mode,
+                    'future_days' => $schedule->future_days,
+                    'date_from' => $schedule->date_from,
+                    'date_to' => $schedule->date_to,
+
+                    'availability' => $schedule->availabilitySlots->map(function ($slot) {
+                        return [
+                            'day' => $slot->day,
+                            'is_available' => $slot->is_available,
+                            'time_ranges' => $slot->timeRanges->map(function ($tr) {
+                                return [
+                                    'start_time' => $tr->start_time,
+                                    'end_time' => $tr->end_time
+                                ];
+                            })
+                        ];
+                    })
+                ];
+            })
+        ];
+
+        return $this->success($formatted, 'Booking details fetched successfully', 200);
     }
+
     public function createBooking(Request $request)
     {
         $request->validate([
