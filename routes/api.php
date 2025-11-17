@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\RoomAppointmentController;
 use App\Http\Controllers\Api\TicketAttachmentController;
 use App\Http\Controllers\Api\TicketController;
 use App\Http\Controllers\Api\TicketMessageController;
+use App\Http\Controllers\MeetingBookingController;
 
 Route::controller(AuthController::class)->group(function () {
     // user login and logout
@@ -176,6 +177,13 @@ Route::controller(BookingController::class)->group(function () {
     Route::post('/meeting-bookings/update/{id}', 'update');
     Route::delete('/meeting-bookings/delete/{id}', 'destroy');
 });
+Route::controller(MeetingBookingController::class)->group(function () {
+    Route::get('/bookings/list', 'index');
+    Route::get('/bookings/details/{id}', 'details');
+    Route::post('/bookings/create', 'createBooking');
+
+});
+
 
 Route::controller(NotificationController::class)->group(function () {
     Route::get('/notifications', 'getNotifications');
