@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Auth;
 class MeetingBookingController extends Controller
 {
     use ApiResponse;
-    public function list()
+    public function index()
     {
         $bookings = MeetingBooking::with('room')
             ->select('id', 'room_id', 'booking_name', 'max_invitees', 'description')
