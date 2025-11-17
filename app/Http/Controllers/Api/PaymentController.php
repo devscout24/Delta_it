@@ -14,10 +14,14 @@ class PaymentController extends Controller
     // Index
     public function index(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'company_id' => 'required|exists:companies,id',
             'year' => 'required|integer|min:2000'
         ]);
+
+        if ($validator->fails()) {
+            return $this->error('Validation Error', $validator->errors()->first(), 422);
+        }
 
         $payments = CompanyPayment::where('company_id', $request->company_id)
             ->where('year', $request->year)
