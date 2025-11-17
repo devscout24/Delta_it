@@ -120,7 +120,7 @@ Route::controller(InternalNoteController::class)->middleware('auth:api')->group(
 Route::controller(ContractController::class)->middleware('auth:api')->group(function () {
     Route::get('/get-company-contracts', 'index');
     Route::post('/update-contract-info', 'update');
-    Route::get('/add-contract-file', 'storeFile');
+    Route::post('/add-contract-file', 'storeFile');
     Route::post('/remove-contract-file', 'destroy');
 
     Route::get('/get-all-company-contracts', 'allContracts');
