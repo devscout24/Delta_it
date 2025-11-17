@@ -42,6 +42,11 @@ class MeetingBookingSchedule extends Model
         return $this->hasMany(MeetingBookingAvailabilitySlot::class, 'schedule_id');
     }
 
+    public function availabilities()
+    {
+        return $this->hasMany(MeetingBookingAvailabilitySlot::class, 'schedule_id');
+    }
+
     /*
     |--------------------------------------------------------------------------
     | Optional Helpers
