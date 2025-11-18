@@ -16,6 +16,8 @@ class RoomController extends Controller
     {
         try {
             $rooms = Room::select('id', 'floor', 'room_name', 'area', 'polygon_points', 'status')->get();
+            // Eager load company relationship if needed here for the frontend to display details
+            $rooms = Room::with('company')->select('id', 'floor', 'room_name', 'area', 'polygon_points', 'status', 'company_id')->get();
             return $this->success($rooms, 'Rooms fetched successfully', 200);
         } catch (\Exception $e) {
             return $this->error([], $e->getMessage(), 500);
@@ -25,10 +27,11 @@ class RoomController extends Controller
     public function addRoom(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'floor'           => 'required|string',
-            'room_name'       => 'required|string|max:255',
-            'area'            => 'required|numeric',
-            'polygon_points'  => 'required|array',
+            'floor'             => 'required|string',
+            'room_name'         => 'required|string|max:255',
+            'area'              => 'required|numeric',
+            'polygon_points'    => 'required|array', // Validates that the input is a PHP array (the nested array format)
+            'company_id'        => 'nullable|integer|exists:companies,id', // Added for completeness, if used
         ]);
 
         if ($validator->fails()) {
@@ -47,7 +50,11 @@ class RoomController extends Controller
                 return $this->error([], 'Room name already exists on this floor', 422);
             }
 
-            // Convert flat array to coordinate pairs (added newly)
+            // FIX: The frontend sends a nested array format, so no custom conversion is needed.
+            // We directly JSON encode the array received from the request.
+            
+            // REMOVED faulty conversion loop:
+            /*
             $points = $data['polygon_points'];
             $converted = [];
             for ($i = 0; $i < count($points); $i += 2) {
@@ -56,15 +63,16 @@ class RoomController extends Controller
                     (float)$points[$i + 1]
                 ];
             }
-            // newly added end
+            */
 
             $room = Room::create([
                 'floor'          => $data['floor'],
                 'room_name'      => $data['room_name'],
                 'area'           => $data['area'],
-                // 'polygon_points' => json_encode($data['polygon_points']),
-                'polygon_points' => json_encode($converted),
-                'status'         => 'available',
+                // FIX: Use the original validated input directly, it's already a nested array
+                'polygon_points' => json_encode($data['polygon_points']),
+                'status'         => (isset($data['company_id']) && $data['company_id'] != null) ? 'occupied' : 'available',
+                'company_id'     => $data['company_id'] ?? null,
             ]);
 
             return $this->success($room, 'Room added successfully', 201);
@@ -126,7 +134,6 @@ class RoomController extends Controller
             }
 
             $room->status = $status;
-
             if ($status === 'available') {
                 $room->company_id = null;
             }
