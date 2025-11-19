@@ -92,7 +92,7 @@ class CollaboratorController extends Controller
                 'email'              => 'nullable|email|unique:collaborators,email,' . $request->id,
                 'phone_extension'    => 'nullable|string|max:20',
                 'phone_number'       => 'nullable|string|max:20',
-                'access_card_number' => 'nullable|string|max:50',
+                'access_card_number' => 'nullable|max:50',
                 'parking_card'       => 'nullable|boolean',
             ]);
 
