@@ -58,6 +58,7 @@ Route::controller(RoomController::class)->middleware('auth:api')->group(function
 
 
     // No Idea
+    Route::get('/get-assign-associate_company-info/{room_id}', 'getAssignCompanyInfo');
     Route::post('/assign-associate_company', 'assignCompany');
     Route::post('/show-room-details/{id}', 'showRoomDetails');
     Route::get('/room-status-change/{status}/{id}', 'roomStatusChange');
@@ -170,7 +171,7 @@ Route::controller(MeetingEventController::class)->group(function () {
 });
 
 Route::controller(BookingController::class)->group(function () {
-    Route::get('/meeting-bookings', 'index');
+    Route::get('/meeting-', 'index');
     Route::get('/meeting-bookings/{id}', 'show');
     Route::post('/meeting-bookings/create', 'store');
     Route::post('/meeting-bookings/update/{id}', 'update');

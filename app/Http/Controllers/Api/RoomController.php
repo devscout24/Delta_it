@@ -76,6 +76,20 @@ class RoomController extends Controller
 
     // ================================================
 
+    public function getAssignCompanyInfo($roomid){
+        try {
+            $room = Room::with('company')->find($roomid);
+
+            if (!$room) {
+                return $this->error([], 'Room not found.', 404);
+            }
+
+            return $this->success($room, 'Room details fetched successfully', 200);
+        } catch (\Exception $e) {
+            return $this->error([], $e->getMessage(), 500);
+        }
+    }
+
     public function assignCompany(Request $request)
     {
         try {
