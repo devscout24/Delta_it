@@ -23,7 +23,7 @@ class BookingController extends Controller
     public function index()
     {
         $bookings = MeetingBooking::with([
-            'schedule.availabilities.slots'
+            'schedules.availabilities.slots'
         ])->orderBy('id', 'desc')->get();
 
         return response()->json([
@@ -38,7 +38,7 @@ class BookingController extends Controller
     public function show($id)
     {
         $booking = MeetingBooking::with([
-            'schedule.availabilities.slots'
+            'schedules.availabilities.slots'
         ])->findOrFail($id);
 
         return response()->json([
@@ -130,7 +130,7 @@ class BookingController extends Controller
             return response()->json([
                 'status' => true,
                 'message' => "Booking created successfully",
-                'data' => $booking->load('schedule.availabilities.slots')
+                'data' => $booking->load('schedules.availabilities.slots')
             ]);
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -162,7 +162,7 @@ class BookingController extends Controller
             ]);
 
             // Update schedule
-            $schedule = $booking->schedule;
+            $schedule = $booking->schedules;
 
             $schedule->update([
                 'duration'       => $request->duration,
@@ -205,7 +205,7 @@ class BookingController extends Controller
             return response()->json([
                 'status' => true,
                 'message' => "Booking updated successfully",
-                'data' => $booking->load('schedule.availabilities.slots')
+                'data' => $booking->load('schedules.availabilities.slots')
             ]);
         } catch (\Throwable $e) {
             DB::rollBack();

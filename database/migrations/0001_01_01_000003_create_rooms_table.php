@@ -18,7 +18,7 @@ return new class extends Migration
             $table->decimal('area', 8, 2);
             $table->json('polygon_points');
             $table->enum('status', ['available', 'occupied', 'maintenance'])->default('available');
-
+            $table->foreignId('company_id')->nullable()->constrained('companies')->cascadeOnDelete();
             $table->timestamps();
             $table->unique(['floor', 'room_name']);
         });

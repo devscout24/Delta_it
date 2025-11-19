@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\RoomAppointmentController;
 use App\Http\Controllers\Api\TicketAttachmentController;
 use App\Http\Controllers\Api\TicketController;
 use App\Http\Controllers\Api\TicketMessageController;
+use App\Http\Controllers\MeetingBookingController;
 
 Route::controller(AuthController::class)->group(function () {
     // user login and logout
@@ -55,15 +56,10 @@ Route::controller(ProfileController::class)->group(function () {
 Route::controller(RoomController::class)->middleware('auth:api')->group(function () {
     Route::get('/get-rooms',  'index');
     Route::post('/add-room', 'addRoom');
-
-
-    // No Idea
-    Route::get('/get-assign-associate_company-info/{room_id}', 'getAssignCompanyInfo');
     Route::post('/assign-associate_company', 'assignCompany');
     Route::post('/show-room-details/{id}', 'showRoomDetails');
     Route::get('/room-status-change/{status}/{id}', 'roomStatusChange');
     Route::post('/map/rooms/remove-company',  'removeCompany');
-    // Trash
     Route::get('/map/rooms',  'index');
 });
 
@@ -78,6 +74,7 @@ Route::controller(CompanyController::class)->group(function () {
     Route::post('/delete-company', 'deleteCompany');
     Route::post('/get-specific-company', 'getSpecificCompanies');
     Route::get('/show-company/{id}', 'show');
+    Route::get('/archive-company/{id}', 'archiveCompany');
 });
 
 Route::controller(PaymentController::class)->group(function () {
@@ -124,7 +121,7 @@ Route::controller(InternalNoteController::class)->middleware('auth:api')->group(
 Route::controller(ContractController::class)->middleware('auth:api')->group(function () {
     Route::get('/get-company-contracts', 'index');
     Route::post('/update-contract-info', 'update');
-    Route::get('/add-contract-file', 'storeFile');
+    Route::post('/add-contract-file', 'storeFile');
     Route::post('/remove-contract-file', 'destroy');
 
     Route::get('/get-all-company-contracts', 'allContracts');
@@ -177,6 +174,14 @@ Route::controller(BookingController::class)->group(function () {
     Route::post('/meeting-bookings/update/{id}', 'update');
     Route::delete('/meeting-bookings/delete/{id}', 'destroy');
 });
+Route::controller(MeetingBookingController::class)->group(function () {
+    Route::get('/bookings/list', 'index');
+    Route::get('/bookings/details/{id}', 'details');
+    Route::post('/bookings/create', 'createBooking');
+    Route::get('/bookings/request/list', 'requestList');
+    Route::get('/bookings/cancel/{id}', 'cancelBooking');
+});
+
 
 Route::controller(NotificationController::class)->group(function () {
     Route::get('/notifications', 'getNotifications');
