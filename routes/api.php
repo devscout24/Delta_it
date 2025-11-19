@@ -56,6 +56,7 @@ Route::controller(ProfileController::class)->group(function () {
 Route::controller(RoomController::class)->middleware('auth:api')->group(function () {
     Route::get('/get-rooms',  'index');
     Route::post('/add-room', 'addRoom');
+    Route::get('/get-assign-associate_company-info/{id}', 'getCompanyInfo');
     Route::post('/assign-associate_company', 'assignCompany');
     Route::post('/show-room-details/{id}', 'showRoomDetails');
     Route::get('/room-status-change/{status}/{id}', 'roomStatusChange');

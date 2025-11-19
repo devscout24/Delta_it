@@ -76,7 +76,7 @@ class RoomController extends Controller
 
     // ================================================
 
-    public function getAssignCompanyInfo($roomid){
+    public function getCompanyInfo($roomid){
         try {
             $room = Room::with('company')->find($roomid);
 
