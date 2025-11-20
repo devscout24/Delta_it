@@ -91,14 +91,15 @@ class RoomController extends Controller
                 'floor'          => $data['floor'],
                 'room_name'      => $data['room_name'],
                 'area'           => $data['area'],
-                // 'polygon_points' => json_encode($data['polygon_points']),
                 'polygon_points' => json_encode($converted),
                 'status'         => 'available',
             ]);
 
+            DB::commit();
 
             return $this->success($room, 'Room added successfully', 201);
         } catch (\Exception $e) {
+            DB::rollBack();
             return $this->error([], $e->getMessage(), 500);
         }
     }
