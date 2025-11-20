@@ -54,14 +54,20 @@ Route::controller(ProfileController::class)->group(function () {
 });
 
 Route::controller(RoomController::class)->middleware('auth:api')->group(function () {
+    Route::get('/map/rooms/stats',  'stats');
+
+    Route::get('/map/rooms',  'index');
     Route::get('/get-rooms',  'index');
+
     Route::post('/add-room', 'addRoom');
-    Route::get('/get-assign-associate_company-info/{id}', 'getCompanyInfo');
     Route::post('/assign-associate_company', 'assignCompany');
+
+
+    Route::get('/get-assign-associate_company-info/{id}', 'getCompanyInfo');
     Route::post('/show-room-details/{id}', 'showRoomDetails');
+
     Route::get('/room-status-change/{status}/{id}', 'roomStatusChange');
     Route::post('/map/rooms/remove-company',  'removeCompany');
-    Route::get('/map/rooms',  'index');
 });
 
 
@@ -81,7 +87,7 @@ Route::controller(CompanyController::class)->group(function () {
 Route::controller(PaymentController::class)->group(function () {
     Route::get('/company-payments-get', 'index');
     Route::post('/company-payments-add', 'store');
-    Route::post('/company-payments-update', 'update');
+    Route::post('/company-payments-update/{id}', 'update');
     Route::get('/company-payments-yearly-info', 'dataInfo');
 
     Route::get('/get-all-company-payments-info', 'allPaymentsInfo');
@@ -91,7 +97,7 @@ Route::controller(PaymentController::class)->group(function () {
 Route::controller(CollaboratorController::class)->group(function () {
     Route::get('/collaborators-list', 'index');
     Route::post('/collaborators-add', 'store');
-    Route::post('/collaborators-update', 'update');
+    Route::post('/collaborators-update/{id}', 'update');
     Route::post('/collaborators-delete', 'destroy');
 });
 

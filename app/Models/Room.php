@@ -20,9 +20,6 @@ class Room extends Model
     ];
 
 
-    /**
-     * Get the company that occupies this room.
-     */
     public function company()
     {
         return $this->belongsTo(Company::class, 'company_id', 'id');

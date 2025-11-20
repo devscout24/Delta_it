@@ -31,7 +31,10 @@ class Company extends Model
 
     public function contract()
     {
-        // A company has one contract.
+        return $this->hasOne(Contract::class);
+    }
+    public function contracts()
+    {
         return $this->hasOne(Contract::class);
     }
 }

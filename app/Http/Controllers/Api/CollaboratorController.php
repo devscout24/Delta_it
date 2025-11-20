@@ -75,7 +75,7 @@ class CollaboratorController extends Controller
         }
     }
 
-    public function update(Request $request)
+    public function update(Request $request, $id)
     {
         try {
             $user = Auth::guard('api')->user();
@@ -85,11 +85,11 @@ class CollaboratorController extends Controller
             }
 
             $validator = Validator::make($request->all(), [
-                'id'                 => 'required|integer|exists:collaborators,id',
+                // 'id'                 => 'required|integer|exists:collaborators,id',
                 'first_name'         => 'required|string|max:255',
                 'last_name'          => 'required|string|max:255',
                 'job_position'       => 'nullable|string|max:255',
-                'email'              => 'nullable|email|unique:collaborators,email,' . $request->id,
+                'email'              => 'nullable|email|unique:collaborators,email,' . $id,
                 'phone_extension'    => 'nullable|string|max:20',
                 'phone_number'       => 'nullable|string|max:20',
                 'access_card_number' => 'nullable|max:50',
@@ -102,8 +102,7 @@ class CollaboratorController extends Controller
 
             $validated = $validator->validated();
 
-            $collaborator = Collaborator::where('id', $validated['id'])
-                ->where('company_id', $user->company_id)
+            $collaborator = Collaborator::where('id', $id)
                 ->first();
 
             if (!$collaborator) {

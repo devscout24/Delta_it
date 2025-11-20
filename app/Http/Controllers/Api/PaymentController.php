@@ -54,10 +54,10 @@ class PaymentController extends Controller
 
         return $this->success($payment, 'Monthly payment created', 201);
     }
-    public function update(Request $request)
+    public function update(Request $request, $id)
     {
         $validation = Validator::make($request->all(), [
-            'id' => 'required|exists:company_payments,id',
+            // 'id' => 'required|exists:company_payments,id',
             'value_non_vat' => 'nullable|numeric',
             'value_vat' => 'nullable|numeric',
             'printings_non_vat' => 'nullable|numeric',
@@ -69,7 +69,7 @@ class PaymentController extends Controller
             return $this->error('Validation Error', $validation->errors()->first(), 422);
         }
 
-        $payment = CompanyPayment::find($request->id);
+        $payment = CompanyPayment::find($id);
 
         $payment->update([
             'value_non_vat' => $request->value_non_vat ?? $payment->value_non_vat,
