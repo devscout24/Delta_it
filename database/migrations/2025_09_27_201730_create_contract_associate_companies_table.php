@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('contract_associate_companies', function (Blueprint $table) {
             $table->id();
             $table->foreignId('contract_id')->constrained('contracts')->onDelete('cascade');
-            $table->foreignId('contract_id')->constrained('contracts')->onDelete('cascade');
+            $table->foreignId('company_id')->constrained('companies')->onDelete('cascade');
             $table->timestamps();
         });
     }
