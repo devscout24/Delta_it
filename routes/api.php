@@ -102,6 +102,7 @@ Route::controller(CollaboratorController::class)->group(function () {
 
 Route::controller(ContractController::class)->group(function () {
     Route::get('/get-company-contracts', 'index');
+    Route::get('/get-company-contracts-details/{id}', 'details');
     Route::post('/update-contract-info', 'update');
     Route::post('/add-contract-file', 'storeFile');
     Route::post('/remove-contract-file', 'destroy');

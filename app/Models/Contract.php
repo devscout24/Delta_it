@@ -28,4 +28,14 @@ class Contract extends Model
     {
         return $this->belongsTo(Company::class, 'company_id');
     }
+
+    public function associates()
+    {
+        return $this->belongsToMany(
+            Company::class,
+            'contract_associate_companies',
+            'contract_id',
+            'company_id'
+        );
+    }
 }
