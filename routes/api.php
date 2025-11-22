@@ -111,27 +111,29 @@ Route::controller(ContractController::class)->group(function () {
 });
 
 Route::controller(DocumentController::class)->middleware('auth:api')->group(function () {
-    Route::post('/add-documents', 'store');
-    Route::post('/delete-document', 'deleteDocument');
     Route::get('/get-all-documents/{id}', 'allDocuments');
+    Route::post('/add-documents/{id}', 'store');
+    Route::post('/delete-document', 'deleteDocument');
 });
 
-Route::controller(AccountController::class)->middleware('auth:api')->group(function () {
-    Route::get('/get-company-user', 'get');
+Route::controller(AccountController::class)->group(function () {
+    Route::get('/get-company-user/{id}', 'get');
+    Route::get('/get-company-user-details/{id}', 'getDetails');
     Route::post('/add-company-user', 'store');
-    Route::post('/update-company-account', 'update');
+    Route::post('/update-company-account/{id}', 'update');
     Route::get('/delete-company-account/{id}', 'destroy');
 });
 
-Route::controller(AccessCardController::class)->middleware('auth:api')->group(function () {
-    Route::get('/get-cards', 'getCardStats');
-    Route::post('/access_card/update', 'updateAccessCode');
+Route::controller(AccessCardController::class)->group(function () {
+    Route::get('/get-cards/{id}', 'getCardStats');
+    Route::post('/access_card/update/{id}', 'updateAccessCode');
 });
 
-Route::controller(InternalNoteController::class)->middleware('auth:api')->group(function () {
+Route::controller(InternalNoteController::class)->group(function () {
+    Route::get('/get-note/{id}', 'get');
     Route::post('/add-note', 'store');
     Route::post('/update-note/{id}', 'update');
-    Route::get('/delete-note/{id}', 'd     estroy');
+    Route::get('/delete-note/{id}', 'destroy');
 });
 
 

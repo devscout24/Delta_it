@@ -15,15 +15,48 @@ use Illuminate\Support\Facades\Validator;
 class DocumentController extends Controller
 {
     use ApiResponse;
-    public function store(Request $request)
+
+    public function allDocuments($id)
+    {
+        $documents = Document::with('company')->where('company_id', $id)->get();
+
+        if ($documents->isEmpty()) {
+            return $this->error([], 'No documents available.', 404);
+        }
+
+        $documents = $documents->map(function ($document) {
+
+            $absolutePath = public_path($document->document_path);
+            $fileSizeMB = File::exists($absolutePath)
+                ? number_format(File::size($absolutePath) / 1048576, 2) . ' MB'
+                : 'N/A';
+
+            return [
+                'id' => $document->id,
+                'company' => [
+                    'id' => $document->company->id,
+                    'name' => $document->company->name,
+                    'email' => $document->company->email,
+                ],
+                'document_name' => $document->document_name,
+                'document_type' => $document->document_type,
+                'document_path' => asset($document->document_path),
+                'file_size_mb' => $fileSizeMB,
+            ];
+        });
+
+        return $this->success($documents, 'Documents fetched successfully.', 200);
+    }
+
+
+    public function store(Request $request, $company_id)
     {
         $validated = Validator::make($request->all(), [
             'document_name' => 'required|string|max:255',
-            'document_type' => 'required|string|max:100',
-            'file' => 'required|file|max:2048', // 2MB max
+            'document_type' => 'required|in:pdf,word,image,other',
+            'file' => 'required|file|max:4096', // allow 4MB safe
             'tags' => 'nullable|array',
             'tags.*' => 'string|max:50|distinct',
-            'company_id' => 'nullable|exists:companies,id',
         ]);
 
         if ($validated->fails()) {
@@ -33,34 +66,31 @@ class DocumentController extends Controller
         try {
             DB::beginTransaction();
 
-            $file = $request->file('file');
-            if (!$file) {
-                return $this->error('No file uploaded', 400);
-            }
+            // upload file manually
+            $uploadedFile = $request->file('file');
+            $filename = time() . '_' . $uploadedFile->getClientOriginalName();
+            $uploadedFile->move(public_path('uploads/documents'), $filename);
 
-            // Upload file (custom helper)
-            $filePath = $this->uploadFile($file, 'documents', null);
-
-            // Create document
             $document = Document::create([
-                'company_id' => $request->company_id,
+                'company_id'    => $company_id,
                 'document_name' => $request->document_name,
                 'document_type' => $request->document_type,
-                'document_path' => $filePath,
+                'document_path' => 'uploads/documents/' . $filename,
             ]);
 
-            // Handle tags
-            if ($request->filled('tags') && is_array($request->tags)) {
-                foreach ($request->tags as $tag) {
-                    Tag::create([
+            if ($request->filled('tags')) {
+                foreach ($request->tags as $tagName) {
+                    Tag::firstOrCreate([
                         'document_id' => $document->id,
-                        'tag' => $tag,
+                        'tag'         => $tagName
                     ]);
                 }
             }
 
+
             DB::commit();
-            return $this->success($document, 'Document uploaded successfully', 200);
+
+            return $this->success([], 'Document uploaded successfully', 200);
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->error($e->getMessage(), 500);
@@ -73,8 +103,9 @@ class DocumentController extends Controller
         $validated = Validator::make($request->all(), [
             'id' => 'required|exists:documents,id',
         ]);
+
         if ($validated->fails()) {
-            return response()->json(['errors' => $validated->errors()], 422);
+            return $this->error($validated->errors(), 422);
         }
 
         $document = Document::find($request->id);
@@ -83,47 +114,13 @@ class DocumentController extends Controller
             return $this->error('Document not found', 404);
         }
 
-        // Delete the file from storage
-        if ($document->document_path && file_exists(public_path($document->document_path))) {
-            unlink(public_path($document->document_path));
+        $filePath = public_path($document->document_path);
+        if (File::exists($filePath)) {
+            unlink($filePath);
         }
-        // Delete the document record from the database
+
         $document->delete();
 
-        return $this->success('Document deleted successfully', 200);
-    }
-
-
-    public function allDocuments($id)
-    {
-        $documents = Document::where('company_id', $id)->get();
-
-        if ($documents->isEmpty()) {
-            return $this->error([], 'No documents available.', 404);
-        }
-
-        $documents = $documents->map(function ($document) {
-            $filePath = public_path($document->document_path);
-            $fileSizeMB = null;
-
-            if (File::exists($filePath)) {
-                $fileSizeMB = number_format(File::size($filePath) / 1048576, 2); // bytes → MB
-            }
-
-            return [
-                'id'             => $document->id,
-                'company' => [
-                    'id'     => $document->company_id,
-                    'name' => $document->company->name,
-                    'email' => $document->company->email
-                ],
-                'document_name'  => $document->document_name,
-                'document_type'  => $document->document_type,
-                'document_path'  => asset($document->document_path),
-                'file_size_mb'   => $fileSizeMB ? "{$fileSizeMB} MB" : 'N/A',
-            ];
-        });
-
-        return $this->success($documents, 'Documents fetched successfully.', 200);
+        return $this->success([], 'Document deleted successfully', 200);
     }
 }

@@ -14,10 +14,10 @@ use Illuminate\Validation\Rule;
 class AccountController extends Controller
 {
     use ApiResponse;
-    public function get(Request $request)
+    public function get($id)
     {
         // Auth user has company_id
-        $companyId = $request->company_id;
+        $companyId = $id;
 
         $users = User::select(
             'id',
@@ -43,19 +43,22 @@ class AccountController extends Controller
 
         return $this->success($users, "Company users fetched successfully", 200);
     }
-
     /**
      * ADD COMPANY USER
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validation = Validator::make($request->all(), [
             'name'        => 'required|string|max:100',
             'last_name'   => 'nullable|string|max:100',
             'job_position'=> 'nullable|string|max:255',
             'email'       => 'required|email|unique:users,email',
             'password'    => 'required|min:6|confirmed'
         ]);
+
+        if ($validation->fails()) {
+            return $this->error([],$validation->errors(), 422);
+        }
 
         $user = new User();
         $user->company_id   = $request->company_id;
@@ -72,13 +75,32 @@ class AccountController extends Controller
         return $this->success($user, "Company user created successfully", 201);
     }
 
+    public function getDetails($id){
+        $user = User::select(
+            'id',
+            'company_id',
+            'job_position',
+            'profile_photo',
+            'username',
+            'name',
+            'last_name',
+            'email',
+            'phone',
+            'user_type',
+            'status'
+        )
+        ->where('id', $id)
+        ->first();
+
+        return $this->success($user, "Company user fetched successfully", 200);
+    }
+
     /**
      * UPDATE COMPANY USER
      */
-    public function update(Request $request)
+    public function update(Request $request, $id)
     {
-        $request->validate([
-            'id'          => 'required|exists:users,id',
+        $validation = Validator::make($request->all(), [
             'name'        => 'required|string|max:100',
             'last_name'   => 'nullable|string|max:100',
             'job_position'=> 'nullable|string|max:255',
@@ -86,9 +108,11 @@ class AccountController extends Controller
             'password'    => 'nullable|min:6|confirmed'
         ]);
 
-        $user = User::where('company_id', $request->company_id)
-                    ->where('id', $request->id)
-                    ->first();
+        if ($validation->fails()) {
+            return $this->error([],$validation->errors(), 422);
+        }
+
+        $user = User::where('id', $id)->first();
 
         if (!$user) {
             return $this->error(null, "User not found", 404);
@@ -105,7 +129,7 @@ class AccountController extends Controller
 
         $user->save();
 
-        return $this->success($user, "Account updated successfully", 200);
+        return $this->success([], "Account updated successfully", 200);
     }
 
     /**

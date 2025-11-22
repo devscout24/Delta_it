@@ -12,6 +12,25 @@ use Illuminate\Support\Facades\Validator;
 class InternalNoteController extends Controller
 {
     use ApiResponse;
+    public function get($company_id) {
+        $data = InternalNote::where('company_id', $company_id)->get();
+
+        if (!$data) {
+            return $this->error('Not Found', 'Internal Notes not found', 404);
+        }
+
+        $data = $data->map(function ($note) {
+            return [
+                'id' => $note->id,
+                'company_id' => $note->company_id,
+                'title' => $note->title,
+                'note' => $note->note
+            ];
+        });
+
+        return $this->success($data, 'Internal Notes Fetched Successfully', 200);
+    }
+
     public function store(Request $request)
     {
         $data = $request->all();

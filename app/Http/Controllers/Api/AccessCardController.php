@@ -7,24 +7,28 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Traits\ApiResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class AccessCardController extends Controller
 {
     use ApiResponse;
-    public function updateAccessCode(Request $request)
+    public function updateAccessCode(Request $request, $company_id)
     {
         // Validate request
-        $request->validate([
-            'company_id'          => 'required|exists:companies,id',
+        $validator = Validator::make($request->all(), [
             'active_card'         => 'sometimes|integer|min:0',
             'lost_damage_card'    => 'sometimes|integer|min:0',
             'active_parking_card' => 'sometimes|integer|min:0',
             'max_parking_card'    => 'sometimes|integer|min:0',
         ]);
 
+        if ($validator->fails()) {
+            return $this->error([], $validator->errors(), 422);
+        }
+
         // Get or create specific company's access card row
         $accessCard = AccessCard::firstOrNew([
-            'company_id' => $request->company_id
+            'company_id' => $company_id
         ]);
 
         // Fill only valid updatable fields
@@ -45,15 +49,9 @@ class AccessCardController extends Controller
         return $this->success($accessCard, $message, 200);
     }
 
-    public function getCardStats()
+    public function getCardStats($id)
     {
-        $user = Auth::guard('api')->user();
-
-        if (!$user || !$user->company_id) {
-            return $this->error(null, 'User not associated with any company', 403);
-        }
-
-        $card = AccessCard::where('company_id', $user->company_id)
+        $card = AccessCard::where('company_id', $id)
             ->select('active_card', 'lost_damage_card', 'active_parking_card', 'max_parking_card')
             ->first();
 
