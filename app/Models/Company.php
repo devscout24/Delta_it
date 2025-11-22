@@ -25,8 +25,12 @@ class Company extends Model
 
     public function room()
     {
-        // A company has one room.
         return $this->hasOne(Room::class);
+    }
+
+    public function rooms()
+    {
+        return $this->hasMany(Room::class);
     }
 
     public function contract()

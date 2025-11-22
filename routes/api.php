@@ -89,16 +89,24 @@ Route::controller(PaymentController::class)->group(function () {
     Route::post('/company-payments-add', 'store');
     Route::post('/company-payments-update/{id}', 'update');
     Route::get('/company-payments-yearly-info', 'dataInfo');
-
     Route::get('/get-all-company-payments-info', 'allPaymentsInfo');
 });
 
-
 Route::controller(CollaboratorController::class)->group(function () {
     Route::get('/collaborators-list', 'index');
+    Route::get('/collaborator-info/{id}', 'collaboratorInfo');
     Route::post('/collaborators-add', 'store');
     Route::post('/collaborators-update/{id}', 'update');
     Route::post('/collaborators-delete', 'destroy');
+});
+
+Route::controller(ContractController::class)->group(function () {
+    Route::get('/get-company-contracts', 'index');
+    Route::post('/update-contract-info', 'update');
+    Route::post('/add-contract-file', 'storeFile');
+    Route::post('/remove-contract-file', 'destroy');
+
+    Route::get('/get-all-company-contracts', 'allContracts');
 });
 
 Route::controller(DocumentController::class)->middleware('auth:api')->group(function () {
@@ -125,14 +133,7 @@ Route::controller(InternalNoteController::class)->middleware('auth:api')->group(
     Route::get('/delete-note/{id}', 'd     estroy');
 });
 
-Route::controller(ContractController::class)->middleware('auth:api')->group(function () {
-    Route::get('/get-company-contracts', 'index');
-    Route::post('/update-contract-info', 'update');
-    Route::post('/add-contract-file', 'storeFile');
-    Route::post('/remove-contract-file', 'destroy');
 
-    Route::get('/get-all-company-contracts', 'allContracts');
-});
 
 // Ticket Controller
 Route::controller(TicketController::class)->group(function () {

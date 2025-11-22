@@ -31,6 +31,16 @@ class CollaboratorController extends Controller
         return $this->success($collaborators, 'Collaborators fetched successfully', 200);
     }
 
+    public function collaboratorInfo($id){
+        $collaborator = Collaborator::select('id', 'company_id', 'first_name', 'last_name', 'job_position', 'email', 'phone_number', 'parking_card', 'phone_extension', 'access_card_number')->where('id', $id)->first();
+
+        if (!$collaborator) {
+            return $this->error([], 'Collaborator not found', 404);
+        }
+
+        return $this->success($collaborator, 'Collaborator fetched successfully', 200);
+    }
+
     public function store(Request $request)
     {
         $validate = Validator::make($request->all(), [

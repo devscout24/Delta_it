@@ -6,6 +6,7 @@ use App\Models\Company;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Room;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
@@ -100,9 +101,9 @@ class CompanyController extends Controller
         $validator = Validator::make($request->all(), [
             'company_id'      => 'required|exists:companies,id',
             'logo'            => 'nullable|image|mimes:jpg,jpeg,png,svg|max:2048',
-            'name'            => 'required|string|max:255',
+            'name'            => 'nullable|string|max:255',
             'fiscal_name'     => 'nullable|string|max:255',
-            'email'           => 'required|email|unique:companies,email,' . $request->company_id,
+            'email'           => 'nullable|email|unique:companies,email,' . $request->company_id,
             'nif'             => 'nullable|string|max:50',
             'phone'           => 'nullable|string|max:20',
             'incubation_type' => 'required|in:virtual,on-site,cowork,colab',
@@ -110,9 +111,12 @@ class CompanyController extends Controller
             'manager'         => 'nullable|string|max:100',
             'description'     => 'nullable|string',
             'status'          => 'nullable|in:active,archived',
+            'rooms' => 'nullable|array',
+            'rooms.*' => 'integer|exists:rooms,id',
+
         ], [
-            'name.required'   => 'The company name is required.',
-            'email.unique'    => 'This email is already registered.',
+            'name.required'            => 'The company name is required.',
+            'email.unique'             => 'This email is already registered.',
             'incubation_type.required' => 'Please select an incubation type.',
         ]);
 
@@ -143,8 +147,8 @@ class CompanyController extends Controller
 
         try {
             $company->update([
-                'name'            => $request->name,
-                'email'           => $request->email,
+                'name'            => $request->name ?? $company->name,
+                'email'           => $request->email ?? $company->email,
                 'fiscal_name'     => $request->fiscal_name,
                 'nif'             => $request->nif,
                 'phone'           => $request->phone,
@@ -155,6 +159,20 @@ class CompanyController extends Controller
                 'logo'            => $uploadPath,
                 'status'          => $request->status ?? $company->status,
             ]);
+
+            if ($request->has('rooms')) {
+
+                $newRoomIds = $request->rooms; // e.g. [1,2]
+
+                // 1. Remove rooms currently assigned to the company but not in new list
+                Room::where('company_id', $company->id)
+                    ->whereNotIn('id', $newRoomIds)
+                    ->update(['company_id' => null]);
+
+                // 2. Assign new rooms to the company
+                Room::whereIn('id', $newRoomIds)
+                    ->update(['company_id' => $company->id]);
+            }
 
             return $this->success((object)[], 'Company General Data updated successfully', 200);
         } catch (\Exception $e) {
@@ -251,7 +269,9 @@ class CompanyController extends Controller
             'description',
             'logo',
             'status'
-        )->where('id', $id)->first();
+        )
+            ->with(['rooms:id,floor,room_name,area,company_id']) // load rooms
+            ->find($id);
 
         if (!$company) {
             return $this->error(null, 'Company not found', 404);
@@ -262,8 +282,25 @@ class CompanyController extends Controller
             ? asset($company->logo)
             : asset('default/default.png');
 
+        // If company has rooms, calculate total area
+        $rooms = $company->rooms ?? collect([]);
+
+        $company->occupied_rooms = $rooms->map(function ($room) {
+            return [
+                'id'         => $room->id,
+                'room_name'  => $room->room_name,
+                'area'       => $room->area,
+            ];
+        });
+
+        $company->total_area_occupied = $rooms->sum('area');
+
+        // (Optional) remove original rooms key
+        unset($company->rooms);
+
         return $this->success($company, 'Company fetched successfully', 200);
     }
+
     public function getSpecificCompanies(Request $request)
     {
         if (!$request->id) {
