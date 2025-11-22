@@ -103,7 +103,7 @@ Route::controller(CollaboratorController::class)->group(function () {
 Route::controller(ContractController::class)->group(function () {
     Route::get('/get-company-contracts', 'index');
     Route::get('/get-company-contracts-details/{id}', 'details');
-    Route::post('/update-contract-info', 'update');
+    Route::post('/update-contract-info/{id}', 'update');
     Route::post('/add-contract-file', 'storeFile');
     Route::post('/remove-contract-file', 'destroy');
 
@@ -113,7 +113,7 @@ Route::controller(ContractController::class)->group(function () {
 Route::controller(DocumentController::class)->middleware('auth:api')->group(function () {
     Route::post('/add-documents', 'store');
     Route::post('/delete-document', 'deleteDocument');
-    Route::get('/get-all-documents', 'allDocuments');
+    Route::get('/get-all-documents/{id}', 'allDocuments');
 });
 
 Route::controller(AccountController::class)->middleware('auth:api')->group(function () {

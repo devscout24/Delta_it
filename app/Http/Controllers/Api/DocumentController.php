@@ -94,15 +94,9 @@ class DocumentController extends Controller
     }
 
 
-    public function allDocuments()
+    public function allDocuments($id)
     {
-        $user = Auth::guard('api')->user();
-
-        if (!$user || !$user->company_id) {
-            return $this->error([], 'User not associated with any company.', 403);
-        }
-
-        $documents = Document::where('company_id', $user->company_id)->get();
+        $documents = Document::where('company_id', $id)->get();
 
         if ($documents->isEmpty()) {
             return $this->error([], 'No documents available.', 404);

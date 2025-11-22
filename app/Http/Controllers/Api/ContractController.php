@@ -56,10 +56,9 @@ class ContractController extends Controller
     }
 
 
-    public function update(Request $request)
+    public function update(Request $request, $company_id)
     {
         $validator = Validator::make($request->all(), [
-            'company_id' => 'required|exists:companies,id',
             'name' => 'required|string|max:255',
             'type' => 'required|in:full-time,part-time,contractor',
             'start_date' => 'required|date',
@@ -81,7 +80,7 @@ class ContractController extends Controller
             return $this->error($validator->errors(), 'Validation error', 422);
         }
 
-        $contract = Contract::where('company_id', $request->company_id)->first();
+        $contract = Contract::where('company_id', $company_id)->first();
 
         if ($contract) {
             $contract->update($request->only([
