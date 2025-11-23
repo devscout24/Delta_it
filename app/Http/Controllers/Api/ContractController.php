@@ -55,7 +55,6 @@ class ContractController extends Controller
         return $this->success($contract, 'Company contract fetched successfully', 200);
     }
 
-
     public function update(Request $request, $company_id)
     {
         $validator = Validator::make($request->all(), [

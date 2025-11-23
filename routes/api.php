@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\AccessCardController;
 use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\CollaboratorController;
+use App\Http\Controllers\API\InternalContractController;
 use App\Http\Controllers\Api\InternalNoteController;
 use App\Http\Controllers\Api\MeetingEventController;
 use App\Http\Controllers\Api\NotificationController;
@@ -106,7 +107,6 @@ Route::controller(ContractController::class)->group(function () {
     Route::post('/update-contract-info/{id}', 'update');
     Route::post('/add-contract-file', 'storeFile');
     Route::post('/remove-contract-file', 'destroy');
-
     Route::get('/get-all-company-contracts', 'allContracts');
 });
 
@@ -134,6 +134,12 @@ Route::controller(InternalNoteController::class)->group(function () {
     Route::post('/add-note', 'store');
     Route::post('/update-note/{id}', 'update');
     Route::get('/delete-note/{id}', 'destroy');
+});
+
+Route::controller(InternalContractController::class)->group(function () {
+    Route::get('/get-internal-contracts', 'index');
+    Route::get('/get-internal-contracts-details', 'details');
+    Route::post('/update-internal-info', 'update');
 });
 
 
@@ -201,4 +207,3 @@ Route::controller(NotificationController::class)->group(function () {
     Route::post('/notifications/read', 'markRead');
     Route::post('/notifications/delete', 'delete');
 });
-
