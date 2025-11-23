@@ -138,8 +138,10 @@ Route::controller(InternalNoteController::class)->group(function () {
 
 Route::controller(InternalContractController::class)->group(function () {
     Route::get('/get-internal-contracts', 'index');
-    Route::get('/get-internal-contracts-details', 'details');
-    Route::post('/update-internal-info', 'update');
+    Route::get('/get-internal-contracts-details/{id}', 'show');
+    Route::post('/get-internal-contracts-store', 'store');
+    Route::post('/get-internal-contracts-update/{id}', 'update');
+    Route::get('/get-internal-contracts-destroy/{id}', 'destroy');
 });
 
 
