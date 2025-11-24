@@ -52,11 +52,11 @@ class DocumentController extends Controller
     public function store(Request $request, $company_id)
     {
         $validated = Validator::make($request->all(), [
-            'document_name' => 'required|string|max:255',
-            'document_type' => 'required|in:pdf,word,image,other',
-            'file' => 'required|file|max:4096', // allow 4MB safe
-            'tags' => 'nullable|array',
-            'tags.*' => 'string|max:50|distinct',
+            'document_name' => 'nullable|string|max:255',
+            'document_type' => 'nullable|in:pdf,word,image,other',
+            'file'          => 'required|file|max:4096',             // allow 4MB safe
+            'tags'          => 'nullable|array',
+            'tags.*'        => 'string|max:50|distinct',
         ]);
 
         if ($validated->fails()) {
