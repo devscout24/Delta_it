@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('internal_document_tags', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('internal_document_id')->constrained('internal_documents')->onDelete('cascade');
+            $table->string('tag');
             $table->timestamps();
         });
     }

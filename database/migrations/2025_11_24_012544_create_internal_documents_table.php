@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('internal_documents', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->enum('type', ['pdf', 'word', 'image', 'other'])->nullable();
             $table->foreignId('company_id')->constrained('companies')->onDelete('cascade');
             $table->timestamps();
         });

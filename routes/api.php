@@ -145,8 +145,11 @@ Route::controller(InternalContractController::class)->group(function () {
     Route::get('/get-internal-contracts-destroy/{id}', 'destroy');
 });
 
-Route::controller(InternalDocumentController::class)->group(function () {
-    Route::get('/get-internal-documents', 'index');
+Route::prefix('internal-documents')->group(function () {
+    Route::get('/company/{company_id}', [InternalDocumentController::class, 'index']);
+    Route::post('/store/{company_id}', [InternalDocumentController::class, 'store']);
+    Route::get('/show/{id}', [InternalDocumentController::class, 'show']);
+    Route::delete('/delete/{id}', [InternalDocumentController::class, 'destroy']);
 });
 
 
