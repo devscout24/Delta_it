@@ -41,7 +41,8 @@ class DocumentController extends Controller
                 'document_name' => $document->document_name,
                 'document_type' => $document->document_type,
                 'document_path' => asset($document->document_path),
-                'file_size_mb' => $fileSizeMB,
+                'file_size_mb'  => $fileSizeMB,
+                'tags'          => $document->tags->pluck('name')->toArray(),
             ];
         });
 

@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\CollaboratorController;
 use App\Http\Controllers\API\InternalContractController;
+use App\Http\Controllers\API\InternalDocumentController;
 use App\Http\Controllers\Api\InternalNoteController;
 use App\Http\Controllers\Api\MeetingEventController;
 use App\Http\Controllers\Api\NotificationController;
@@ -142,6 +143,12 @@ Route::controller(InternalContractController::class)->group(function () {
     Route::post('/get-internal-contracts-store', 'store');
     Route::post('/get-internal-contracts-update/{id}', 'update');
     Route::get('/get-internal-contracts-destroy/{id}', 'destroy');
+});
+
+Route::controller(InternalDocumentController::class)->group(function () {
+    Route::get('/get-all-documents/{id}', 'allDocuments');
+    Route::post('/add-documents/{id}', 'store');
+    Route::post('/delete-document', 'deleteDocument');
 });
 
 
