@@ -146,9 +146,7 @@ Route::controller(InternalContractController::class)->group(function () {
 });
 
 Route::controller(InternalDocumentController::class)->group(function () {
-    Route::get('/get-all-documents/{id}', 'allDocuments');
-    Route::post('/add-documents/{id}', 'store');
-    Route::post('/delete-document', 'deleteDocument');
+    Route::get('/get-internal-documents', 'index');
 });
 
 
