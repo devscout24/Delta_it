@@ -101,10 +101,22 @@ class PaymentController extends Controller
         $query = CompanyPayment::where('company_id', $request->company_id)
             ->where('year', $request->year);
 
+        $unpaid = 0;
+        $paid = 0;
+
+        $query->each(function ($payment) use (&$unpaid, &$paid) {
+            if ($payment->status == 'unpaid') {
+                $unpaid += $payment->total_amount;
+            } else {
+                $paid += $payment->total_amount;
+            }
+        });
+
+
         return $this->success([
-            'total_paid' => $query->where('status', 'paid')->sum('total_amount'),
-            'total_unpaid' => $query->where('status', 'unpaid')->sum('total_amount'),
-            'months' => $query->orderBy('month')->get(),
+            'total_paid' => $paid,
+            'total_unpaid' => $unpaid,
+            // 'months' => $query->orderBy('month')->get(),
         ], 'Yearly info fetched successfully', 200);
     }
 
@@ -113,7 +125,7 @@ class PaymentController extends Controller
         // Validate filters
         $request->validate([
             'year'   => 'nullable|digits:4',
-            'month'  => 'nullable|string',
+            'month'  => 'nullable|integer|min:1|max:12',
             'status' => 'nullable|in:paid,unpaid,all',
             'name'   => 'nullable|string'
         ]);
@@ -127,12 +139,8 @@ class PaymentController extends Controller
             $query->whereYear('created_at', $request->year);
         }
 
-        // Filter by Month ("January", "02", "Jan", "3" → all handled)
         if ($request->month) {
-            $monthNumber = $this->convertMonthToNumber($request->month);
-            if ($monthNumber) {
-                $query->whereMonth('created_at', $monthNumber);
-            }
+            $query->where('month', $request->month);
         }
 
         // Filter by Status (skip when 'all')
