@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Ticket extends Model
 {
+    use SoftDeletes;
+
     protected $guarded = [];
 
     public function company()
@@ -21,5 +24,10 @@ class Ticket extends Model
     public function messages()
     {
         return $this->hasMany(TicketMessage::class);
+    }
+
+    public function assignedToUser()
+    {
+        return $this->belongsTo(User::class, 'assigned_to');
     }
 }

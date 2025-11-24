@@ -110,7 +110,7 @@ Route::controller(ContractController::class)->group(function () {
     Route::get('/get-all-company-contracts', 'allContracts');
 });
 
-Route::controller(DocumentController::class)->middleware('auth:api')->group(function () {
+Route::controller(DocumentController::class)->group(function () {
     Route::get('/get-all-documents/{id}', 'allDocuments');
     Route::post('/add-documents/{id}', 'store');
     Route::post('/delete-document', 'deleteDocument');

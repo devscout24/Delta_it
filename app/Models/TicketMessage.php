@@ -11,11 +11,16 @@ class TicketMessage extends Model
 
     public function sender()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'sender_id');
     }
 
     public function ticket()
     {
         return $this->belongsTo(Ticket::class);
+    }
+
+    public function files()
+    {
+        return $this->hasMany(TicketMessageFile::class);
     }
 }

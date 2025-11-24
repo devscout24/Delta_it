@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('unique_id')->unique();
 
             $table->foreignId('company_id')->constrained('companies')->onDelete('cascade');
+            $table->foreignId('assigned_to')->nullable()->constrained('users')->nullOnDelete();
 
             $table->string('subject');
             $table->string('type')->nullable();
@@ -29,6 +30,8 @@ return new class extends Migration
             $table->string('action')->nullable();
 
             $table->enum('status', ['pending', 'in-progress', 'unsolved', 'solved'])->default('pending');
+
+            $table->softDeletes();
 
             $table->timestamps();
         });
