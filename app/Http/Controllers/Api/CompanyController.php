@@ -385,4 +385,11 @@ class CompanyController extends Controller
         $company->save();
         return $this->success([], 'Company archived successfully', 200);
     }
+    public function restoreCompany(Request $request)
+    {
+        $company = Company::find($request->id);
+        $company->status = 'active';
+        $company->save();
+        return $this->success([], 'Company restored successfully', 200);
+    }
 }
