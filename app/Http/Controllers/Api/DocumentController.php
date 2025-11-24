@@ -18,7 +18,7 @@ class DocumentController extends Controller
 
     public function allDocuments($id)
     {
-        $documents = Document::with('company')->where('company_id', $id)->get();
+        $documents = Document::with('company', 'tags')->where('company_id', $id)->get();
 
         if ($documents->isEmpty()) {
             return $this->error([], 'No documents available.', 404);
@@ -42,7 +42,11 @@ class DocumentController extends Controller
                 'document_type' => $document->document_type,
                 'document_path' => asset($document->document_path),
                 'file_size_mb'  => $fileSizeMB,
-                'tags'          => $document->tags->pluck('name')->toArray(),
+                'tags'          => $document->tags->map(function ($tag) {
+                    return [
+                        'name' => $tag->tag
+                    ];
+                }),
             ];
         });
 
