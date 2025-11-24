@@ -19,4 +19,9 @@ class Document extends Model
     {
         return $this->belongsTo(Company::class);
     }
+
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class);
+    }
 }
