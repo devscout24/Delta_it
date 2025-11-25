@@ -65,8 +65,11 @@ class InternalDocumentController extends Controller
             return $this->error($validated->errors()->first(), 422);
         }
 
+
+
         try {
             DB::beginTransaction();
+
 
             $document = InternalDocument::create([
                 'name'       => $request->name,

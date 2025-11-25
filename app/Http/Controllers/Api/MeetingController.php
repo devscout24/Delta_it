@@ -12,8 +12,10 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Models\MettingBookRequest;
 use App\Http\Controllers\Controller;
+use App\Models\MeetingEmail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Collection;
 
 class MeetingController extends Controller
 {
@@ -21,35 +23,176 @@ class MeetingController extends Controller
 
     public function index(Request $request)
     {
-        // Auto-complete old meetings
+        // ---- VALIDATION ----
+        $validator = Validator::make($request->all(), [
+            'date'       => 'required|date_format:d-m-Y',
+            'start_time' => 'nullable|date_format:H:i',
+            'end_time'   => 'nullable|date_format:H:i',
+            'mode'       => 'nullable|in:day,week,month',
+            'month'      => 'nullable|date_format:Y-m'
+        ]);
+
+        if ($validator->fails()) {
+            return $this->error([], $validator->errors()->first(), 422);
+        }
+
+        // Convert validated date to Carbon safely
+        $startDate = Carbon::createFromFormat('d-m-Y', $request->date);
+
+        // Auto complete old meetings
         Meeting::whereDate('date', '<', Carbon::today())
             ->where('status', 'pending')
             ->update(['status' => 'completed']);
 
+        // Base query
         $query = Meeting::query();
 
-        // Filter: Company
-        if ($request->company_id) {
+        if ($request->filled('company_id')) {
             $query->where('company_id', $request->company_id);
         }
 
-        // Filter: Status (pending, completed, cancelled)
-        if ($request->status) {
+        if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        // Filter: Meeting type (virtual, office)
-        if ($request->meeting_type) {
+        if ($request->filled('meeting_type')) {
             $query->where('meeting_type', $request->meeting_type);
         }
 
-        // Filter: Room (only office meetings have room)
-        if ($request->room_id) {
-            $query->where('room_id', $request->room_id);
+        if ($request->filled('location')) {
+            $query->where('location', $request->location);
         }
 
-        $meetings = $query->orderBy('date', 'desc')->get();
+        $mode = $request->get('mode', 'day');
 
+        // ----------------------------------------------------------
+        // DAY MODE
+        // ----------------------------------------------------------
+        if ($mode === 'day') {
+
+            $day = $startDate->copy()->format('Y-m-d');
+
+            $meetings = (clone $query)
+                ->whereDate('date', $day)
+                ->orderBy('start_time')
+                ->get();
+
+            // Generate hourly slots (9-10, 10-11, etc.)
+            $slots = [];
+            for ($h = 8; $h <= 18; $h++) {
+                $slots[] = sprintf('%02d:00-%02d:00', $h, $h + 1);
+            }
+
+            // Count meetings per slot
+            $slotCounts = [];
+            foreach ($slots as $slot) {
+                [$s, $e] = explode('-', $slot);
+                $slotCounts[$slot] = $meetings->filter(function ($m) use ($s, $e) {
+                    return !($m->end_time <= $s || $m->start_time >= $e);
+                })->count();
+            }
+
+            return $this->success([
+                'mode' => 'day',
+                'date' => $day,
+                'slots' => $slots,
+                'slot_counts' => $slotCounts,
+                'meetings' => $meetings
+            ], "Day meetings fetched", 200);
+        }
+
+        // ----------------------------------------------------------
+        // WEEK MODE
+        // ----------------------------------------------------------
+        if ($mode === 'week') {
+
+            $start = $startDate->copy()->startOfDay();
+            $end   = $start->copy()->addDays(6)->endOfDay();
+
+            $meetings = (clone $query)
+                ->whereBetween('date', [$start->format('Y-m-d'), $end->format('Y-m-d')])
+                ->orderBy('date')->orderBy('start_time')
+                ->get();
+
+            // Week dates
+            $dates = [];
+            for ($i = 0; $i < 7; $i++) {
+                $dates[] = $start->copy()->addDays($i)->format('Y-m-d');
+            }
+
+            // Time slots
+            $slots = [];
+            for ($h = 8; $h <= 18; $h++) {
+                $slots[] = sprintf('%02d:00-%02d:00', $h, $h + 1);
+            }
+
+            // Matrix (slot × date)
+            $matrix = [];
+            foreach ($slots as $slot) {
+                [$s, $e] = explode('-', $slot);
+                $row = [];
+
+                foreach ($dates as $d) {
+                    $count = $meetings->filter(function ($m) use ($d, $s, $e) {
+                        if ($m->date !== $d) return false;
+                        return !($m->end_time <= $s || $m->start_time >= $e);
+                    })->count();
+                    $row[] = $count;
+                }
+
+                $matrix[$slot] = $row;
+            }
+
+            return $this->success([
+                'mode' => 'week',
+                'start_date' => $start->format('Y-m-d'),
+                'end_date' => $end->format('Y-m-d'),
+                'dates' => $dates,
+                'slots' => $slots,
+                'matrix' => $matrix,
+                'meetings_grouped' => $meetings->groupBy('date')->map->values()
+            ], "Week meetings fetched", 200);
+        }
+
+        // ----------------------------------------------------------
+        // MONTH MODE
+        // ----------------------------------------------------------
+        if ($mode === 'month') {
+
+            if ($request->filled('month')) {
+                $monthStart = Carbon::createFromFormat('Y-m', $request->month)->startOfMonth();
+            } else {
+                $monthStart = $startDate->copy()->startOfMonth();
+            }
+
+            $monthEnd = $monthStart->copy()->endOfMonth();
+
+            $meetings = (clone $query)
+                ->whereBetween('date', [$monthStart->format('Y-m-d'), $monthEnd->format('Y-m-d')])
+                ->orderBy('date')->orderBy('start_time')
+                ->get();
+
+            $days = [];
+            $dayCounts = [];
+            $grouped = $meetings->groupBy('date');
+
+            for ($d = $monthStart->copy(); $d->lte($monthEnd); $d->addDay()) {
+                $dateStr = $d->format('Y-m-d');
+                $days[] = $dateStr;
+                $dayCounts[$dateStr] = ($grouped[$dateStr] ?? collect())->count();
+            }
+
+            return $this->success([
+                'mode' => 'month',
+                'month' => $monthStart->format('Y-m'),
+                'days' => $days,
+                'day_counts' => $dayCounts,
+                'meetings_grouped' => $grouped->map->values()
+            ], "Month meetings fetched", 200);
+        }
+
+        // ---------- DEFAULT ----------
+        $meetings = $query->orderBy('date', 'desc')->get();
         return $this->success($meetings, "Meetings fetched successfully", 200);
     }
 
@@ -57,14 +200,77 @@ class MeetingController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'company_id'   => 'required|exists:companies,id',
-            'room_id'      => 'nullable|exists:rooms,id',
             'meeting_name' => 'required|string',
             'date'         => 'required|date',
             'start_time'   => 'required',
             'end_time'     => 'required',
             'meeting_type' => 'required|in:virtual,office',
             'online_link'  => 'nullable|string',
+            'location'     => 'nullable|string',
             'add_emails'   => 'nullable|array',
+            'add_emails.*' => 'email',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->error([], $validator->errors()->first(), 422);
+        }
+
+        // Validation rules based on meeting type
+        if ($request->meeting_type === 'virtual' && !$request->online_link) {
+            return $this->error([], "Online meeting link is required for virtual meetings", 422);
+        }
+
+        if ($request->meeting_type === 'office' && !$request->location) {
+            return $this->error([], "Location is required for office meetings", 422);
+        }
+        $date = \Carbon\Carbon::createFromFormat('d-m-Y', $request->date)->format('Y-m-d');
+
+        $meeting = Meeting::create([
+            'company_id'   => $request->company_id,
+            'created_by'   => Auth::guard('api')->user()->id,
+            'meeting_name' => $request->meeting_name,
+            'date'         => $date,
+            'start_time'   => $request->start_time,
+            'end_time'     => $request->end_time,
+            'meeting_type' => $request->meeting_type,
+            'online_link'  => $request->meeting_type === 'virtual' ? $request->online_link : null,
+            'location'     => $request->meeting_type === 'office' ? $request->location : null,
+            'status'       => 'pending',
+        ]);
+
+
+        // Store emails into separate table
+        if (!empty($request->add_emails)) {
+            foreach ($request->add_emails as $email) {
+                MeetingEmail::create([
+                    'meeting_id' => $meeting->id,
+                    'email'      => $email,
+                ]);
+            }
+        }
+
+        return $this->success($meeting, "Meeting created successfully", 201);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $meeting = Meeting::find($id);
+
+        if (!$meeting) {
+            return $this->error([], "Meeting not found", 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'company_id'   => 'required|exists:companies,id',
+            'meeting_name' => 'required|string',
+            'date'         => 'required|string',
+            'start_time'   => 'required',
+            'end_time'     => 'required',
+            'meeting_type' => 'required|in:virtual,office',
+            'online_link'  => 'nullable|string',
+            'location'     => 'nullable|string',
+            'add_emails'   => 'nullable|array',
+            'add_emails.*' => 'email',
         ]);
 
         if ($validator->fails()) {
@@ -76,66 +282,76 @@ class MeetingController extends Controller
             return $this->error([], "Online meeting link is required for virtual meetings", 422);
         }
 
-        $meeting = Meeting::create([
-            'company_id'   => $request->company_id,
-            'room_id'      => $request->meeting_type == 'office' ? $request->room_id : null,
-            'created_by'   => Auth::gueard('api')->user()->id,
-            'meeting_name' => $request->meeting_name,
-            'date'         => $request->date,
-            'start_time'   => $request->start_time,
-            'end_time'     => $request->end_time,
-            'meeting_type' => $request->meeting_type,
-            'online_link'  => $request->meeting_type == 'virtual' ? $request->online_link : null,
-            'add_emails'   => json_encode($request->add_emails),
-            'status'       => 'pending',
-        ]);
-
-        return $this->success($meeting, "Meeting created successfully", 201);
-    }
-
-    /**
-     * UPDATE MEETING
-     */
-    public function update(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'id'           => 'required|exists:meetings,id',
-            'company_id'   => 'nullable|exists:companies,id',
-            'room_id'      => 'nullable|exists:rooms,id',
-            'meeting_name' => 'required|string',
-            'date'         => 'required|date',
-            'start_time'   => 'required',
-            'end_time'     => 'required',
-            'meeting_type' => 'required|in:virtual,office',
-            'online_link'  => 'nullable|string',
-            'add_emails'   => 'nullable|array',
-        ]);
-
-        if ($validator->fails()) {
-            return $this->error([], $validator->errors()->first(), 422);
+        // Office meeting must have location
+        if ($request->meeting_type === 'office' && !$request->location) {
+            return $this->error([], "Location is required for office meetings", 422);
         }
 
-        $meeting = Meeting::find($request->id);
-
-        // Check meeting type logic
-        if ($request->meeting_type === 'virtual' && !$request->online_link) {
-            return $this->error([], "Online meeting link is required for virtual meetings", 422);
+        // Convert date format d-m-Y to Y-m-d
+        try {
+            $date = \Carbon\Carbon::createFromFormat('d-m-Y', $request->date)->format('Y-m-d');
+        } catch (\Exception $e) {
+            return $this->error([], "Invalid date format. Expected d-m-Y", 422);
         }
 
+        // Update meeting data
         $meeting->update([
             'company_id'   => $request->company_id,
-            'room_id'      => $request->meeting_type == 'office' ? $request->room_id : null,
             'meeting_name' => $request->meeting_name,
-            'date'         => $request->date,
+            'date'         => $date,
             'start_time'   => $request->start_time,
             'end_time'     => $request->end_time,
             'meeting_type' => $request->meeting_type,
-            'online_link'  => $request->meeting_type == 'virtual' ? $request->online_link : null,
-            'add_emails'   => json_encode($request->add_emails),
+            'online_link'  => $request->meeting_type === 'virtual' ? $request->online_link : null,
+            'location'     => $request->meeting_type === 'office' ? $request->location : null,
         ]);
+
+        // -----------------------------
+        // UPDATE MEETING EMAILS
+        // -----------------------------
+        MeetingEmail::where('meeting_id', $meeting->id)->delete();
+
+        if (!empty($request->add_emails)) {
+            foreach ($request->add_emails as $email) {
+                MeetingEmail::create([
+                    'meeting_id' => $meeting->id,
+                    'email'      => $email,
+                ]);
+            }
+        }
 
         return $this->success($meeting, "Meeting updated successfully", 200);
     }
+
+    public function details($id){
+        $meeting = Meeting::find($id);
+
+        if (!$meeting) {
+            return $this->error([], "Meeting not found", 404);
+        }
+
+        $meeting->emails = MeetingEmail::where('meeting_id', $meeting->id)->get();
+
+        $data = [
+            'id'           => $meeting->id,
+            'company_id'   => $meeting->company_id,
+            'meeting_name' => $meeting->meeting_name,
+            'date'         => $meeting->date,
+            'start_time'   => $meeting->start_time,
+            'end_time'     => $meeting->end_time,
+            'meeting_type' => $meeting->meeting_type,
+            'online_link'  => $meeting->online_link,
+            'location'     => $meeting->location,
+            'emails'       => $meeting->emails->map(function ($email) {
+                return [
+                    'email' => $email->email
+                ];
+            })
+        ];
+
+        return $this->success($data, "Meeting details", 200);
+    }
+
 
     /**
      * UPDATE MEETING STATUS

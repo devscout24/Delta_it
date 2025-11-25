@@ -39,7 +39,6 @@ Route::controller(AuthController::class)->group(function () {
     // Store FCM Token
     Route::post('/store-user-fcm-token', 'storeFcmToken');
     Route::post('/delete-user-fcm-token', 'deleteFcmToken');
-
     // user profile
     Route::post('/update-user', 'updateUser');
     Route::post('/delete-account', 'deleteSelfAccount')->middleware('auth:api');
@@ -146,12 +145,14 @@ Route::controller(InternalContractController::class)->group(function () {
     Route::get('/get-internal-contracts-destroy/{id}', 'destroy');
 });
 
-Route::prefix('internal-documents')->group(function () {
-    Route::get('/company/{company_id}', [InternalDocumentController::class, 'index']);
-    Route::post('/store/{company_id}', [InternalDocumentController::class, 'store']);
-    Route::get('/show/{id}', [InternalDocumentController::class, 'show']);
-    Route::delete('/delete/{id}', [InternalDocumentController::class, 'destroy']);
+Route::controller(InternalDocumentController::class)->prefix('internal-documents')->group(function () {
+    Route::get('/company/{company_id}','index');
+    Route::post('/store/{company_id}','store');
+    Route::get('/show/{id}', 'show');
+    Route::get('/delete/{id}', 'destroy');
 });
+
+
 
 
 
@@ -178,7 +179,9 @@ Route::controller(TicketAttachmentController::class)->group(function () {
 Route::controller(MeetingController::class)->group(function () {
     Route::get('/get-meeting', 'index');
     Route::post('/create-meetings', 'create');
-    Route::post('/update-meetings', 'update');
+    Route::post('/update-meetings/{id}', 'update');
+    Route::get('/meeting-details/{id}', 'details');
+
     Route::post('/update-meeting-status', 'updateStatus');
 
     Route::post('/meeting/request', 'requestMeeting');

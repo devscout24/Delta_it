@@ -12,6 +12,7 @@ class Meeting extends Model
         'start_time',
         'end_time',
         'room_id',
+        'location',
         'meeting_type',
         'online_link',
         'created_by',
@@ -38,5 +39,15 @@ class Meeting extends Model
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    public function emails()
+    {
+        return $this->hasMany(MeetingEmail::class);
     }
 }
