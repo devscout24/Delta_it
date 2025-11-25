@@ -12,10 +12,11 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Models\MettingBookRequest;
 use App\Http\Controllers\Controller;
+use App\Mail\MeetingNotificationMail;
 use App\Models\MeetingEmail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Mail;
 
 class MeetingController extends Controller
 {
@@ -240,14 +241,21 @@ class MeetingController extends Controller
 
 
         // Store emails into separate table
+        // Store emails into separate table + Send mails
         if (!empty($request->add_emails)) {
             foreach ($request->add_emails as $email) {
+
+                // Save email
                 MeetingEmail::create([
                     'meeting_id' => $meeting->id,
                     'email'      => $email,
                 ]);
+
+                // Send mail
+                Mail::to($email)->send(new MeetingNotificationMail($meeting, $email));
             }
         }
+
 
         return $this->success($meeting, "Meeting created successfully", 201);
     }
@@ -323,7 +331,8 @@ class MeetingController extends Controller
         return $this->success($meeting, "Meeting updated successfully", 200);
     }
 
-    public function details($id){
+    public function details($id)
+    {
         $meeting = Meeting::find($id);
 
         if (!$meeting) {
