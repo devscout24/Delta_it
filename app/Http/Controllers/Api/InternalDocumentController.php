@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\Document;
 use App\Models\InternalDocument;
 use App\Models\InternalDocumentFile;
 use App\Models\InternalDocumentTags;
@@ -15,40 +16,97 @@ use Illuminate\Support\Facades\Validator;
 class InternalDocumentController extends Controller
 {
     use ApiResponse;
-    public function index($company_id)
+    public function index(Request $request)
     {
-        $documents = InternalDocument::with(['files', 'tags', 'company'])
-            ->where('company_id', $company_id)
-            ->get();
+        $filter = $request->filter; // all | internal | company
+        $companyId = $request->company_id; // optional company id
 
-        if ($documents->isEmpty()) {
-            return $this->error([], "No internal documents found.", 404);
+        $response = collect();
+
+        // -----------------------------
+        // COMPANY DOCUMENTS
+        // -----------------------------
+        if ($filter == 'all' || $filter == 'company') {
+            $companyDocs = Document::with(['company', 'tags'])
+                ->when($companyId, fn($q) => $q->where('company_id', $companyId))
+                ->get()
+                ->map(function ($doc) {
+
+                    $absolutePath = public_path($doc->document_path);
+                    $fileSizeMB = File::exists($absolutePath)
+                        ? number_format(File::size($absolutePath) / 1048576, 2) . ' MB'
+                        : 'N/A';
+
+                    return [
+                        'id'   => $doc->id,
+                        'type' => 'company',   // IDENTIFIER
+                        'name' => $doc->document_name,
+
+                        'company' => [
+                            'id'    => $doc->company->id,
+                            'name'  => $doc->company->name,
+                            'email' => $doc->company->email,
+                        ],
+
+                        'document_type' => $doc->document_type,
+                        'file_url'      => asset($doc->document_path),
+                        'file_size_mb'  => $fileSizeMB,
+
+                        'tags' => $doc->tags->pluck('tag'),
+                        'created_at' => $doc->created_at,
+                    ];
+                });
+
+            $response = $response->merge($companyDocs);
         }
 
-        $data = $documents->map(function ($doc) {
-            return [
-                'id' => $doc->id,
-                'name' => $doc->name,
+        // -----------------------------
+        // INTERNAL DOCUMENTS
+        // -----------------------------
+        if ($filter == 'all' || $filter == 'internal') {
+            $internalDocs = InternalDocument::with(['company', 'files', 'tags'])
+                ->when($companyId, fn($q) => $q->where('company_id', $companyId))
+                ->get()
+                ->map(function ($doc) {
 
-                'company' => [
-                    'id' => $doc->company->id,
-                    'name' => $doc->company->name,
-                ],
-
-                'tags' => $doc->tags->pluck('tag'),
-
-                'files' => $doc->files->map(function ($file) {
                     return [
-                        'file_name' => $file->file_name,
-                        'file_type' => $file->file_type,
-                        'file_url'  => asset($file->file_path),
-                    ];
-                }),
-            ];
-        });
+                        'id'   => $doc->id,
+                        'type' => 'internal',  // IDENTIFIER
+                        'name' => $doc->name,
 
-        return $this->success($data, "Internal documents fetched successfully.");
+                        'company' => [
+                            'id'   => $doc->company->id,
+                            'name' => $doc->company->name,
+                        ],
+
+                        'files' => $doc->files->map(function ($file) {
+                            return [
+                                'file_name' => $file->file_name,
+                                'file_type' => $file->file_type,
+                                'file_url'  => asset($file->file_path),
+                            ];
+                        }),
+
+                        'tags' => $doc->tags->pluck('tag'),
+                        'created_at' => $doc->created_at,
+                    ];
+                });
+
+            $response = $response->merge($internalDocs);
+        }
+
+        // -----------------------------
+        // SORT FINAL LIST BY DATE
+        // -----------------------------
+        $sorted = $response->sortByDesc('created_at')->values();
+
+        if ($sorted->isEmpty()) {
+            return $this->error([], "No documents found", 404);
+        }
+
+        return $this->success($sorted, "Documents fetched successfully");
     }
+
 
     public function store(Request $request, $company_id)
     {
@@ -64,7 +122,6 @@ class InternalDocumentController extends Controller
         if ($validated->fails()) {
             return $this->error($validated->errors()->first(), 422);
         }
-
 
 
         try {
