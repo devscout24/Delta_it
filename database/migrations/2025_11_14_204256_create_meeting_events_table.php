@@ -20,6 +20,7 @@ return new class extends Migration
             $table->date('event_date');
             $table->string('event_color', 20)->default('#000000');
             $table->string('online_link')->nullable();
+            $table->string('location')->nullable();
             $table->unsignedInteger('max_invitees')->default(0);
             $table->text('description')->nullable();
             $table->enum('status', ['pending', 'completed', 'cancelled'])->default('pending')->index();

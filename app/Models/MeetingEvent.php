@@ -17,6 +17,7 @@ class MeetingEvent extends Model
         'max_invitees',
         'description',
         'status',
+        'location',
         'auto_completed',
     ];
 
@@ -48,5 +49,10 @@ class MeetingEvent extends Model
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function schedule()
+    {
+        return $this->hasMany(MeetingEventSchedule::class);
     }
 }

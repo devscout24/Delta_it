@@ -192,10 +192,10 @@ Route::controller(MeetingController::class)->group(function () {
 
 Route::controller(MeetingEventController::class)->group(function () {
     Route::get('/meeting-events', 'index');
-    Route::get('/meeting-events/{id}', 'show');
+    Route::get('/meeting-events-show/{id}', 'show');
     Route::post('/meeting-events/create', 'store');
     Route::post('/meeting-events/update/{id}', 'update');
-    Route::delete('/meeting-events/delete/{id}', 'destroy');
+    Route::get('/meeting-events/delete/{id}', 'destroy');
 });
 
 Route::controller(BookingController::class)->group(function () {
