@@ -36,8 +36,6 @@ class MeetingEventController extends Controller
             'data' => $events
         ]);
     }
-
-
     // ---------------------------------------------
     // GET SINGLE EVENT
     // ---------------------------------------------
@@ -57,8 +55,6 @@ class MeetingEventController extends Controller
 
         return $this->success($event, 'Event fetched successfully', 200);
     }
-
-
     // ---------------------------------------------
     // CREATE EVENT + SCHEDULE + AVAILABILITY
     // ---------------------------------------------
