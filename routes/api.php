@@ -199,12 +199,14 @@ Route::controller(MeetingEventController::class)->group(function () {
 });
 
 Route::controller(BookingController::class)->group(function () {
-    Route::get('/meeting-', 'index');
-    Route::get('/meeting-bookings/{id}', 'show');
+    Route::get('/meeting-bookings', 'index');
+    Route::get('/meeting-bookings-show/{id}', 'show');
     Route::post('/meeting-bookings/create', 'store');
     Route::post('/meeting-bookings/update/{id}', 'update');
     Route::delete('/meeting-bookings/delete/{id}', 'destroy');
 });
+
+
 Route::controller(MeetingBookingController::class)->group(function () {
     Route::get('/bookings/list', 'index');
     Route::get('/bookings/details/{id}', 'details');

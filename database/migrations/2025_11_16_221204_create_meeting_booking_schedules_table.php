@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('meeting_booking_id')->constrained('meeting_bookings')->cascadeOnDelete();
             $table->integer('duration')->default(60);
             $table->string('timezone', 50)->default('UTC');
-            $table->enum('schedule_mode', ['future_days', 'date_range'])->default('future_days');
+            $table->enum('schedule_mode', ['future', 'range'])->default('future');
             $table->integer('future_days')->nullable();
             $table->date('date_from')->nullable();
             $table->date('date_to')->nullable();

@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('meeting_booking_availability_slots', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('schedule_id')->constrained('meeting_booking_schedules')->cascadeOnDelete();
-            $table->enum('day', ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']);
-            $table->boolean('is_available')->default(true);
+            $table->foreignId('availability_id')->constrained('meeting_booking_availabilities')->cascadeOnDelete();
+            $table->time('start_time');
+            $table->time('end_time');
             $table->timestamps();
         });
     }

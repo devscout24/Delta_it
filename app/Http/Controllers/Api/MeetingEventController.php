@@ -154,7 +154,6 @@ class MeetingEventController extends Controller
         }
     }
 
-
     // ---------------------------------------------
     // UPDATE EVENT + SCHEDULE + AVAILABILITY + SLOTS
     // ---------------------------------------------
@@ -288,7 +287,6 @@ class MeetingEventController extends Controller
             return $this->error($th->getMessage(), 'Something went wrong', 500);
         }
     }
-
 
 
     // ---------------------------------------------
