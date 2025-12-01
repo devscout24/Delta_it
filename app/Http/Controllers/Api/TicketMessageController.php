@@ -66,16 +66,16 @@ class TicketMessageController extends Controller
             });
 
         return $this->success([
-            "ticket" => [
+            "ticket" => [        // extra info but doesn't break old model
                 "id" => $ticket->id,
                 "unique_id" => $ticket->unique_id,
                 "subject" => $ticket->subject,
                 "type" => $ticket->type,
                 "status" => $ticket->status,
 
-                "assigned_to" => $ticket->assignedTo ? [
-                    "id" => $ticket->assignedTo->id,
-                    "name" => $ticket->assignedTo->name,
+                "assigned_to" => $ticket->assignedToUser ? [
+                    "id" => $ticket->assignedToUser->id,
+                    "name" => $ticket->assignedToUser->name,
                 ] : null,
 
                 "requester" => [
