@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class InternalDocument extends Model
 {
-    protected $fillable = ['name', 'company_id'];
+    protected $fillable = ['name','type', 'company_id'];
 
     public function files()
     {

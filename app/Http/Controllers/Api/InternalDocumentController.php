@@ -39,7 +39,7 @@ class InternalDocumentController extends Controller
 
                     return [
                         'id'   => $doc->id,
-                        'type' => 'company',   // IDENTIFIER
+                        'type' => $doc->document_type ?? null,
                         'name' => $doc->document_name,
 
                         'company' => [
@@ -71,7 +71,7 @@ class InternalDocumentController extends Controller
 
                     return [
                         'id'   => $doc->id,
-                        'type' => 'internal',  // IDENTIFIER
+                        'type' => $doc->type,
                         'name' => $doc->name,
 
                         'company' => [
@@ -112,6 +112,7 @@ class InternalDocumentController extends Controller
     {
         $validated = Validator::make($request->all(), [
             'name'  => 'required|string|max:255',
+            'type'  => 'nullable|string',
             'files' => 'required|array',
             'files.*' => 'file|max:5120', // 5MB each file
 
@@ -130,6 +131,7 @@ class InternalDocumentController extends Controller
 
             $document = InternalDocument::create([
                 'name'       => $request->name,
+                'type'       => $request->type,
                 'company_id' => $company_id,
             ]);
 
