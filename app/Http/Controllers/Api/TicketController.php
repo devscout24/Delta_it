@@ -205,8 +205,6 @@ class TicketController extends Controller
         return $this->success($data, "Ticket fetched successfully");
     }
 
-
-
     public function updateStatus(Request $request, $id)
     {
         $validated = Validator::make($request->all(), [
@@ -228,5 +226,17 @@ class TicketController extends Controller
         ]);
 
         return $this->success([], "Ticket status updated");
+    }
+
+    public function destroy($id)
+    {
+        $ticket = Ticket::find($id);
+        if (!$ticket) {
+            return $this->error(null, "Ticket not found", 404);
+        }
+
+        $ticket->delete();
+
+        return $this->success([], "Ticket deleted", 200);
     }
 }

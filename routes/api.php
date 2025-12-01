@@ -162,6 +162,7 @@ Route::controller(TicketController::class)->group(function () {
     Route::post('/tickets/create', 'store');
     Route::get('/tickets/show/{id}', 'show');
     Route::post('/tickets/update/{id}', 'updateStatus');
+    Route::get('/tickets/delete/{id}', 'destroy');
 });
 
 // Ticket Message Controller (Chat)
@@ -172,7 +173,7 @@ Route::controller(TicketMessageController::class)->group(function () {
 
 // Ticket File Controller (Attachments)
 Route::controller(TicketAttachmentController::class)->group(function () {
-    Route::post('/tickets/messages/{message_id}/upload-file', ' ');
+    Route::post('/tickets/messages/{message_id}/upload-file', 'store');
     Route::delete('/tickets/messages/{message_id}/delete-file', 'destroy');
 });
 
