@@ -24,12 +24,7 @@ class BookingController extends Controller
     // -------------------------------------------------------------
     public function index()
     {
-        $bookings = MeetingBooking::with([
-            'schedule:id,meeting_booking_id,duration,timezone,schedule_mode,future_days,date_from,date_to',
-            'schedule.availabilities:id,schedule_id,day,is_available',
-            'schedule.availabilities.slots:id,availability_id,start_time,end_time'
-        ])
-            ->select(
+        $bookings = MeetingBooking::select(
                 'id',
                 'booking_name',
                 'booking_date',
@@ -221,7 +216,11 @@ class BookingController extends Controller
         DB::beginTransaction();
 
         try {
-            $booking = MeetingBooking::with('schedule.availabilities.slots')->findOrFail($id);
+            $booking = MeetingBooking::with('schedule.availabilities.slots')->find($id);
+
+            if (!$booking) {
+                return $this->error('Booking not found', 404);
+            }
 
             // ---------------------------------------------
             // 1. Update Booking
@@ -287,28 +286,24 @@ class BookingController extends Controller
             // ---------------------------------------------
             // 3. Insert new availability + slots
             // ---------------------------------------------
-            foreach ($request->availabilities as $dayItem) {
-
+            foreach ($request->availabilities as $item) {
                 $availability = MeetingBookingAvailabilities::create([
-                    'schedule_id'  => $schedule->id,
-                    'day'          => $dayItem['day'],
-                    'is_available' => $dayItem['is_available'],
+                    'schedule_id' => $schedule->id, // REQUIRED
+                    'day'         => $item['day'],
+                    'is_available' => $item['is_available'],
                 ]);
 
-                if (!empty($dayItem['slots'])) {
-                    $slotData = [];
-                    foreach ($dayItem['slots'] as $slot) {
-                        $slotData[] = [
+                if (!empty($item['slots'])) {
+                    foreach ($item['slots'] as $slot) {
+                        MeetingBookingAvailabilitySlot::create([
                             'availability_id' => $availability->id,
                             'start_time'      => $slot['start_time'],
                             'end_time'        => $slot['end_time'],
-                            'created_at'      => now(),
-                            'updated_at'      => now(),
-                        ];
+                        ]);
                     }
-                    MeetingBookingAvailabilitySlot::insert($slotData);
                 }
             }
+
 
             DB::commit();
 
@@ -331,7 +326,14 @@ class BookingController extends Controller
         DB::beginTransaction();
 
         try {
-            $booking = MeetingBooking::with('schedule.availabilities.slots')->findOrFail($id);
+            $booking = MeetingBooking::with('schedule.availabilities.slots')->find($id);
+
+            if (!$booking) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Booking not found',
+                ], 404);
+            }
 
             // Cascade delete handled by DB (foreign keys)
             $booking->delete();

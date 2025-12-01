@@ -10,9 +10,9 @@ class MeetingBookingAvailabilitySlot extends Model
     use HasFactory;
 
     protected $fillable = [
-        'schedule_id',
-        'day',
-        'is_available',
+        'availability_id',
+        'start_time',
+        'end_time',
     ];
 
     protected $casts = [
@@ -28,7 +28,7 @@ class MeetingBookingAvailabilitySlot extends Model
     // Belongs to schedule
     public function schedule()
     {
-        return $this->belongsTo(MeetingBookingSchedule::class);
+        return $this->belongsTo(MeetingBookingSchedule::class, 'schedule_id');
     }
 
     // Time ranges (start_time / end_time)

@@ -204,7 +204,7 @@ Route::controller(BookingController::class)->group(function () {
     Route::get('/meeting-bookings-show/{id}', 'show');
     Route::post('/meeting-bookings/create', 'store');
     Route::post('/meeting-bookings/update/{id}', 'update');
-    Route::delete('/meeting-bookings/delete/{id}', 'destroy');
+    Route::get('/meeting-bookings/delete/{id}', 'destroy');
 });
 
 

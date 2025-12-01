@@ -10,9 +10,9 @@ class MeetingBookingAvailabilities extends Model
     use HasFactory;
 
     protected $fillable = [
-        'availability_id',
-        'start_time',
-        'end_time',
+        'schedule_id',
+        'is_available',
+        'day',
     ];
 
     /*
