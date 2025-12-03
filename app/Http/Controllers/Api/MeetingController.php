@@ -22,6 +22,52 @@ class MeetingController extends Controller
 {
     use ApiResponse;
 
+    public function todaysMeetings(Request $request)
+    {
+        $user = Auth::guard('api')->user();
+
+        if (!$user || !$user->company_id) {
+            return $this->error([], "User does not belong to a company", 403);
+        }
+
+        $companyId = $user->company_id;
+        $today     = Carbon::today()->format('Y-m-d');
+
+        // Auto complete old meetings
+        Meeting::whereDate('date', '<', $today)
+            ->where('status', 'pending')
+            ->update(['status' => 'completed']);
+
+        // Get meetings for user's company happening today
+        $meetings = Meeting::where('company_id', $companyId)
+            ->orderBy('start_time')
+            ->get();
+
+        $meetings = $meetings->map(function ($meeting) {
+            return [
+                'id'           => $meeting->id,
+                'meeting_name' => $meeting->meeting_name,
+                'date'         => $meeting->date,
+                'location'     => $meeting->location,
+                'online_link'  => $meeting->online_link,
+                'start_time'   => $meeting->start_time,
+                'end_time'     => $meeting->end_time,
+                'status'       => $meeting->status,
+                'creator'      => $meeting->creator ? [
+                    'id'    => $meeting->creator->id,
+                    'profile_photo'  => $meeting->creator->profile_photo ?? asset('default/avatar.png'),
+                ] : null,
+            ];
+        });
+
+        return $this->success([
+            'date'     => $today,
+            'company_id' => $companyId,
+            'meetings' => $meetings
+        ], "Today's meetings fetched successfully");
+    }
+
+
     public function index(Request $request)
     {
         // ---- VALIDATION ----
