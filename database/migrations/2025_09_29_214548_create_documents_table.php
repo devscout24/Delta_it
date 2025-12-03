@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('company_id')->constrained('companies')->onDelete('cascade');
             $table->string('document_name')->nullable();
-            $table->enum('document_type', ['pdf', 'word', 'image', 'other'])->nullable();
+            $table->string('document_type')->nullable();
             $table->string('document_path')->nullable();
             $table->timestamps();
         });

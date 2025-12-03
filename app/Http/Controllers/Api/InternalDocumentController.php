@@ -7,6 +7,7 @@ use App\Models\Document;
 use App\Models\InternalDocument;
 use App\Models\InternalDocumentFile;
 use App\Models\InternalDocumentTags;
+use App\Models\Tag;
 use App\Traits\ApiResponse;
 use Illuminate\Support\Facades\File;
 use Illuminate\Http\Request;
@@ -23,9 +24,6 @@ class InternalDocumentController extends Controller
 
         $response = collect();
 
-        // -----------------------------
-        // COMPANY DOCUMENTS
-        // -----------------------------
         if ($filter == 'all' || $filter == 'company') {
             $companyDocs = Document::with(['company', 'tags'])
                 ->when($companyId, fn($q) => $q->where('company_id', $companyId))
@@ -38,19 +36,23 @@ class InternalDocumentController extends Controller
                         : 'N/A';
 
                     return [
-                        'id'   => $doc->id,
-                        'type' => $doc->document_type ?? null,
-                        'name' => $doc->document_name,
+                        'id'            => $doc->id,
+                        'source'        => 'company',
+                        'type'          => $doc->document_type,
+                        'name'          => $doc->document_name,
 
-                        'company' => [
+                        'company' => $doc->company ? [
                             'id'    => $doc->company->id,
                             'name'  => $doc->company->name,
                             'email' => $doc->company->email,
-                        ],
+                        ] : null,
 
-                        'document_type' => $doc->document_type,
-                        'file_url'      => asset($doc->document_path),
-                        'file_size_mb'  => $fileSizeMB,
+                        'files' => [[
+                            'file_name' => basename($doc->document_path),
+                            'file_type' => $doc->document_type,
+                            'file_url'  => asset($doc->document_path),
+                            'file_size_mb' => $fileSizeMB,
+                        ]],
 
                         'tags' => $doc->tags->pluck('tag'),
                         'created_at' => $doc->created_at,
@@ -59,45 +61,39 @@ class InternalDocumentController extends Controller
 
             $response = $response->merge($companyDocs);
         }
-
-        // -----------------------------
-        // INTERNAL DOCUMENTS
-        // -----------------------------
         if ($filter == 'all' || $filter == 'internal') {
-            $internalDocs = InternalDocument::with(['company', 'files', 'tags'])
-                ->when($companyId, fn($q) => $q->where('company_id', $companyId))
-                ->get()
-                ->map(function ($doc) {
 
-                    return [
-                        'id'   => $doc->id,
-                        'type' => $doc->type,
-                        'name' => $doc->name,
+            // internal docs do NOT belong to any company
+            if ($companyId) {
+                // skip internal docs because internal docs don't have company_id
+            } else {
+                $internalDocs = InternalDocument::with(['files', 'tags'])
+                    ->get()
+                    ->map(function ($doc) {
 
-                        'company' => [
-                            'id'   => $doc->company->id,
-                            'name' => $doc->company->name,
-                        ],
+                        return [
+                            'id'      => $doc->id,
+                            'source'  => 'internal',
+                            'type'    => $doc->type,
+                            'name'    => $doc->name,
+                            'company' => null,  // internal -> no company
 
-                        'files' => $doc->files->map(function ($file) {
-                            return [
-                                'file_name' => $file->file_name,
-                                'file_type' => $file->file_type,
-                                'file_url'  => asset($file->file_path),
-                            ];
-                        }),
+                            'files' => $doc->files->map(function ($file) {
+                                return [
+                                    'file_name' => $file->file_name,
+                                    'file_type' => $file->file_type,
+                                    'file_url'  => asset($file->file_path),
+                                ];
+                            }),
 
-                        'tags' => $doc->tags->pluck('tag'),
-                        'created_at' => $doc->created_at,
-                    ];
-                });
+                            'tags' => $doc->tags->pluck('tag'),
+                            'created_at' => $doc->created_at,
+                        ];
+                    });
 
-            $response = $response->merge($internalDocs);
+                $response = $response->merge($internalDocs);
+            }
         }
-
-        // -----------------------------
-        // SORT FINAL LIST BY DATE
-        // -----------------------------
         $sorted = $response->sortByDesc('created_at')->values();
 
         if ($sorted->isEmpty()) {
@@ -108,65 +104,88 @@ class InternalDocumentController extends Controller
     }
 
 
-    public function store(Request $request, $company_id)
+
+    public function store(Request $request)
     {
         $validated = Validator::make($request->all(), [
-            'name'  => 'required|string|max:255',
-            'type'  => 'nullable|string',
-            'files' => 'required|array',
-            'files.*' => 'file|max:5120', // 5MB each file
-
-            'tags' => 'nullable|array',
-            'tags.*' => 'string|max:50|distinct',
+            'company_id' => 'nullable|exists:companies,id',
+            'name'       => 'required_without:company_id|string|max:255',
+            'type'       => 'nullable|string',
+            'files'      => 'required_without:company_id|array',
+            'files.*'    => 'file|max:5120',
+            'tags'      => 'nullable|array',
+            'tags.*'    => 'string|max:50|distinct',
         ]);
 
         if ($validated->fails()) {
             return $this->error($validated->errors()->first(), 422);
         }
 
-
         try {
             DB::beginTransaction();
 
 
-            $document = InternalDocument::create([
-                'name'       => $request->name,
-                'type'       => $request->type,
-                'company_id' => $company_id,
-            ]);
+            if ($request->filled('company_id')) {
 
-            // Upload multiple files
-            foreach ($request->file('files') as $uploadedFile) {
+                foreach ($request->file('files') as $uploadedFile) {
+                    $filename = time() . '_' . $uploadedFile->getClientOriginalName();
+                    $uploadedFile->move(public_path('uploads/documents'), $filename);
 
-                $filename = time() . '_' . $uploadedFile->getClientOriginalName();
-                $uploadedFile->move(public_path('uploads/internal_documents'), $filename);
-
-                InternalDocumentFile::create([
-                    'internal_document_id' => $document->id,
-                    'file_path' => 'uploads/internal_documents/' . $filename,
-                    'file_type' => $uploadedFile->getClientOriginalExtension(),
-                    'file_name' => $uploadedFile->getClientOriginalName(),
-                ]);
-            }
-
-            // Store tags
-            if ($request->filled('tags')) {
-                foreach ($request->tags as $tagName) {
-                    InternalDocumentTags::create([
-                        'internal_document_id' => $document->id,
-                        'tag' => $tagName
+                    $document = Document::create([
+                        'company_id'    => $request->company_id,
+                        'document_name' => $request->name,
+                        'document_type' => $request->type,
+                        'document_path' => 'uploads/documents/' . $filename,
                     ]);
+
+                    if ($request->filled('tags')) {
+                        foreach ($request->tags as $tagName) {
+                            Tag::firstOrCreate([
+                                'document_id' => $document->id,
+                                'tag'         => $tagName
+                            ]);
+                        }
+                    }
+                }
+            } else {
+                $document = InternalDocument::create([
+                    'name' => $request->name,
+                    'type' => $request->type,
+                ]);
+
+                foreach ($request->file('files') as $uploadedFile) {
+
+                    $filename = time() . '_' . $uploadedFile->getClientOriginalName();
+                    $uploadedFile->move(public_path('uploads/internal_documents'), $filename);
+
+                    InternalDocumentFile::create([
+                        'internal_document_id' => $document->id,
+                        'file_path' => 'uploads/internal_documents/' . $filename,
+                        'file_type' => $uploadedFile->getClientOriginalExtension(),
+                        'file_name' => $uploadedFile->getClientOriginalName(),
+                    ]);
+                }
+
+                if ($request->filled('tags')) {
+                    foreach ($request->tags as $tagName) {
+                        InternalDocumentTags::create([
+                            'internal_document_id' => $document->id,
+                            'tag' => $tagName
+                        ]);
+                    }
                 }
             }
 
             DB::commit();
-
             return $this->success([], "Internal document created successfully.");
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->error($e->getMessage(), 500);
         }
     }
+
+
+
     public function show($id)
     {
         $doc = InternalDocument::with(['files', 'tags', 'company'])->find($id);
