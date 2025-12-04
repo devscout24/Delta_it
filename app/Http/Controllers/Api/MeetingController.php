@@ -67,7 +67,6 @@ class MeetingController extends Controller
         ], "Today's meetings fetched successfully");
     }
 
-
     public function index(Request $request)
     {
         // ---- VALIDATION ----
