@@ -23,6 +23,11 @@ class TicketController extends Controller
                 $q->onlyTrashed();
             })
 
+            ->when($request->company_id, function ($q) use ($request) {
+                $q->where('company_id', $request->company_id);
+            })
+
+
             // Otherwise apply normal status filter
             ->when($request->status && $request->status != 'deleted', function ($q) use ($request) {
                 $allowed = ['pending', 'in-progress', 'unsolved', 'solved'];
