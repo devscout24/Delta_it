@@ -49,12 +49,7 @@ class BookingController extends Controller
     // -------------------------------------------------------------
     public function show($id)
     {
-        $booking = MeetingBooking::with([
-            'schedule:id,meeting_booking_id,duration,timezone,schedule_mode,future_days,date_from,date_to',
-            'schedule.availabilities:id,schedule_id,day,is_available',
-            'schedule.availabilities.slots:id,availability_id,start_time,end_time'
-        ])
-            ->select(
+        $booking = MeetingBooking::select(
                 'id',
                 'booking_name',
                 'booking_date',

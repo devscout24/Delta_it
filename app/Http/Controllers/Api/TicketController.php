@@ -18,7 +18,6 @@ class TicketController extends Controller
     {
         $tickets = Ticket::with(['company', 'requester'])
 
-            // If status = deleted → show only soft deleted
             ->when($request->status == 'deleted', function ($q) {
                 $q->onlyTrashed();
             })
@@ -27,8 +26,6 @@ class TicketController extends Controller
                 $q->where('company_id', $request->company_id);
             })
 
-
-            // Otherwise apply normal status filter
             ->when($request->status && $request->status != 'deleted', function ($q) use ($request) {
                 $allowed = ['pending', 'in-progress', 'unsolved', 'solved'];
                 if (in_array($request->status, $allowed)) {
@@ -36,7 +33,6 @@ class TicketController extends Controller
                 }
             })
 
-            // Filter by company
             ->when($request->company_id, function ($q) use ($request) {
                 $q->where('company_id', $request->company_id);
             })
@@ -74,53 +70,6 @@ class TicketController extends Controller
 
         return $this->success($tickets, "Tickets fetched successfully");
     }
-
-
-    public function store(Request $request)
-    {
-        $validated = Validator::make($request->all(), [
-            'subject'       => 'required|string',
-            'company_id'    => 'required|exists:companies,id',
-            'type'          => 'required|string',
-            'room_id'       => 'nullable|exists:rooms,id',
-            'message'       => 'required|string',
-
-            // NEW FIELD (Account)
-            'assigned_to'   => 'required|exists:users,id',
-        ]);
-
-        if ($validated->fails()) {
-            return $this->error(null, $validated->errors()->first(), 422);
-        }
-
-        // requester = logged-in admin/user
-        $requesterId = Auth::guard('api')->id();
-
-        $ticket = Ticket::create([
-            'unique_id'    => 'TIC-' . strtoupper(Str::random(10)),
-            'subject'      => $request->subject,
-            'company_id'   => $request->company_id,
-            'requester_id' => $requesterId,
-            'assigned_to'  => $request->assigned_to,  // <-- NEW
-            'type'         => $request->type,
-            'status'       => 'pending',
-            'room_id'      => $request->room_id,
-            'action'       => 'created',
-            'date'         => now()->toDateString(),
-        ]);
-
-        // Insert first message
-        TicketMessage::create([
-            'ticket_id'    => $ticket->id,
-            'sender_id'    => $requesterId,
-            'message_type' => 'text',
-            'message_text' => $request->message,
-            'is_read'      => false,
-        ]);
-
-        return $this->success([], "Ticket created successfully");
-    }
-
 
     public function show($id)
     {

@@ -31,10 +31,7 @@ class MeetingEventController extends Controller
             ->orderBy('id', 'desc')
             ->get();
 
-        return response()->json([
-            'status' => true,
-            'data' => $events
-        ]);
+        return $this->success($events, 'Events fetched successfully', 200);
     }
     // ---------------------------------------------
     // GET SINGLE EVENT
