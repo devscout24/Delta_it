@@ -153,9 +153,6 @@ Route::controller(InternalDocumentController::class)->prefix('internal-documents
 });
 
 
-
-
-
 // Ticket Controller
 Route::controller(TicketController::class)->group(function () {
     Route::get('/tickets/list', 'index');
