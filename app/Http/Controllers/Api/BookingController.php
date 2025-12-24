@@ -112,6 +112,23 @@ class BookingController extends Controller
             ], 422);
         }
 
+        // Normalize and validate day values to match DB enum (mon, tue, wed, thu, fri, sat, sun)
+        $availabilities = $request->input('availabilities', []);
+        $allowedDays = ['mon','tue','wed','thu','fri','sat','sun'];
+        foreach ($availabilities as $idx => $dayItem) {
+            $day = $dayItem['day'] ?? null;
+            $normalized = $this->normalizeDay($day);
+            if (!$normalized || !in_array($normalized, $allowedDays)) {
+                return response()->json([
+                    'status' => false,
+                    'errors' => ['availabilities.' . $idx . '.day' => ['Invalid day: ' . ($day ?? 'null')]]
+                ], 422);
+            }
+            $availabilities[$idx]['day'] = $normalized;
+        }
+        // persist normalized availabilities back into the request
+        $request->merge(['availabilities' => $availabilities]);
+
         DB::beginTransaction();
 
         try {
@@ -202,11 +219,26 @@ class BookingController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'status' => false,
-                'errors' => $validator->errors()
-            ], 422);
+            return $this->error($validator->errors(), $validator->errors()->first(), 200);
         }
+
+        // Normalize and validate day values to match DB enum (mon, tue, wed, thu, fri, sat, sun)
+        $availabilities = $request->input('availabilities', []);
+        $allowedDays = ['mon','tue','wed','thu','fri','sat','sun'];
+        $errors = [];
+        foreach ($availabilities as $idx => $item) {
+            $day = $item['day'] ?? null;
+            $normalized = $this->normalizeDay($day);
+            if (!$normalized || !in_array($normalized, $allowedDays)) {
+                $errors['availabilities.' . $idx . '.day'] = 'Invalid day: ' . ($day ?? 'null');
+            } else {
+                $availabilities[$idx]['day'] = $normalized;
+            }
+        }
+        if (!empty($errors)) {
+            return $this->error($errors, 'Invalid availability day', 200);
+        }
+        $request->merge(['availabilities' => $availabilities]);
 
         DB::beginTransaction();
 
@@ -324,10 +356,7 @@ class BookingController extends Controller
             $booking = MeetingBooking::with('schedule.availabilities.slots')->find($id);
 
             if (!$booking) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Booking not found',
-                ], 404);
+                return $this->error([], 'Booking not found', 404);
             }
 
             // Cascade delete handled by DB (foreign keys)
@@ -335,17 +364,40 @@ class BookingController extends Controller
 
             DB::commit();
 
-            return response()->json([
-                'status' => true,
-                'message' => "Booking and related schedule/availabilities/slots deleted successfully"
-            ]);
+            return $this->success([], 'Booking deleted successfully', 200);
         } catch (\Throwable $th) {
             DB::rollBack();
-            return response()->json([
-                'status' => false,
-                'message' => 'Failed to delete booking',
-                'error' => $th->getMessage()
-            ], 500);
+            return $this->error($th->getMessage(), 'Something went wrong', 500);
         }
+    }
+
+    /**
+     * Normalize day to DB enum short form (mon, tue, ...)
+     */
+    private function normalizeDay(?string $day): ?string
+    {
+        if (empty($day)) {
+            return null;
+        }
+
+        $d = strtolower(trim($day));
+
+        $map = [
+            'monday' => 'mon', 'mon' => 'mon',
+            'tuesday' => 'tue', 'tue' => 'tue', 'tues' => 'tue',
+            'wednesday' => 'wed', 'wed' => 'wed',
+            'thursday' => 'thu', 'thu' => 'thu', 'thur' => 'thu', 'thurs' => 'thu',
+            'friday' => 'fri', 'fri' => 'fri',
+            'saturday' => 'sat', 'sat' => 'sat',
+            'sunday' => 'sun', 'sun' => 'sun',
+        ];
+
+        if (isset($map[$d])) {
+            return $map[$d];
+        }
+
+        $short = substr($d, 0, 3);
+
+        return $map[$short] ?? null;
     }
 }

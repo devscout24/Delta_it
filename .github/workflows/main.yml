@@ -14,7 +14,7 @@ jobs:
     - name: 📂 Sync files
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
       with:
-          server: ftp.softvencefsd.xyz
-          username: delta@delta-it-api.softvencefsd.xyz
-          password: "F]RmI2rhVsdrH(2Z"
+          server: ftp.reigeeky.com
+          username: delta_it@reigeeky.com
+          password: "p9kvU[N%LoYof^nX"
 

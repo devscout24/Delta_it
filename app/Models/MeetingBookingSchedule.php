@@ -36,15 +36,23 @@ class MeetingBookingSchedule extends Model
         return $this->belongsTo(MeetingBooking::class);
     }
 
-    // Availability slots for Mon–Sun
-    public function availabilitySlots()
-    {
-        return $this->hasMany(MeetingBookingAvailabilitySlot::class, 'availability_id');
-    }
-
+    // All availabilities for this schedule (Mon–Sun)
     public function availabilities()
     {
-        return $this->hasMany(MeetingBookingAvailabilitySlot::class, 'availability_id');
+        return $this->hasMany(MeetingBookingAvailabilities::class, 'schedule_id');
+    }
+
+    // Convenience: all slots across availabilities
+    public function availabilitySlots()
+    {
+        return $this->hasManyThrough(
+            MeetingBookingAvailabilitySlot::class,
+            MeetingBookingAvailabilities::class,
+            'schedule_id',
+            'availability_id',
+            'id',
+            'id'
+        );
     }
 
     /*

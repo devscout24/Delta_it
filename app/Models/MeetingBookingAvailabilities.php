@@ -21,10 +21,15 @@ class MeetingBookingAvailabilities extends Model
     |--------------------------------------------------------------------------
     */
 
-    // This references the "slot" model, even though your schema incorrectly
-    // references the same table. We assume intended relationship:
-    public function slot()
+    // Parent schedule for this availability
+    public function schedule()
     {
-        return $this->belongsTo(MeetingBookingAvailabilitySlot::class, 'availability_id');
+        return $this->belongsTo(MeetingBookingSchedule::class, 'schedule_id');
+    }
+
+    // Slots for this availability (one availability has many slots)
+    public function slots()
+    {
+        return $this->hasMany(MeetingBookingAvailabilitySlot::class, 'availability_id');
     }
 }

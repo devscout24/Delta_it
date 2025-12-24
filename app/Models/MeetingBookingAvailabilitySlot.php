@@ -25,15 +25,9 @@ class MeetingBookingAvailabilitySlot extends Model
     |--------------------------------------------------------------------------
     */
 
-    // Belongs to schedule
-    public function schedule()
+    // Belongs to availability
+    public function availability()
     {
-        return $this->belongsTo(MeetingBookingSchedule::class, 'schedule_id');
-    }
-
-    // Time ranges (start_time / end_time)
-    public function timeRanges()
-    {
-        return $this->hasMany(MeetingBookingAvailabilities::class, 'availability_id');
+        return $this->belongsTo(MeetingBookingAvailabilities::class, 'availability_id');
     }
 }
