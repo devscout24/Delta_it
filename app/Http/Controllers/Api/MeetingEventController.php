@@ -313,7 +313,7 @@ class MeetingEventController extends Controller
             // }
 
             // // delete event
-            // $event->delete();
+            $event->delete();
 
             DB::commit();
 
