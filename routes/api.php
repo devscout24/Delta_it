@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\AccessCardController;
 use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\CollaboratorController;
+use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\InternalContractController;
 use App\Http\Controllers\Api\InternalDocumentController;
 use App\Http\Controllers\Api\InternalNoteController;
@@ -45,6 +46,10 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('/user/profile/reset-password', 'userResetPassword')->middleware('auth:api');
     // Account create
     Route::post('/create-account', 'createAccount');
+});
+
+Route::controller(DashboardController::class)->group(function () {
+    Route::get('/dashboard/stats', 'stats');
 });
 
 
@@ -195,6 +200,25 @@ Route::controller(MeetingEventController::class)->group(function () {
     Route::post('/meeting-events/create', 'store');
     Route::post('/meeting-events/update/{id}', 'update');
     Route::get('/meeting-events/delete/{id}', 'destroy');
+    Route::get('/meeting-events/requests', 'getEventRequests');
+});
+
+Route::controller(BookingController::class)->group(function () {
+    Route::get('/meeting-bookings', 'index');
+    Route::get('/meeting-bookings-show/{id}', 'show');
+    Route::post('/meeting-bookings/create', 'store');
+    Route::post('/meeting-bookings/update/{id}', 'update');
+    Route::get('/meeting-bookings/delete/{id}', 'destroy');
+});
+
+// Meeting booking requests admin
+Route::controller(MeetingBookingController::class)->group(function () {
+    Route::get('/bookings/list', 'index');
+    Route::get('/bookings/details/{id}', 'details');
+    Route::post('/bookings/create', 'createBooking');
+    Route::get('/bookings/request/list', 'requestList');
+    Route::get('/bookings/cancel/{id}', 'cancelBooking');
+    Route::get('/bookings/request/admin', 'requestsAll');
 });
 
 Route::controller(BookingController::class)->group(function () {

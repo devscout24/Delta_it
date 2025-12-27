@@ -426,30 +426,43 @@ class MeetingController extends Controller
 
     public function requestMeeting(Request $request)
     {
+        // Ensure authenticated user and attach their company if available
+        $user = Auth::guard('api')->user();
+        if (!$user) {
+            return $this->error([], 'Unauthenticated', 401);
+        }
+
+        if ($user->company_id) {
+            // force company to user's company
+            $request->merge(['company_id' => $user->company_id]);
+        }
+
         $validation = Validator::make($request->all(), [
-            'room_id'     => 'required|exists:rooms,id',
-            'company_id'  => 'required|exists:companies,id',
-            'date'        => 'required|date',
-            'start_time'  => 'required|date_format:H:i',
-            'end_time'    => 'required|date_format:H:i|after:start_time',
-            'status'      => 'nullable|string|in:pending,confirmed,cancelled',
+            'room_id'      => 'nullable|exists:rooms,id',
+            'meeting_name' => 'required|string',
+            'company_id'   => 'required|exists:companies,id',
+            'date'         => 'required|date',
+            'start_time'   => 'required|date_format:H:i',
+            'end_time'     => 'required|date_format:H:i|after:start_time',
+            'status'       => 'nullable|string|in:pending,confirmed,cancelled,requested,approved,rejected',
         ]);
 
         if ($validation->fails()) {
             return $this->error([], $validation->errors()->first(), 422);
         }
 
-        //  Create meeting
+        //  Create meeting request (store in Meeting as requested)
         $meeting = Meeting::create([
             'room_id'     => $request->room_id,
             'company_id'  => $request->company_id,
+            'meeting_name' => $request->meeting_name,
+            'created_by'  => $user->id,
             'date'        => $request->date,
             'start_time'  => $request->start_time,
             'end_time'    => $request->end_time,
             'status'      => $request->status ?? 'requested',
         ]);
 
-        //  Return response
         return $this->success($meeting, "Meeting Requested submitted successfully.", 201);
     }
 
@@ -817,51 +830,22 @@ class MeetingController extends Controller
 
     public function getmeetingRequest()
     {
-        $meetings = MettingBookRequest::all();
+        // Include Meeting model requests (status requested/pending) and MettingBookRequest
+        $meetingModelRequests = Meeting::whereIn('status', ['requested', 'pending'])
+            ->with(['room', 'company', 'creator'])
+            ->get();
 
-        if ($meetings->isEmpty()) {
-            return $this->error(
-                [],
-                'No meeting requests found.',
-                404
-            );
+        $mettingBookRequests = MettingBookRequest::all();
+
+        if ($meetingModelRequests->isEmpty() && $mettingBookRequests->isEmpty()) {
+            return $this->error([], 'No meeting requests found.', 404);
         }
 
-        return $this->success(
-            $meetings,
-            'All meeting requests retrieved successfully.',
-            200
-        );
+        return $this->success([
+            'meeting_model_requests' => $meetingModelRequests,
+            'metting_book_requests'  => $mettingBookRequests,
+        ], 'All meeting requests retrieved successfully.', 200);
     }
 
-    // meeting request for mobile
-    public function StoreMeeting(Request $request)
-    {
-        //  Validate request data
-        $request->validate([
-            'room_id'     => 'required|exists:rooms,id',
-            'company_id'  => 'required|exists:companies,id',
-            'date'        => 'required|date',
-            'start_time'  => 'required|date_format:H:i',
-            'end_time'    => 'required|date_format:H:i|after:start_time',
-            'status'      => 'nullable|string|in:pending,confirmed,cancelled',
-        ]);
 
-        //  Create meeting
-        $meeting = MettingBookRequest::create([
-            'room_id'     => $request->room_id,
-            'company_id'  => $request->company_id,
-            'date'        => $request->date,
-            'start_time'  => $request->start_time,
-            'end_time'    => $request->end_time,
-            'status'      => $request->status ?? 'pending',
-        ]);
-
-        //  Return response
-        return response()->json([
-            'status'  => true,
-            'message' => 'Meeting Requested submited successfully.',
-            'data'    => $meeting,
-        ], 201);
-    }
 }

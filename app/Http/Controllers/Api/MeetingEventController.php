@@ -57,6 +57,12 @@ class MeetingEventController extends Controller
     // ---------------------------------------------
     public function store(Request $request)
     {
+        // Attach authenticated user's company when available
+        $user = Auth::guard('api')->user();
+        if ($user && $user->company_id) {
+            $request->merge(['company_id' => $user->company_id]);
+        }
+
         $validator = Validator::make($request->all(), [
             // Basic event fields
             'event_name'     => 'required|string',
@@ -66,6 +72,10 @@ class MeetingEventController extends Controller
             'location'       => 'nullable|string',
             'max_invitees'   => 'required|integer|min:1',
             'description'    => 'required|string',
+
+            // Company & Room
+            'company_id'     => 'required|exists:companies,id',
+            'room_id'        => 'nullable|exists:rooms,id',
 
             // Schedule fields
             'duration'       => 'required|integer',
@@ -149,6 +159,20 @@ class MeetingEventController extends Controller
             DB::rollBack();
             return $this->error($th->getMessage(), 'Something went wrong', 500);
         }
+    }
+
+    // Admin: list event requests (pending)
+    public function getEventRequests()
+    {
+        $events = MeetingEvent::where('status', 'pending')
+            ->with(['company:id,name,logo', 'room:id,room_name', 'creator:id,profile_photo'])
+            ->get();
+
+        if ($events->isEmpty()) {
+            return $this->error([], 'No event requests found.', 404);
+        }
+
+        return $this->success($events, 'Event requests fetched successfully', 200);
     }
 
     // ---------------------------------------------

@@ -119,6 +119,20 @@ class MeetingBookingController extends Controller
         return $this->success($response, 'Bookings fetched successfully', 200);
     }
 
+    // Admin: all booking requests (pending)
+    public function requestsAll()
+    {
+        $bookings = MeetingBookingCreates::with('meetingBooking.room', 'user')
+            ->where('status', 'pending')
+            ->get();
+
+        if ($bookings->isEmpty()) {
+            return $this->error([], 'No booking requests found.', 404);
+        }
+
+        return $this->success($bookings, 'Booking requests retrieved successfully.', 200);
+    }
+
 
     public function cancelBooking($id)
     {
