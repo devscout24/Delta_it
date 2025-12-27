@@ -238,6 +238,13 @@ Route::controller(MeetingBookingController::class)->group(function () {
     Route::get('/bookings/cancel/{id}', 'cancelBooking');
 });
 
+// Admin: protected request lists
+Route::middleware('auth:api')->group(function () {
+    Route::get('/meeting/requests', [MeetingController::class, 'getmeetingRequest']);
+    Route::get('/meeting-events/requests', [MeetingEventController::class, 'getEventRequests']);
+    Route::get('/bookings/request/admin', [MeetingBookingController::class, 'requestsAll']);
+});
+
 
 Route::controller(NotificationController::class)->group(function () {
     Route::get('/notifications', 'getNotifications');
