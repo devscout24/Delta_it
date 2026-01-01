@@ -14,7 +14,7 @@ jobs:
     - name: 📂 Sync files
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
       with:
-          server: ftp.reigeeky.com
-          username: delta_it@reigeeky.com
-          password: "2PzI(;p2tb.v4HRk"
+          server: 167.235.249.143
+          username: teclabs
+          password: "YH49hHwQQjQjqJV5ZDwb"
 
