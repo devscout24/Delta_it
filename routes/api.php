@@ -27,6 +27,7 @@ use App\Http\Controllers\Api\RoomAppointmentController;
 use App\Http\Controllers\Api\TicketAttachmentController;
 use App\Http\Controllers\Api\TicketController;
 use App\Http\Controllers\Api\TicketMessageController;
+use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\MeetingBookingController;
 
 Route::controller(AuthController::class)->group(function () {
@@ -194,13 +195,17 @@ Route::controller(MeetingController::class)->group(function () {
     Route::get('/meeting/{id}/cancel', 'cancelMeeting');
 });
 
+// Public: list and view events
 Route::controller(MeetingEventController::class)->group(function () {
     Route::get('/meeting-events', 'index');
     Route::get('/meeting-events-show/{id}', 'show');
+});
+
+// Protected: company users can create/update/delete their event requests
+Route::controller(MeetingEventController::class)->middleware('auth:api')->group(function () {
     Route::post('/meeting-events/create', 'store');
     Route::post('/meeting-events/update/{id}', 'update');
     Route::get('/meeting-events/delete/{id}', 'destroy');
-    Route::get('/meeting-events/requests', 'getEventRequests');
 });
 
 Route::controller(BookingController::class)->group(function () {
@@ -211,14 +216,13 @@ Route::controller(BookingController::class)->group(function () {
     Route::get('/meeting-bookings/delete/{id}', 'destroy');
 });
 
-// Meeting booking requests admin
-Route::controller(MeetingBookingController::class)->group(function () {
+// Meeting booking endpoints (authenticated users)
+Route::controller(MeetingBookingController::class)->middleware('auth:api')->group(function () {
     Route::get('/bookings/list', 'index');
     Route::get('/bookings/details/{id}', 'details');
     Route::post('/bookings/create', 'createBooking');
     Route::get('/bookings/request/list', 'requestList');
     Route::get('/bookings/cancel/{id}', 'cancelBooking');
-    Route::get('/bookings/request/admin', 'requestsAll');
 });
 
 Route::controller(BookingController::class)->group(function () {
@@ -230,13 +234,7 @@ Route::controller(BookingController::class)->group(function () {
 });
 
 
-Route::controller(MeetingBookingController::class)->group(function () {
-    Route::get('/bookings/list', 'index');
-    Route::get('/bookings/details/{id}', 'details');
-    Route::post('/bookings/create', 'createBooking');
-    Route::get('/bookings/request/list', 'requestList');
-    Route::get('/bookings/cancel/{id}', 'cancelBooking');
-});
+
 
 // Admin: protected request lists
 Route::middleware('auth:api')->group(function () {
@@ -253,3 +251,11 @@ Route::controller(NotificationController::class)->group(function () {
     Route::post('/notifications/read', 'markRead');
     Route::post('/notifications/delete', 'delete');
 });
+
+Route::controller(UserController::class)->group(function () {
+    Route::get('/company-users/list', 'index');
+    Route::post('/create-company-user', 'create');
+});
+
+
+
