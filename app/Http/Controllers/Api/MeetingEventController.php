@@ -175,6 +175,66 @@ class MeetingEventController extends Controller
         return $this->success($events, 'Event requests fetched successfully', 200);
     }
 
+    // Approve an event request
+    public function acceptEvent($id)
+    {
+        $event = MeetingEvent::find($id);
+
+        if (!$event) {
+            return $this->error([], "Event not found.", 404);
+        }
+
+        if (!in_array($event->status, ['requested', 'pending'])) {
+            return $this->error([], "Only requested or pending events can be approved.", 422);
+        }
+
+        $event->update([
+            'status' => 'approved'
+        ]);
+
+        return $this->success($event, "Event request approved successfully.", 200);
+    }
+
+    // Reject an event request
+    public function rejectEvent($id)
+    {
+        $event = MeetingEvent::find($id);
+
+        if (!$event) {
+            return $this->error([], "Event not found.", 404);
+        }
+
+        if (!in_array($event->status, ['requested', 'pending'])) {
+            return $this->error([], "Only requested or pending events can be rejected.", 422);
+        }
+
+        $event->update([
+            'status' => 'rejected'
+        ]);
+
+        return $this->success($event, "Event request rejected successfully.", 200);
+    }
+
+    // Cancel an event
+    public function cancelEvent($id)
+    {
+        $event = MeetingEvent::find($id);
+
+        if (!$event) {
+            return $this->error([], "Event not found.", 404);
+        }
+
+        if (!in_array($event->status, ['approved', 'requested', 'pending'])) {
+            return $this->error([], "Only approved, requested, or pending events can be cancelled.", 422);
+        }
+
+        $event->update([
+            'status' => 'cancelled'
+        ]);
+
+        return $this->success($event, "Event cancelled successfully.", 200);
+    }
+
     // ---------------------------------------------
     // UPDATE EVENT + SCHEDULE + AVAILABILITY + SLOTS
     // ---------------------------------------------

@@ -133,6 +133,46 @@ class MeetingBookingController extends Controller
         return $this->success($bookings, 'Booking requests retrieved successfully.', 200);
     }
 
+    // Approve a booking request
+    public function acceptBooking($id)
+    {
+        $booking = MeetingBookingCreates::find($id);
+
+        if (!$booking) {
+            return $this->error('Booking not found', 404);
+        }
+
+        if (!in_array($booking->status, ['pending', 'requested'])) {
+            return $this->error([], "Only requested or pending bookings can be approved.", 422);
+        }
+
+        $booking->update([
+            'status' => 'approved'
+        ]);
+
+        return $this->success($booking, 'Booking request approved successfully', 200);
+    }
+
+    // Reject a booking request
+    public function rejectBooking($id)
+    {
+        $booking = MeetingBookingCreates::find($id);
+
+        if (!$booking) {
+            return $this->error('Booking not found', 404);
+        }
+
+        if (!in_array($booking->status, ['pending', 'requested'])) {
+            return $this->error([], "Only requested or pending bookings can be rejected.", 422);
+        }
+
+        $booking->update([
+            'status' => 'rejected'
+        ]);
+
+        return $this->success($booking, 'Booking request rejected successfully', 200);
+    }
+
 
     public function cancelBooking($id)
     {

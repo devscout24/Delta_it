@@ -199,6 +199,11 @@ Route::controller(MeetingController::class)->group(function () {
 Route::controller(MeetingEventController::class)->group(function () {
     Route::get('/meeting-events', 'index');
     Route::get('/meeting-events-show/{id}', 'show');
+
+    // Approve / Reject / Cancel event requests
+    Route::get('/meeting-events/{id}/accept', 'acceptEvent');
+    Route::get('/meeting-events/{id}/reject', 'rejectEvent');
+    Route::get('/meeting-events/{id}/cancel', 'cancelEvent');
 });
 
 // Protected: company users can create/update/delete their event requests
@@ -222,9 +227,12 @@ Route::controller(MeetingBookingController::class)->middleware('auth:api')->grou
     Route::get('/bookings/details/{id}', 'details');
     Route::post('/bookings/create', 'createBooking');
     Route::get('/bookings/request/list', 'requestList');
+
+    // Approve / Reject / Cancel booking requests
+    Route::get('/bookings/{id}/accept', 'acceptBooking');
+    Route::get('/bookings/{id}/reject', 'rejectBooking');
     Route::get('/bookings/cancel/{id}', 'cancelBooking');
 });
-
 Route::controller(BookingController::class)->group(function () {
     Route::get('/meeting-bookings', 'index');
     Route::get('/meeting-bookings-show/{id}', 'show');
