@@ -219,29 +219,24 @@ Route::controller(BookingController::class)->group(function () {
     Route::post('/meeting-bookings/create', 'store');
     Route::post('/meeting-bookings/update/{id}', 'update');
     Route::get('/meeting-bookings/delete/{id}', 'destroy');
+    Route::get('/meeting-bookings/request/list', 'requestList');
+    Route::get('/meeting-bookings/{id}/accept', 'acceptBooking');
+    Route::get('/meeting-bookings/{id}/reject', 'rejectBooking');
+    Route::get('/meeting-bookings/cancel/{id}', 'cancelBooking');
 });
 
 // Meeting booking endpoints (authenticated users)
-Route::controller(MeetingBookingController::class)->middleware('auth:api')->group(function () {
-    Route::get('/bookings/list', 'index');
-    Route::get('/bookings/details/{id}', 'details');
-    Route::post('/bookings/create', 'createBooking');
-    Route::get('/bookings/request/list', 'requestList');
+// Route::controller(MeetingBookingController::class)->middleware('auth:api')->group(function () {
+//     Route::get('/bookings/list', 'index');
+//     Route::get('/bookings/details/{id}', 'details');
+//     Route::post('/bookings/create', 'createBooking');
+//     Route::get('/bookings/request/list', 'requestList');
 
-    // Approve / Reject / Cancel booking requests
-    Route::get('/bookings/{id}/accept', 'acceptBooking');
-    Route::get('/bookings/{id}/reject', 'rejectBooking');
-    Route::get('/bookings/cancel/{id}', 'cancelBooking');
-});
-Route::controller(BookingController::class)->group(function () {
-    Route::get('/meeting-bookings', 'index');
-    Route::get('/meeting-bookings-show/{id}', 'show');
-    Route::post('/meeting-bookings/create', 'store');
-    Route::post('/meeting-bookings/update/{id}', 'update');
-    Route::get('/meeting-bookings/delete/{id}', 'destroy');
-});
-
-
+//     // Approve / Reject / Cancel booking requests
+//     Route::get('/bookings/{id}/accept', 'acceptBooking');
+//     Route::get('/bookings/{id}/reject', 'rejectBooking');
+//     Route::get('/bookings/cancel/{id}', 'cancelBooking');
+// });
 
 
 // Admin: protected request lists

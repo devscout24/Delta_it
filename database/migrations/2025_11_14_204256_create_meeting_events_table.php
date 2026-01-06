@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('location')->nullable();
             $table->unsignedInteger('max_invitees')->default(0);
             $table->text('description')->nullable();
-            $table->enum('status', ['pending', 'completed', 'cancelled'])->default('pending')->index();
+            $table->enum('status', ['pending','approved', 'rejected', 'completed', 'cancelled'])->default('pending')->index();
             $table->boolean('auto_completed')->default(false);
             $table->timestamps();
         });

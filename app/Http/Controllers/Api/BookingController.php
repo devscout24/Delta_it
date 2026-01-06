@@ -25,16 +25,16 @@ class BookingController extends Controller
     public function index()
     {
         $bookings = MeetingBooking::select(
-                'id',
-                'booking_name',
-                'booking_date',
-                'booking_color',
-                'max_invitees',
-                'description',
-                'online_link',
-                'location',
-                'status'
-            )
+            'id',
+            'booking_name',
+            'booking_date',
+            'booking_color',
+            'max_invitees',
+            'description',
+            'online_link',
+            'location',
+            'status'
+        )
             ->orderBy('id', 'desc')
             ->get();
 
@@ -50,16 +50,16 @@ class BookingController extends Controller
     public function show($id)
     {
         $booking = MeetingBooking::select(
-                'id',
-                'booking_name',
-                'booking_date',
-                'booking_color',
-                'max_invitees',
-                'description',
-                'online_link',
-                'location',
-                'status'
-            )
+            'id',
+            'booking_name',
+            'booking_date',
+            'booking_color',
+            'max_invitees',
+            'description',
+            'online_link',
+            'location',
+            'status'
+        )
             ->find($id);
 
         if (!$booking) {
@@ -114,7 +114,7 @@ class BookingController extends Controller
 
         // Normalize and validate day values to match DB enum (mon, tue, wed, thu, fri, sat, sun)
         $availabilities = $request->input('availabilities', []);
-        $allowedDays = ['mon','tue','wed','thu','fri','sat','sun'];
+        $allowedDays = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
         foreach ($availabilities as $idx => $dayItem) {
             $day = $dayItem['day'] ?? null;
             $normalized = $this->normalizeDay($day);
@@ -224,7 +224,7 @@ class BookingController extends Controller
 
         // Normalize and validate day values to match DB enum (mon, tue, wed, thu, fri, sat, sun)
         $availabilities = $request->input('availabilities', []);
-        $allowedDays = ['mon','tue','wed','thu','fri','sat','sun'];
+        $allowedDays = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
         $errors = [];
         foreach ($availabilities as $idx => $item) {
             $day = $item['day'] ?? null;
@@ -371,6 +371,128 @@ class BookingController extends Controller
         }
     }
 
+    // -------------------------------------------------------------
+    // GET REQUEST LIST
+    // -------------------------------------------------------------
+    public function requestList()
+    {
+        // Eager load schedule -> availabilities -> slots to avoid N+1
+        $bookings = MeetingBooking::with('schedule.availabilities.slots')
+            ->where('status', 'pending')
+            ->get();
+
+        // Use Collection::isEmpty() to correctly detect an empty result set
+        if ($bookings->isEmpty()) {
+            return $this->success([], 'Request list is empty', 200);
+        }
+
+        $bookings = $bookings->map(function ($booking) {
+            // Normalize schedule relation (supports hasOne or hasMany)
+            $scheduleRelation = $booking->relationLoaded('schedule') ? $booking->getRelation('schedule') : $booking->schedule();
+
+            if ($scheduleRelation instanceof \Illuminate\Database\Eloquent\Collection) {
+                $schedule = $scheduleRelation->first();
+            } elseif ($scheduleRelation instanceof \Illuminate\Database\Eloquent\Model) {
+                $schedule = $scheduleRelation;
+            } else {
+                $schedule = $booking->schedule()->first();
+            }
+
+            return [
+                'id' => $booking->id,
+                'booking_name' => $booking->booking_name,
+                'booking_date' => $booking->booking_date,
+                'booking_color' => $booking->booking_color,
+                'max_invitees' => $booking->max_invitees,
+                'description' => $booking->description,
+                'online_link' => $booking->online_link,
+                'location' => $booking->location,
+                'status' => $booking->status,
+                'schedule' => $schedule ? [
+                    'id' => $schedule->id,
+                    'duration' => $schedule->duration,
+                    'timezone' => $schedule->timezone,
+                    'schedule_mode' => $schedule->schedule_mode,
+                    'future_days' => $schedule->future_days,
+                    'date_from' => $schedule->date_from,
+                    'date_to' => $schedule->date_to,
+                    'availabilities' => $schedule->availabilities->map(function ($availability) {
+                        return [
+                            'id' => $availability->id,
+                            'day' => $availability->day,
+                            'is_available' => $availability->is_available,
+                            'slots' => $availability->slots->map(function ($slot) {
+                                return [
+                                    'id' => $slot->id,
+                                    'start_time' => $slot->start_time,
+                                    'end_time' => $slot->end_time,
+                                ];
+                            }),
+                        ];
+                    }),
+                ] : null,
+            ];
+        });
+
+
+        return $this->success($bookings, 'Request list', 200);
+    }
+
+    // -------------------------------------------------------------
+    // APPROVE / REJECT / CANCEL BOOKING
+    // -------------------------------------------------------------
+    public function acceptBooking($id)
+    {
+        $booking = MeetingBooking::find($id);
+
+        if (!$booking) {
+            return $this->error([], 'Booking not found', 404);
+        }
+
+        if (!in_array($booking->status, ['requested', 'pending'])) {
+            return $this->error([], "Only requested or pending bookings can be approved.", 422);
+        }
+
+        $booking->update(['status' => 'approved']);
+
+        return $this->success($booking, 'Booking request approved successfully', 200);
+    }
+
+    public function rejectBooking($id)
+    {
+        $booking = MeetingBooking::find($id);
+
+        if (!$booking) {
+            return $this->error([], 'Booking not found', 404);
+        }
+
+        if (!in_array($booking->status, ['requested', 'pending'])) {
+            return $this->error([], "Only requested or pending bookings can be rejected.", 422);
+        }
+
+        $booking->update(['status' => 'rejected']);
+
+        return $this->success($booking, 'Booking request rejected successfully', 200);
+    }
+
+    public function cancelBooking($id)
+    {
+        $booking = MeetingBooking::find($id);
+
+        if (!$booking) {
+            return $this->error([], 'Booking not found', 404);
+        }
+
+        if (!in_array($booking->status, ['approved', 'requested', 'pending'])) {
+            return $this->error([], "Only approved, requested, or pending bookings can be cancelled.", 422);
+        }
+
+        $booking->update(['status' => 'cancelled']);
+
+        return $this->success($booking, 'Booking cancelled successfully', 200);
+    }
+
+
     /**
      * Normalize day to DB enum short form (mon, tue, ...)
      */
@@ -383,13 +505,23 @@ class BookingController extends Controller
         $d = strtolower(trim($day));
 
         $map = [
-            'monday' => 'mon', 'mon' => 'mon',
-            'tuesday' => 'tue', 'tue' => 'tue', 'tues' => 'tue',
-            'wednesday' => 'wed', 'wed' => 'wed',
-            'thursday' => 'thu', 'thu' => 'thu', 'thur' => 'thu', 'thurs' => 'thu',
-            'friday' => 'fri', 'fri' => 'fri',
-            'saturday' => 'sat', 'sat' => 'sat',
-            'sunday' => 'sun', 'sun' => 'sun',
+            'monday' => 'mon',
+            'mon' => 'mon',
+            'tuesday' => 'tue',
+            'tue' => 'tue',
+            'tues' => 'tue',
+            'wednesday' => 'wed',
+            'wed' => 'wed',
+            'thursday' => 'thu',
+            'thu' => 'thu',
+            'thur' => 'thu',
+            'thurs' => 'thu',
+            'friday' => 'fri',
+            'fri' => 'fri',
+            'saturday' => 'sat',
+            'sat' => 'sat',
+            'sunday' => 'sun',
+            'sun' => 'sun',
         ];
 
         if (isset($map[$d])) {
