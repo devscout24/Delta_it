@@ -255,6 +255,40 @@ class MeetingEventController extends Controller
         return $this->success($req, 'Event booking request created successfully', 201);
     }
 
+    // GET current authenticated user's event booking requests
+    public function myRequests()
+    {
+        $userId = Auth::guard('api')->id();
+        $requests = MeetingEventCreates::with('meetingEvent.room')
+            ->where('user_id', $userId)
+            ->orderByDesc('created_at')
+            ->get();
+
+        if ($requests->isEmpty()) {
+            return $this->success([], 'No event booking requests found for the user', 200);
+        }
+
+        $response = $requests->map(function ($r) {
+            return [
+                'id' => $r->id,
+                'meeting_event_id' => $r->meeting_event_id,
+                'event_name' => $r->meetingEvent->event_name ?? null,
+                'date' => $r->date,
+                'start_time' => $r->start_time,
+                'end_time' => $r->end_time,
+                'invitees' => $r->invitees,
+                'status' => $r->status,
+                'room' => $r->meetingEvent && $r->meetingEvent->room ? [
+                    'id' => $r->meetingEvent->room->id,
+                    'name' => $r->meetingEvent->room->room_name,
+                ] : null,
+                'created_at' => $r->created_at,
+            ];
+        });
+
+        return $this->success($response, 'User event booking requests fetched', 200);
+    }
+
     // Approve an event request (handles both user requests and event configs)
     public function acceptEvent($id)
     {

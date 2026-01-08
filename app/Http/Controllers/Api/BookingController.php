@@ -457,6 +457,42 @@ class BookingController extends Controller
     }
 
     // -------------------------------------------------------------
+    // GET current authenticated user's booking requests
+    // -------------------------------------------------------------
+    public function myRequests()
+    {
+        $userId = Auth::guard('api')->id();
+        $requests = MeetingBookingCreates::with('meetingBooking.room')
+            ->where('user_id', $userId)
+            ->orderByDesc('created_at')
+            ->get();
+
+        if ($requests->isEmpty()) {
+            return $this->success([], 'No booking requests found for the user', 200);
+        }
+
+        $response = $requests->map(function ($b) {
+            return [
+                'id' => $b->id,
+                'meeting_booking_id' => $b->meeting_booking_id,
+                'booking_name' => $b->meetingBooking->booking_name ?? null,
+                'date' => $b->date,
+                'start_time' => $b->start_time,
+                'end_time' => $b->end_time,
+                'invitees' => $b->invitees,
+                'status' => $b->status,
+                'room' => $b->meetingBooking && $b->meetingBooking->room ? [
+                    'id' => $b->meetingBooking->room->id,
+                    'name' => $b->meetingBooking->room->room_name,
+                ] : null,
+                'created_at' => $b->created_at,
+            ];
+        });
+
+        return $this->success($response, 'User booking requests fetched', 200);
+    }
+
+    // -------------------------------------------------------------
     // APPROVE / REJECT / CANCEL BOOKING (handles both booking configs and user requests)
     // -------------------------------------------------------------
     public function acceptBooking($id)

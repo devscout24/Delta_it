@@ -204,6 +204,9 @@ Route::controller(MeetingEventController::class)->group(function () {
     Route::get('/meeting-events/request/list', 'requestList');
     Route::post('/meeting-events/request/create', 'createEventRequest')->middleware('auth:api');
 
+    // Authenticated: user's own requests
+    Route::get('/meeting-events/request/my', 'myRequests')->middleware('auth:api');
+
     // Approve / Reject / Cancel event requests (handles both event configs and user requests)
     Route::get('/meeting-events/{id}/accept', 'acceptEvent');
     Route::get('/meeting-events/{id}/reject', 'rejectEvent');
@@ -229,6 +232,8 @@ Route::controller(BookingController::class)->group(function () {
 
     // Allow mobile users to create booking requests (must be authenticated)
     Route::post('/meeting-bookings/request/create', 'createBookingRequest')->middleware('auth:api');
+    // Authenticated: user's own booking requests
+    Route::get('/meeting-bookings/request/my', 'myRequests')->middleware('auth:api');
 
     // Approve / Reject / Cancel booking configs OR user booking requests
     Route::get('/meeting-bookings/{id}/accept', 'acceptBooking');
