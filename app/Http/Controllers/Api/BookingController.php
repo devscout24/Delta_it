@@ -9,6 +9,7 @@ use App\Models\MeetingBookingAvailabilities;
 use App\Models\MeetingBookingAvailabilitySlot;
 use App\Models\MeetingBookingSchedule;
 use App\Models\RoomBookings;
+use App\Models\MeetingBookingCreates;
 use App\Traits\ApiResponse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -372,77 +373,106 @@ class BookingController extends Controller
     }
 
     // -------------------------------------------------------------
-    // GET REQUEST LIST
+    // GET REQUEST LIST (only user booking requests)
     // -------------------------------------------------------------
     public function requestList()
     {
-        // Eager load schedule -> availabilities -> slots to avoid N+1
-        $bookings = MeetingBooking::with('schedule.availabilities.slots')
+        $requests = MeetingBookingCreates::with('meetingBooking.room', 'user')
             ->where('status', 'pending')
             ->get();
 
-        // Use Collection::isEmpty() to correctly detect an empty result set
-        if ($bookings->isEmpty()) {
+        if ($requests->isEmpty()) {
             return $this->success([], 'Request list is empty', 200);
         }
 
-        $bookings = $bookings->map(function ($booking) {
-            // Normalize schedule relation (supports hasOne or hasMany)
-            $scheduleRelation = $booking->relationLoaded('schedule') ? $booking->getRelation('schedule') : $booking->schedule();
-
-            if ($scheduleRelation instanceof \Illuminate\Database\Eloquent\Collection) {
-                $schedule = $scheduleRelation->first();
-            } elseif ($scheduleRelation instanceof \Illuminate\Database\Eloquent\Model) {
-                $schedule = $scheduleRelation;
-            } else {
-                $schedule = $booking->schedule()->first();
-            }
-
+        $response = $requests->map(function ($b) {
             return [
-                'id' => $booking->id,
-                'booking_name' => $booking->booking_name,
-                'booking_date' => $booking->booking_date,
-                'booking_color' => $booking->booking_color,
-                'max_invitees' => $booking->max_invitees,
-                'description' => $booking->description,
-                'online_link' => $booking->online_link,
-                'location' => $booking->location,
-                'status' => $booking->status,
-                'schedule' => $schedule ? [
-                    'id' => $schedule->id,
-                    'duration' => $schedule->duration,
-                    'timezone' => $schedule->timezone,
-                    'schedule_mode' => $schedule->schedule_mode,
-                    'future_days' => $schedule->future_days,
-                    'date_from' => $schedule->date_from,
-                    'date_to' => $schedule->date_to,
-                    'availabilities' => $schedule->availabilities->map(function ($availability) {
-                        return [
-                            'id' => $availability->id,
-                            'day' => $availability->day,
-                            'is_available' => $availability->is_available,
-                            'slots' => $availability->slots->map(function ($slot) {
-                                return [
-                                    'id' => $slot->id,
-                                    'start_time' => $slot->start_time,
-                                    'end_time' => $slot->end_time,
-                                ];
-                            }),
-                        ];
-                    }),
+                'id' => $b->id,
+                'meeting_booking_id' => $b->meeting_booking_id,
+                'booking_name' => $b->meetingBooking->booking_name ?? null,
+                'date' => $b->date,
+                'start_time' => $b->start_time,
+                'end_time' => $b->end_time,
+                'invitees' => $b->invitees,
+                'status' => $b->status,
+                'room' => $b->meetingBooking && $b->meetingBooking->room ? [
+                    'id' => $b->meetingBooking->room->id,
+                    'name' => $b->meetingBooking->room->room_name,
+                    'area' => $b->meetingBooking->room->area ?? null,
                 ] : null,
+                'user' => [
+                    'id' => $b->user->id ?? null,
+                    'name' => $b->user->name ?? null,
+                ],
+                'created_at' => $b->created_at,
             ];
         });
 
-
-        return $this->success($bookings, 'Request list', 200);
+        return $this->success($response, 'Request list', 200);
     }
 
     // -------------------------------------------------------------
-    // APPROVE / REJECT / CANCEL BOOKING
+    // CREATE A USER BOOKING REQUEST (mobile users book a booking config)
+    // -------------------------------------------------------------
+    public function createBookingRequest(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'meeting_booking_id' => 'required|exists:meeting_bookings,id',
+            'date' => 'required|date',
+            'start_time' => 'required',
+            'end_time' => 'required|after:start_time',
+            'invitees' => 'required|integer|min:1',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
+        }
+
+        $meeting = MeetingBooking::find($request->meeting_booking_id);
+        if (!$meeting) {
+            return $this->error('Booking not found', 404);
+        }
+
+        // Optional: ensure invitees do not exceed max_invitees
+        if (!empty($meeting->max_invitees) && $request->invitees > $meeting->max_invitees) {
+            return $this->error(['invitees' => 'Exceeds maximum invitees for this booking'], 'Validation error', 422);
+        }
+
+        $userId = Auth::guard('api')->id();
+        if (!$userId) {
+            return $this->error('Unauthenticated', 401);
+        }
+
+        $req = MeetingBookingCreates::create([
+            'user_id' => $userId,
+            'meeting_booking_id' => $request->meeting_booking_id,
+            'date' => $request->date,
+            'start_time' => $request->start_time,
+            'end_time' => $request->end_time,
+            'invitees' => $request->invitees,
+            'status' => 'pending',
+        ]);
+
+        return $this->success($req, 'Booking request created successfully', 201);
+    }
+
+    // -------------------------------------------------------------
+    // APPROVE / REJECT / CANCEL BOOKING (handles both booking configs and user requests)
     // -------------------------------------------------------------
     public function acceptBooking($id)
     {
+        // Try user booking request first
+        $bookingReq = MeetingBookingCreates::find($id);
+        if ($bookingReq) {
+            if (!in_array($bookingReq->status, ['pending', 'requested'])) {
+                return $this->error([], "Only requested or pending bookings can be approved.", 422);
+            }
+
+            $bookingReq->update(['status' => 'approved']);
+
+            return $this->success($bookingReq, 'Booking request approved successfully', 200);
+        }
+
         $booking = MeetingBooking::find($id);
 
         if (!$booking) {
@@ -460,6 +490,17 @@ class BookingController extends Controller
 
     public function rejectBooking($id)
     {
+        $bookingReq = MeetingBookingCreates::find($id);
+        if ($bookingReq) {
+            if (!in_array($bookingReq->status, ['pending', 'requested'])) {
+                return $this->error([], "Only requested or pending bookings can be rejected.", 422);
+            }
+
+            $bookingReq->update(['status' => 'rejected']);
+
+            return $this->success($bookingReq, 'Booking request rejected successfully', 200);
+        }
+
         $booking = MeetingBooking::find($id);
 
         if (!$booking) {
@@ -477,6 +518,17 @@ class BookingController extends Controller
 
     public function cancelBooking($id)
     {
+        $bookingReq = MeetingBookingCreates::find($id);
+        if ($bookingReq) {
+            if (!in_array($bookingReq->status, ['approved', 'requested', 'pending'])) {
+                return $this->error([], "Only approved, requested, or pending bookings can be cancelled.", 422);
+            }
+
+            $bookingReq->update(['status' => 'cancelled']);
+
+            return $this->success($bookingReq, 'Booking cancelled successfully', 200);
+        }
+
         $booking = MeetingBooking::find($id);
 
         if (!$booking) {

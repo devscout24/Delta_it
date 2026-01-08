@@ -200,7 +200,11 @@ Route::controller(MeetingEventController::class)->group(function () {
     Route::get('/meeting-events', 'index');
     Route::get('/meeting-events-show/{id}', 'show');
 
-    // Approve / Reject / Cancel event requests
+    // User event booking request endpoints
+    Route::get('/meeting-events/request/list', 'requestList');
+    Route::post('/meeting-events/request/create', 'createEventRequest')->middleware('auth:api');
+
+    // Approve / Reject / Cancel event requests (handles both event configs and user requests)
     Route::get('/meeting-events/{id}/accept', 'acceptEvent');
     Route::get('/meeting-events/{id}/reject', 'rejectEvent');
     Route::get('/meeting-events/{id}/cancel', 'cancelEvent');
@@ -219,7 +223,14 @@ Route::controller(BookingController::class)->group(function () {
     Route::post('/meeting-bookings/create', 'store');
     Route::post('/meeting-bookings/update/{id}', 'update');
     Route::get('/meeting-bookings/delete/{id}', 'destroy');
+
+    // Admin: list pending booking configs and pending user booking requests
     Route::get('/meeting-bookings/request/list', 'requestList');
+
+    // Allow mobile users to create booking requests (must be authenticated)
+    Route::post('/meeting-bookings/request/create', 'createBookingRequest')->middleware('auth:api');
+
+    // Approve / Reject / Cancel booking configs OR user booking requests
     Route::get('/meeting-bookings/{id}/accept', 'acceptBooking');
     Route::get('/meeting-bookings/{id}/reject', 'rejectBooking');
     Route::get('/meeting-bookings/cancel/{id}', 'cancelBooking');

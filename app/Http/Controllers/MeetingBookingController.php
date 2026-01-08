@@ -119,72 +119,154 @@ class MeetingBookingController extends Controller
         return $this->success($response, 'Bookings fetched successfully', 200);
     }
 
-    // Admin: all booking requests (pending)
+    // Admin: all booking requests (pending) including booking configurations created via /meeting-bookings/create
     public function requestsAll()
     {
-        $bookings = MeetingBookingCreates::with('meetingBooking.room', 'user')
+        // pending user booking requests
+        $requests = MeetingBookingCreates::with('meetingBooking.room', 'user')
             ->where('status', 'pending')
-            ->get();
+            ->get()
+            ->map(function ($b) {
+                return [
+                    'id' => $b->id,
+                    'type' => 'booking_request',
+                    'booking_name' => $b->meetingBooking->booking_name ?? null,
+                    'date' => $b->date,
+                    'start_time' => $b->start_time,
+                    'end_time' => $b->end_time,
+                    'status' => $b->status,
+                    'room' => $b->meetingBooking && $b->meetingBooking->room ? [
+                        'id' => $b->meetingBooking->room->id,
+                        'name' => $b->meetingBooking->room->room_name,
+                        'area' => $b->meetingBooking->room->area ?? null,
+                    ] : null,
+                    'user' => [
+                        'id' => $b->user->id ?? null,
+                        'name' => $b->user->name ?? null,
+                    ],
+                    'created_at' => $b->created_at,
+                ];
+            });
 
-        if ($bookings->isEmpty()) {
+        // pending booking configurations created by company users
+        $configs = MeetingBooking::where('status', 'pending')
+            ->with('room', 'creator')
+            ->get()
+            ->map(function ($c) {
+                return [
+                    'id' => $c->id,
+                    'type' => 'booking_config',
+                    'booking_name' => $c->booking_name,
+                    'date' => $c->booking_date ?? null,
+                    'start_time' => null,
+                    'end_time' => null,
+                    'status' => $c->status,
+                    'room' => $c->room ? [
+                        'id' => $c->room->id,
+                        'name' => $c->room->room_name,
+                        'area' => $c->room->area ?? null,
+                    ] : null,
+                    'user' => [
+                        'id' => $c->creator->id ?? null,
+                        'name' => $c->creator->name ?? null,
+                    ],
+                    'created_at' => $c->created_at,
+                ];
+            });
+
+        $combined = $requests->merge($configs)->sortByDesc('created_at')->values();
+
+        if ($combined->isEmpty()) {
             return $this->error([], 'No booking requests found.', 404);
         }
 
-        return $this->success($bookings, 'Booking requests retrieved successfully.', 200);
+        return $this->success($combined, 'Booking requests retrieved successfully', 200);
     }
 
-    // Approve a booking request
+    // Approve a booking request or booking configuration
     public function acceptBooking($id)
     {
-        $booking = MeetingBookingCreates::find($id);
+        // Try user booking request first
+        $bookingReq = MeetingBookingCreates::find($id);
+        if ($bookingReq) {
+            if (!in_array($bookingReq->status, ['pending', 'requested'])) {
+                return $this->error([], "Only requested or pending bookings can be approved.", 422);
+            }
 
-        if (!$booking) {
-            return $this->error('Booking not found', 404);
+            $bookingReq->update(['status' => 'approved']);
+
+            return $this->success($bookingReq, 'Booking request approved successfully', 200);
         }
 
-        if (!in_array($booking->status, ['pending', 'requested'])) {
-            return $this->error([], "Only requested or pending bookings can be approved.", 422);
+        // Then try booking configuration created via /meeting-bookings/create
+        $bookingConfig = MeetingBooking::find($id);
+        if ($bookingConfig) {
+            if (!in_array($bookingConfig->status, ['pending', 'requested'])) {
+                return $this->error([], "Only requested or pending booking configs can be approved.", 422);
+            }
+
+            $bookingConfig->update(['status' => 'approved']);
+
+            return $this->success($bookingConfig, 'Booking configuration approved successfully', 200);
         }
 
-        $booking->update([
-            'status' => 'approved'
-        ]);
-
-        return $this->success($booking, 'Booking request approved successfully', 200);
+        return $this->error('Booking not found', 404);
     }
 
-    // Reject a booking request
+    // Reject a booking request or booking configuration
     public function rejectBooking($id)
     {
-        $booking = MeetingBookingCreates::find($id);
+        $bookingReq = MeetingBookingCreates::find($id);
+        if ($bookingReq) {
+            if (!in_array($bookingReq->status, ['pending', 'requested'])) {
+                return $this->error([], "Only requested or pending bookings can be rejected.", 422);
+            }
 
-        if (!$booking) {
-            return $this->error('Booking not found', 404);
+            $bookingReq->update(['status' => 'rejected']);
+
+            return $this->success($bookingReq, 'Booking request rejected successfully', 200);
         }
 
-        if (!in_array($booking->status, ['pending', 'requested'])) {
-            return $this->error([], "Only requested or pending bookings can be rejected.", 422);
+        $bookingConfig = MeetingBooking::find($id);
+        if ($bookingConfig) {
+            if (!in_array($bookingConfig->status, ['pending', 'requested'])) {
+                return $this->error([], "Only requested or pending booking configs can be rejected.", 422);
+            }
+
+            $bookingConfig->update(['status' => 'rejected']);
+
+            return $this->success($bookingConfig, 'Booking configuration rejected successfully', 200);
         }
 
-        $booking->update([
-            'status' => 'rejected'
-        ]);
-
-        return $this->success($booking, 'Booking request rejected successfully', 200);
+        return $this->error('Booking not found', 404);
     }
 
 
+    // Cancel a booking request or booking configuration
     public function cancelBooking($id)
     {
-        $booking = MeetingBookingCreates::find($id);
+        $bookingReq = MeetingBookingCreates::find($id);
+        if ($bookingReq) {
+            if (!in_array($bookingReq->status, ['approved', 'requested', 'pending'])) {
+                return $this->error([], "Only approved, requested, or pending bookings can be cancelled.", 422);
+            }
 
-        if (!$booking) {
-            return $this->error('Booking not found', 200);
+            $bookingReq->update(['status' => 'cancelled']);
+
+            return $this->success($bookingReq, 'Booking cancelled successfully', 200);
         }
 
-        $booking->status = 'cancelled';
-        $booking->save();
+        $bookingConfig = MeetingBooking::find($id);
+        if ($bookingConfig) {
+            if (!in_array($bookingConfig->status, ['approved', 'requested', 'pending'])) {
+                return $this->error([], "Only approved, requested, or pending booking configs can be cancelled.", 422);
+            }
 
-        return $this->success($booking, 'Booking cancelled successfully', 200);
+            $bookingConfig->update(['status' => 'cancelled']);
+
+            return $this->success($bookingConfig, 'Booking cancelled successfully', 200);
+        }
+
+        return $this->error('Booking not found', 404);
     }
 }

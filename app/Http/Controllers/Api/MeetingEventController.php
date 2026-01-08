@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use App\Models\MeetingEventCreates;
 
 class MeetingEventController extends Controller
 {
@@ -161,7 +162,7 @@ class MeetingEventController extends Controller
         }
     }
 
-    // Admin: list event requests (pending)
+    // Admin: list event requests (pending configurations created by companies)
     public function getEventRequests()
     {
         $events = MeetingEvent::where('status', 'pending')
@@ -175,9 +176,100 @@ class MeetingEventController extends Controller
         return $this->success($events, 'Event requests fetched successfully', 200);
     }
 
-    // Approve an event request
+    // GET REQUEST LIST (only user event booking requests)
+    public function requestList()
+    {
+        $requests = MeetingEventCreates::with('meetingEvent.room', 'user')
+            ->where('status', 'pending')
+            ->get();
+
+        if ($requests->isEmpty()) {
+            return $this->success([], 'Request list is empty', 200);
+        }
+
+        $response = $requests->map(function ($r) {
+            return [
+                'id' => $r->id,
+                'meeting_event_id' => $r->meeting_event_id,
+                'event_name' => $r->meetingEvent->event_name ?? null,
+                'date' => $r->date,
+                'start_time' => $r->start_time,
+                'end_time' => $r->end_time,
+                'invitees' => $r->invitees,
+                'status' => $r->status,
+                'room' => $r->meetingEvent && $r->meetingEvent->room ? [
+                    'id' => $r->meetingEvent->room->id,
+                    'name' => $r->meetingEvent->room->room_name,
+                    'area' => $r->meetingEvent->room->area ?? null,
+                ] : null,
+                'user' => [
+                    'id' => $r->user->id ?? null,
+                    'name' => $r->user->name ?? null,
+                ],
+                'created_at' => $r->created_at,
+            ];
+        });
+
+        return $this->success($response, 'Request list', 200);
+    }
+
+    // Allow authenticated mobile users to create an event booking request
+    public function createEventRequest(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'meeting_event_id' => 'required|exists:meeting_events,id',
+            'date' => 'required|date',
+            'start_time' => 'required',
+            'end_time' => 'required|after:start_time',
+            'invitees' => 'required|integer|min:1',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
+        }
+
+        $event = MeetingEvent::find($request->meeting_event_id);
+        if (!$event) {
+            return $this->error('Event not found', 404);
+        }
+
+        if (!empty($event->max_invitees) && $request->invitees > $event->max_invitees) {
+            return $this->error(['invitees' => 'Exceeds maximum invitees for this event'], 'Validation error', 422);
+        }
+
+        $userId = Auth::guard('api')->id();
+        if (!$userId) {
+            return $this->error('Unauthenticated', 401);
+        }
+
+        $req = MeetingEventCreates::create([
+            'user_id' => $userId,
+            'meeting_event_id' => $request->meeting_event_id,
+            'date' => $request->date,
+            'start_time' => $request->start_time,
+            'end_time' => $request->end_time,
+            'invitees' => $request->invitees,
+            'status' => 'pending',
+        ]);
+
+        return $this->success($req, 'Event booking request created successfully', 201);
+    }
+
+    // Approve an event request (handles both user requests and event configs)
     public function acceptEvent($id)
     {
+        // Try user request first
+        $req = MeetingEventCreates::find($id);
+        if ($req) {
+            if (!in_array($req->status, ['pending', 'requested'])) {
+                return $this->error([], "Only requested or pending event bookings can be approved.", 422);
+            }
+
+            $req->update(['status' => 'approved']);
+
+            return $this->success($req, "Event booking request approved successfully.", 200);
+        }
+
         $event = MeetingEvent::find($id);
 
         if (!$event) {
@@ -195,9 +287,20 @@ class MeetingEventController extends Controller
         return $this->success($event, "Event request approved successfully.", 200);
     }
 
-    // Reject an event request
+    // Reject an event request (handles both user requests and event configs)
     public function rejectEvent($id)
     {
+        $req = MeetingEventCreates::find($id);
+        if ($req) {
+            if (!in_array($req->status, ['pending', 'requested'])) {
+                return $this->error([], "Only requested or pending event bookings can be rejected.", 422);
+            }
+
+            $req->update(['status' => 'rejected']);
+
+            return $this->success($req, "Event booking request rejected successfully.", 200);
+        }
+
         $event = MeetingEvent::find($id);
 
         if (!$event) {
@@ -215,9 +318,20 @@ class MeetingEventController extends Controller
         return $this->success($event, "Event request rejected successfully.", 200);
     }
 
-    // Cancel an event
+    // Cancel an event (handles both user requests and event configs)
     public function cancelEvent($id)
     {
+        $req = MeetingEventCreates::find($id);
+        if ($req) {
+            if (!in_array($req->status, ['approved', 'requested', 'pending'])) {
+                return $this->error([], "Only approved, requested, or pending event bookings can be cancelled.", 422);
+            }
+
+            $req->update(['status' => 'cancelled']);
+
+            return $this->success($req, "Event booking cancelled successfully.", 200);
+        }
+
         $event = MeetingEvent::find($id);
 
         if (!$event) {
