@@ -230,6 +230,9 @@ Route::controller(BookingController::class)->group(function () {
     // Admin: list pending booking configs and pending user booking requests
     Route::get('/meeting-bookings/request/list', 'requestList');
 
+    // Show booking details with availabilities and time slots (before creating request)
+    Route::get('/meeting-bookings/request/details/{id}', 'showRequestDetails')->middleware('auth:api');
+
     // Allow mobile users to create booking requests (must be authenticated)
     Route::post('/meeting-bookings/request/create', 'createBookingRequest')->middleware('auth:api');
     // Authenticated: user's own booking requests

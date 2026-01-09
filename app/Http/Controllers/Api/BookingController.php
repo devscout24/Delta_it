@@ -412,6 +412,68 @@ class BookingController extends Controller
     }
 
     // -------------------------------------------------------------
+    // SHOW BOOKING DETAILS WITH AVAILABILITIES AND TIME SLOTS
+    // For mobile users to view booking details before creating a request
+    // Returns: title, location, max invites, description, available dates and time slots
+    // -------------------------------------------------------------
+    public function showRequestDetails($id)
+    {
+        $booking = MeetingBooking::with([
+            'schedules.availabilities.slots' => function ($query) {
+                $query->orderBy('start_time', 'asc');
+            }
+        ])->find($id);
+
+        if (!$booking) {
+            return $this->error('Booking not found', 404);
+        }
+
+        // Format the response with relevant details
+        $response = [
+            'id' => $booking->id,
+            'title' => $booking->booking_name,
+            'location' => $booking->location,
+            'max_invites' => $booking->max_invitees,
+            'description' => $booking->description,
+            'online_link' => $booking->online_link,
+            'booking_color' => $booking->booking_color,
+            'availabilities' => []
+        ];
+
+        // Process availabilities and time slots from all schedules
+        if ($booking->schedules && count($booking->schedules) > 0) {
+            foreach ($booking->schedules as $schedule) {
+                if ($schedule->availabilities && count($schedule->availabilities) > 0) {
+                    foreach ($schedule->availabilities as $availability) {
+                        if ($availability->is_available) {
+                            $availabilityData = [
+                                'id' => $availability->id,
+                                'day' => $availability->day,
+                                'slots' => []
+                            ];
+
+                            // Format time slots
+                            if ($availability->slots && count($availability->slots) > 0) {
+                                foreach ($availability->slots as $slot) {
+                                    $availabilityData['slots'][] = [
+                                        'id' => $slot->id,
+                                        'start_time' => $slot->start_time,
+                                        'end_time' => $slot->end_time,
+                                    ];
+                                }
+                            }
+
+                            $response['availabilities'][] = $availabilityData;
+                        }
+                    }
+                }
+            }
+        }
+
+        return $this->success($response, 'Booking details fetched successfully', 200);
+    }
+
+    // -------------------------------------------------------------
     // CREATE A USER BOOKING REQUEST (mobile users book a booking config)
     // -------------------------------------------------------------
     public function createBookingRequest(Request $request)
