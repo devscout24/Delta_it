@@ -67,6 +67,24 @@ class MeetingController extends Controller
         ], "Today's meetings fetched successfully");
     }
 
+    public function index_mobile()
+    {
+        // Auto complete old meetings
+        Meeting::whereDate('date', '<', Carbon::today())
+            ->where('status', 'pending')
+            ->update(['status' => 'completed']);
+
+        // Fetch meetings
+        $meetings = Meeting::orderBy('date', 'desc')
+            ->orderBy('start_time', 'asc')
+            ->get();
+
+        return $this->success([
+            'meetings' => $meetings
+        ], "Meetings fetched successfully", 200);
+    }
+
+
     public function index(Request $request)
     {
         // ---- VALIDATION ----
@@ -846,6 +864,4 @@ class MeetingController extends Controller
             'metting_book_requests'  => $mettingBookRequests,
         ], 'All meeting requests retrieved successfully.', 200);
     }
-
-
 }

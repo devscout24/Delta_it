@@ -182,6 +182,7 @@ Route::controller(TicketAttachmentController::class)->group(function () {
 
 Route::controller(MeetingController::class)->group(function () {
     Route::get('/get-meeting', 'index');
+    Route::get('/get-meeting/mobile', 'index_mobile');
     Route::get('/get-todays-meetings', 'todaysMeetings');
     Route::post('/create-meetings', 'create');
     Route::post('/update-meetings/{id}', 'update');

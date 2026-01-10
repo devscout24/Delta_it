@@ -25,7 +25,7 @@ class BookingController extends Controller
     // -------------------------------------------------------------
     public function index()
     {
-        $bookings = MeetingBooking::select(
+        $bookings = MeetingBooking::with('schedules')->select(
             'id',
             'booking_name',
             'booking_date',
@@ -39,10 +39,26 @@ class BookingController extends Controller
             ->orderBy('id', 'desc')
             ->get();
 
-        return response()->json([
-            'status' => true,
-            'data' => $bookings
-        ]);
+        $bookings = $bookings->map(function ($booking) {
+            return [
+                'id'            => $booking->id,
+                'booking_name'  => $booking->booking_name,
+                'booking_date'  => $booking->booking_date,
+                'booking_color' => $booking->booking_color,
+                'max_invitees'  => $booking->max_invitees,
+                'description'   => $booking->description,
+                'online_link'   => $booking->online_link,
+                'location'      => $booking->location,
+                'status'        => $booking->status,
+                'average_duration' => round(
+                    $booking->schedules->avg('duration'),
+                    2
+                ),
+            ];
+        });
+
+
+        return $this->success($bookings, 'Bookings fetched successfully', 200);
     }
 
     // -------------------------------------------------------------
