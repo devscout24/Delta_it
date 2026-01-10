@@ -81,7 +81,7 @@ class TicketController extends Controller
             'message'       => 'required|string',
 
             // NEW FIELD (Account)
-            'assigned_to'   => 'required|exists:users,id',
+            'assigned_to'   => 'nullable|exists:users,id',
         ]);
 
         if ($validated->fails()) {
@@ -96,7 +96,7 @@ class TicketController extends Controller
             'subject'      => $request->subject,
             'company_id'   => $request->company_id,
             'requester_id' => $requesterId,
-            'assigned_to'  => $request->assigned_to,  // <-- NEW
+            'assigned_to'  => $request->assigned_to ?? null,   // <-- NEW
             'type'         => $request->type,
             'status'       => 'pending',
             'room_id'      => $request->room_id,
