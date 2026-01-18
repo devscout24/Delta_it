@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Company;
+use App\Models\Contract;
+use App\Models\Ticket;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -65,6 +67,16 @@ class CompanyController extends Controller
             $company->logo = $company->logo
                 ? asset($company->logo)
                 : asset('default/default.png');
+            
+            // Get end_date from contract
+            $contract = Contract::where('company_id', $company->id)->first();
+            $company->end_date = $contract ? $contract->end_date : null;
+            
+            // Get pending requests count from tickets
+            $company->pending_requests = Ticket::where('company_id', $company->id)
+                ->where('status', 'pending')
+                ->count();
+            
             return $company;
         });
 

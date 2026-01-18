@@ -18,6 +18,12 @@ class DocumentController extends Controller
 
     public function allDocuments($id)
     {
+        // Validate company exists
+        $company = \App\Models\Company::find($id);
+        if (!$company) {
+            return $this->error([], 'Company not found.', 404);
+        }
+
         $documents = Document::with('company', 'tags')->where('company_id', $id)->get();
 
         if ($documents->isEmpty()) {
