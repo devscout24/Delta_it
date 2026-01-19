@@ -27,7 +27,7 @@ use App\Http\Controllers\Api\RoomAppointmentController;
 use App\Http\Controllers\Api\TicketAttachmentController;
 use App\Http\Controllers\Api\TicketController;
 use App\Http\Controllers\Api\TicketMessageController;
-use App\Http\Controllers\API\UserController;
+use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\MeetingBookingController;
 
 Route::controller(AuthController::class)->group(function () {
