@@ -18,6 +18,10 @@ class ContractController extends Controller
 
     public function index(Request $request)
     {
+        if ($request->company_id == null) {
+            return $this->success([], 'Company ID is required', 400);
+        }
+
         $contract = Contract::where('company_id', $request->company_id)
             ->with(['files', 'associates:id,name'])
             ->first();

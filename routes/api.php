@@ -62,17 +62,12 @@ Route::controller(ProfileController::class)->group(function () {
 
 Route::controller(RoomController::class)->middleware('auth:api')->group(function () {
     Route::get('/map/rooms/stats',  'stats');
-
     Route::get('/map/rooms',  'index');
     Route::get('/get-rooms',  'index');
-
     Route::post('/add-room', 'addRoom');
     Route::post('/assign-associate_company', 'assignCompany');
-
-
     Route::get('/get-assign-associate_company-info/{id}', 'getCompanyInfo');
     Route::post('/show-room-details/{id}', 'showRoomDetails');
-
     Route::get('/room-status-change/{status}/{id}', 'roomStatusChange');
     Route::post('/map/rooms/remove-company',  'removeCompany');
 });
