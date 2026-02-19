@@ -12,12 +12,10 @@ class Company extends Model
         'email',
         'fiscal_name',
         'nif',
-        'phone_number',
+        'phone',
         'incubation_type',
-        'occupied_office',
-        'occupied_area',
-        'bussiness_area',
-        'company_manager',
+        'business_area',
+        'manager',
         'description',
         'status'
     ];

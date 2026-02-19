@@ -17,7 +17,7 @@ return new class extends Migration
                 $table->timestamps();
 
                 // Create unique index to prevent duplicate reminders
-                $table->unique(['contract_id', 'days_remaining', 'sent_at']);
+                $table->unique(['contract_id', 'days_remaining', 'sent_at'], 'contract_notif_logs_unique');
             });
         }
     }

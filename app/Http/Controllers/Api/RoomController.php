@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Room;
+use App\Models\Ticket;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -169,7 +170,38 @@ class RoomController extends Controller
 
             DB::commit();
 
-            return $this->success($room->load('company'), 'Company assigned successfully', 200);
+            // Load company with contract to get start_date and end_date
+            $room->load(['company.contract']);
+
+            $response = $room->toArray();
+            if ($room->company && $room->company->contract) {
+                $response['start_date'] = $room->company->contract->start_date;
+                $response['end_date'] = $room->company->contract->end_date;
+            } else {
+                $response['start_date'] = null;
+                $response['end_date'] = null;
+            }
+
+            // Get open tickets for the company
+            $openTickets = Ticket::where('company_id', $validated['company_id'])
+                ->whereIn('status', ['pending', 'in-progress', 'unsolved'])
+                ->select('id', 'unique_id', 'subject', 'type', 'status', 'date', 'created_at')
+                ->get()
+                ->map(function ($ticket) {
+                    return [
+                        'id' => $ticket->id,
+                        'unique_id' => $ticket->unique_id,
+                        'subject' => $ticket->subject,
+                        'type' => $ticket->type,
+                        'status' => $ticket->status,
+                        'date' => $ticket->date,
+                        'created_at' => $ticket->created_at ? $ticket->created_at->format('d/m/Y') : null,
+                    ];
+                });
+
+            $response['open_tickets'] = $openTickets;
+
+            return $this->success($response, 'Company assigned successfully', 200);
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->error([], $e->getMessage(), 500);
