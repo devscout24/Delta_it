@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('contracts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('company_id')->nullable()->constrained('companies')->onDelete('cascade');
-            $table->string('name')->index();
-            $table->enum('type', ['full-time', 'part-time', 'contractor'])->index();
+            $table->string('name');
+            $table->string('type')->nullable();
             $table->date('start_date');
             $table->date('end_date')->nullable();
             $table->date('renewal_date')->nullable();

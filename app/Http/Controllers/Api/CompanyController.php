@@ -282,7 +282,7 @@ class CompanyController extends Controller
             'logo',
             'status'
         )
-            ->with(['rooms:id,floor,room_name,area,company_id']) // load rooms
+            ->with(['rooms:id,floor,room_name,area,company_id', 'contract']) // load rooms and contract
             ->find($id);
 
         if (!$company) {
@@ -309,6 +309,28 @@ class CompanyController extends Controller
 
         // (Optional) remove original rooms key
         unset($company->rooms);
+
+        // Add contract dates (same as assignCompany response)
+        $company->start_date = $company->contract->start_date ?? null;
+        $company->end_date = $company->contract->end_date ?? null;
+        unset($company->contract);
+
+        // Get open tickets for the company (same as assignCompany response)
+        $company->open_tickets = Ticket::where('company_id', $id)
+            ->whereIn('status', ['pending', 'in-progress', 'unsolved'])
+            ->select('id', 'unique_id', 'subject', 'type', 'status', 'date', 'created_at')
+            ->get()
+            ->map(function ($ticket) {
+                return [
+                    'id' => $ticket->id,
+                    'unique_id' => $ticket->unique_id,
+                    'subject' => $ticket->subject,
+                    'type' => $ticket->type,
+                    'status' => $ticket->status,
+                    'date' => $ticket->date,
+                    'created_at' => $ticket->created_at ? $ticket->created_at->format('d/m/Y') : null,
+                ];
+            });
 
         return $this->success($company, 'Company fetched successfully', 200);
     }
@@ -373,21 +395,46 @@ class CompanyController extends Controller
             $uploadPath = $company->logo;
         }
 
-        // Update company data
+        // Update company data (use null coalescing to preserve existing values)
         $company->update([
-            'name'            => $request->name,
-            'email'           => $request->email,
-            'fiscal_name'     => $request->fiscal_name,
-            'nif'             => $request->nif,
-            'phone'           => $request->phone,
-            'incubation_type' => $request->incubation_type,
-            'business_area'   => $request->business_area,
-            'manager'         => $request->manager,
-            'description'     => $request->description,
+            'name'            => $request->name ?? $company->name,
+            'email'           => $request->email ?? $company->email,
+            'fiscal_name'     => $request->fiscal_name ?? $company->fiscal_name,
+            'nif'             => $request->nif ?? $company->nif,
+            'phone'           => $request->phone ?? $company->phone,
+            'incubation_type' => $request->incubation_type ?? $company->incubation_type,
+            'business_area'   => $request->business_area ?? $company->business_area,
+            'manager'         => $request->manager ?? $company->manager,
+            'description'     => $request->description ?? $company->description,
             'logo'            => $uploadPath,
         ]);
 
-        return $this->success([], 'Company information updated successfully', 200);
+        // Load contract and return response similar to assignCompany
+        $company->load('contract');
+
+        $response = $company->toArray();
+        $response['start_date'] = $company->contract->start_date ?? null;
+        $response['end_date'] = $company->contract->end_date ?? null;
+        unset($response['contract']);
+
+        // Get open tickets for the company
+        $response['open_tickets'] = Ticket::where('company_id', $company->id)
+            ->whereIn('status', ['pending', 'in-progress', 'unsolved'])
+            ->select('id', 'unique_id', 'subject', 'type', 'status', 'date', 'created_at')
+            ->get()
+            ->map(function ($ticket) {
+                return [
+                    'id' => $ticket->id,
+                    'unique_id' => $ticket->unique_id,
+                    'subject' => $ticket->subject,
+                    'type' => $ticket->type,
+                    'status' => $ticket->status,
+                    'date' => $ticket->date,
+                    'created_at' => $ticket->created_at ? $ticket->created_at->format('d/m/Y') : null,
+                ];
+            });
+
+        return $this->success($response, 'Company information updated successfully', 200);
     }
 
     public function archiveCompany(Request $request)

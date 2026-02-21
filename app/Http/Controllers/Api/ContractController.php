@@ -63,7 +63,7 @@ class ContractController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'type' => 'required|in:full-time,part-time,contractor',
+            'type' => 'required',
             'start_date' => 'required|date',
             'end_date' => 'nullable|date',
             'renewal_date' => 'nullable|date',
