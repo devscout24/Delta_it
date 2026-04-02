@@ -17,6 +17,7 @@ use App\Models\MeetingEmail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class MeetingController extends Controller
 {
@@ -287,7 +288,15 @@ class MeetingController extends Controller
         if ($request->meeting_type === 'office' && !$request->location) {
             return $this->error([], "Location is required for office meetings", 422);
         }
-        $date = \Carbon\Carbon::createFromFormat('d-m-Y', $request->date)->format('Y-m-d');
+        try {
+            if (preg_match('/^\d{2}-\d{2}-\d{4}$/', $request->date)) {
+                $date = Carbon::createFromFormat('d-m-Y', $request->date)->format('Y-m-d');
+            } else {
+                $date = Carbon::parse($request->date)->format('Y-m-d');
+            }
+        } catch (Exception $e) {
+            return $this->error([], "Invalid date format. Use d-m-Y or Y-m-d", 422);
+        }
 
         $meeting = Meeting::create([
             'company_id'   => $request->company_id,
@@ -303,8 +312,9 @@ class MeetingController extends Controller
         ]);
 
 
-        // Store emails into separate table
-        // Store emails into separate table + Send mails
+        $failedEmails = [];
+
+        // Store emails into separate table + send mails
         if (!empty($request->add_emails)) {
             foreach ($request->add_emails as $email) {
 
@@ -314,9 +324,26 @@ class MeetingController extends Controller
                     'email'      => $email,
                 ]);
 
-                // Send mail
-                Mail::to($email)->send(new MeetingNotificationMail($meeting, $email));
+                try {
+                    Mail::to($email)->send(new MeetingNotificationMail($meeting, $email));
+                } catch (Exception $e) {
+                    $failedEmails[] = $email;
+
+                    Log::warning('Meeting notification email failed', [
+                        'meeting_id' => $meeting->id,
+                        'email' => $email,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
             }
+        }
+
+        if (!empty($failedEmails)) {
+            return $this->success([
+                'meeting' => $meeting,
+                'email_send_failed' => $failedEmails,
+                'warning' => 'Meeting saved, but some email notifications failed to send.',
+            ], "Meeting created with email delivery warnings", 201);
         }
 
 
