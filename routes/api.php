@@ -147,8 +147,8 @@ Route::controller(InternalContractController::class)->group(function () {
 });
 
 Route::controller(InternalDocumentController::class)->prefix('internal-documents')->group(function () {
-    Route::get('/company','index');
-    Route::post('/store','store');
+    Route::get('/company', 'index');
+    Route::post('/store', 'store');
     Route::get('/show/{id}', 'show');
     Route::get('/delete/{id}', 'destroy');
 });
