@@ -177,6 +177,7 @@ Route::controller(TicketAttachmentController::class)->group(function () {
 
 Route::controller(MeetingController::class)->group(function () {
     Route::get('/get-meeting', 'index');
+    Route::get('/get-meeting/latest', 'latestMeetings');
     Route::get('/get-meeting/mobile', 'index_mobile');
     Route::get('/get-todays-meetings', 'todaysMeetings');
     Route::post('/create-meetings', 'create');
@@ -274,6 +275,3 @@ Route::controller(UserController::class)->group(function () {
     Route::get('/company-users/list', 'index');
     Route::post('/create-company-user', 'create');
 });
-
-
-

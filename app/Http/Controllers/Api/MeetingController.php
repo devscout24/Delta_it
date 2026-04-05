@@ -85,6 +85,20 @@ class MeetingController extends Controller
         ], "Meetings fetched successfully", 200);
     }
 
+    public function latestMeetings()
+    {
+        // Auto complete old meetings
+        Meeting::whereDate('date', '<', Carbon::today())
+            ->where('status', 'pending')
+            ->update(['status' => 'completed']);
+
+        $meetings = Meeting::latest()->get();
+
+        return $this->success([
+            'meetings' => $meetings
+        ], "Meetings fetched successfully", 200);
+    }
+
 
     public function index(Request $request)
     {
