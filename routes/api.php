@@ -237,8 +237,9 @@ Route::controller(BookingController::class)->group(function () {
     Route::get('/meeting-bookings/request/my', 'myRequests')->middleware('auth:api');
 
     // Approve / Reject / Cancel booking configs OR user booking requests
-    Route::get('/meeting-bookings/{id}/accept', 'acceptBooking');
-    Route::get('/meeting-bookings/{id}/reject', 'rejectBooking');
+    Route::match(['get', 'post'], '/meeting-bookings/{booking_id}/accept', 'acceptBooking');
+    Route::match(['get', 'post'], '/meeting-bookings/{booking_id}/reject', 'rejectBooking');
+    Route::match(['get', 'post'], '/meeting-bookings/{booking_id}/cancel', 'cancelBooking');
     Route::get('/meeting-bookings/cancel/{id}', 'cancelBooking');
 });
 

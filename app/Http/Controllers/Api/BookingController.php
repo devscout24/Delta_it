@@ -15,6 +15,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
 
 class BookingController extends Controller
@@ -575,8 +576,8 @@ class BookingController extends Controller
     // -------------------------------------------------------------
     public function acceptBooking($id)
     {
-        // Try user booking request first
-        $bookingReq = MeetingBookingCreates::find($id);
+        // Try user booking request first (if table exists in current environment)
+        $bookingReq = $this->findBookingRequestById($id);
         if ($bookingReq) {
             if (!in_array($bookingReq->status, ['pending', 'requested'])) {
                 return $this->error([], "Only requested or pending bookings can be approved.", 422);
@@ -604,7 +605,7 @@ class BookingController extends Controller
 
     public function rejectBooking($id)
     {
-        $bookingReq = MeetingBookingCreates::find($id);
+        $bookingReq = $this->findBookingRequestById($id);
         if ($bookingReq) {
             if (!in_array($bookingReq->status, ['pending', 'requested'])) {
                 return $this->error([], "Only requested or pending bookings can be rejected.", 422);
@@ -632,7 +633,7 @@ class BookingController extends Controller
 
     public function cancelBooking($id)
     {
-        $bookingReq = MeetingBookingCreates::find($id);
+        $bookingReq = $this->findBookingRequestById($id);
         if ($bookingReq) {
             if (!in_array($bookingReq->status, ['approved', 'requested', 'pending'])) {
                 return $this->error([], "Only approved, requested, or pending bookings can be cancelled.", 422);
@@ -656,6 +657,15 @@ class BookingController extends Controller
         $booking->update(['status' => 'cancelled']);
 
         return $this->success($booking, 'Booking cancelled successfully', 200);
+    }
+
+    private function findBookingRequestById($id)
+    {
+        if (!Schema::hasTable('meeting_booking_creates')) {
+            return null;
+        }
+
+        return MeetingBookingCreates::find($id);
     }
 
 
