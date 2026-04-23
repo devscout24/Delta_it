@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\RoomBookController;
 use App\Http\Controllers\Api\AccessCardController;
 use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\Api\BookingController;
+use App\Http\Controllers\Api\CalendarController;
 use App\Http\Controllers\Api\CollaboratorController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\InternalContractController;
@@ -239,6 +240,10 @@ Route::controller(BookingController::class)->group(function () {
     Route::get('/meeting-bookings/{id}/accept', 'acceptBooking');
     Route::get('/meeting-bookings/{id}/reject', 'rejectBooking');
     Route::get('/meeting-bookings/cancel/{id}', 'cancelBooking');
+});
+
+Route::controller(CalendarController::class)->group(function () {
+    Route::get('/calendar/overview', 'index');
 });
 
 // Meeting booking endpoints (authenticated users)
