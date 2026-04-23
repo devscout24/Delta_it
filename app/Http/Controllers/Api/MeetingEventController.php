@@ -8,10 +8,10 @@ use App\Models\MeetingEventAvailabilities;
 use App\Models\MeetingEventAvailabilitySlot;
 use App\Models\MeetingEventSchedule;
 use App\Traits\ApiResponse;
-use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
 use App\Models\MeetingEventCreates;
 
@@ -165,22 +165,87 @@ class MeetingEventController extends Controller
     // Admin: list event requests (pending configurations created by companies)
     public function getEventRequests()
     {
-        $events = MeetingEvent::where('status', 'pending')
-            ->with(['company:id,name,logo', 'room:id,room_name', 'creator:id,profile_photo'])
-            ->get();
+        $eventRequests = collect();
 
-        if ($events->isEmpty()) {
-            return $this->error([], 'No event requests found.', 404);
+        if (Schema::hasTable('meeting_event_creates')) {
+            $eventRequests = MeetingEventCreates::with('meetingEvent.room', 'user')
+                ->where(function ($query) {
+                    $query->whereNull('status')->orWhere('status', '!=', 'removed');
+                })
+                ->get()
+                ->map(function ($r) {
+                    return [
+                        'id' => $r->id,
+                        'request_type' => 'event_request',
+                        'target_id' => $r->id,
+                        'event_name' => $r->meetingEvent->event_name ?? null,
+                        'date' => $r->date,
+                        'start_time' => $r->start_time,
+                        'end_time' => $r->end_time,
+                        'invitees' => $r->invitees,
+                        'status' => $r->status,
+                        'room' => $r->meetingEvent && $r->meetingEvent->room ? [
+                            'id' => $r->meetingEvent->room->id,
+                            'name' => $r->meetingEvent->room->room_name,
+                            'area' => $r->meetingEvent->room->area ?? null,
+                        ] : null,
+                        'user' => [
+                            'id' => $r->user->id ?? null,
+                            'name' => $r->user->name ?? null,
+                        ],
+                        'created_at' => $r->created_at,
+                    ];
+                });
         }
 
-        return $this->success($events, 'Event requests fetched successfully', 200);
+        $events = MeetingEvent::where(function ($query) {
+            $query->whereNull('status')->orWhere('status', '!=', 'removed');
+        })
+            ->with(['company:id,name,logo', 'room:id,room_name', 'creator:id,profile_photo'])
+            ->get()
+            ->map(function ($event) {
+                return [
+                    'id' => $event->id,
+                    'request_type' => 'event_config',
+                    'target_id' => $event->id,
+                    'event_name' => $event->event_name,
+                    'date' => $event->event_date,
+                    'start_time' => null,
+                    'end_time' => null,
+                    'invitees' => $event->max_invitees,
+                    'status' => $event->status,
+                    'room' => $event->room ? [
+                        'id' => $event->room->id,
+                        'name' => $event->room->room_name,
+                    ] : null,
+                    'user' => [
+                        'id' => $event->creator->id ?? null,
+                        'name' => $event->creator->name ?? null,
+                    ],
+                    'created_at' => $event->created_at,
+                ];
+            });
+
+        $combined = $eventRequests->merge($events)->sortByDesc('created_at')->values();
+
+        if ($combined->isEmpty()) {
+            return $this->success([], 'No event requests found.', 200);
+        }
+
+        return $this->success($combined, 'Event requests fetched successfully', 200);
     }
 
     // GET REQUEST LIST (only user event booking requests)
     public function requestList()
     {
+        if (!Schema::hasTable('meeting_event_creates')) {
+            return $this->success([], 'Request list is empty', 200);
+        }
+
         $requests = MeetingEventCreates::with('meetingEvent.room', 'user')
-            ->where('status', 'pending')
+            ->where(function ($query) {
+                $query->whereNull('status')->orWhere('status', '!=', 'removed');
+            })
             ->get();
 
         if ($requests->isEmpty()) {
@@ -216,6 +281,10 @@ class MeetingEventController extends Controller
     // Allow authenticated mobile users to create an event booking request
     public function createEventRequest(Request $request)
     {
+        if (!Schema::hasTable('meeting_event_creates')) {
+            return $this->error([], 'Event request storage is not available in this environment.', 503);
+        }
+
         $validator = Validator::make($request->all(), [
             'meeting_event_id' => 'required|exists:meeting_events,id',
             'date' => 'required|date',
@@ -258,6 +327,10 @@ class MeetingEventController extends Controller
     // GET current authenticated user's event booking requests
     public function myRequests()
     {
+        if (!Schema::hasTable('meeting_event_creates')) {
+            return $this->success([], 'No event booking requests found for the user', 200);
+        }
+
         $userId = Auth::guard('api')->id();
         $requests = MeetingEventCreates::with('meetingEvent.room')
             ->where('user_id', $userId)
@@ -290,10 +363,12 @@ class MeetingEventController extends Controller
     }
 
     // Approve an event request (handles both user requests and event configs)
-    public function acceptEvent($id)
+    public function acceptEvent(Request $request, $id)
     {
+        $requestType = $this->resolveRequestType($request);
+
         // Try user request first
-        $req = MeetingEventCreates::find($id);
+        $req = $requestType === 'event_config' ? null : $this->findEventRequestById($id);
         if ($req) {
             if (!in_array($req->status, ['pending', 'requested'])) {
                 return $this->error([], "Only requested or pending event bookings can be approved.", 422);
@@ -304,7 +379,7 @@ class MeetingEventController extends Controller
             return $this->success($req, "Event booking request approved successfully.", 200);
         }
 
-        $event = MeetingEvent::find($id);
+        $event = $requestType === 'event_request' ? null : MeetingEvent::find($id);
 
         if (!$event) {
             return $this->error([], "Event not found.", 404);
@@ -322,9 +397,11 @@ class MeetingEventController extends Controller
     }
 
     // Reject an event request (handles both user requests and event configs)
-    public function rejectEvent($id)
+    public function rejectEvent(Request $request, $id)
     {
-        $req = MeetingEventCreates::find($id);
+        $requestType = $this->resolveRequestType($request);
+
+        $req = $requestType === 'event_config' ? null : $this->findEventRequestById($id);
         if ($req) {
             if (!in_array($req->status, ['pending', 'requested'])) {
                 return $this->error([], "Only requested or pending event bookings can be rejected.", 422);
@@ -335,7 +412,7 @@ class MeetingEventController extends Controller
             return $this->success($req, "Event booking request rejected successfully.", 200);
         }
 
-        $event = MeetingEvent::find($id);
+        $event = $requestType === 'event_request' ? null : MeetingEvent::find($id);
 
         if (!$event) {
             return $this->error([], "Event not found.", 404);
@@ -353,9 +430,11 @@ class MeetingEventController extends Controller
     }
 
     // Cancel an event (handles both user requests and event configs)
-    public function cancelEvent($id)
+    public function cancelEvent(Request $request, $id)
     {
-        $req = MeetingEventCreates::find($id);
+        $requestType = $this->resolveRequestType($request);
+
+        $req = $requestType === 'event_config' ? null : $this->findEventRequestById($id);
         if ($req) {
             if (!in_array($req->status, ['approved', 'requested', 'pending'])) {
                 return $this->error([], "Only approved, requested, or pending event bookings can be cancelled.", 422);
@@ -366,7 +445,7 @@ class MeetingEventController extends Controller
             return $this->success($req, "Event booking cancelled successfully.", 200);
         }
 
-        $event = MeetingEvent::find($id);
+        $event = $requestType === 'event_request' ? null : MeetingEvent::find($id);
 
         if (!$event) {
             return $this->error([], "Event not found.", 404);
@@ -381,6 +460,48 @@ class MeetingEventController extends Controller
         ]);
 
         return $this->success($event, "Event cancelled successfully.", 200);
+    }
+
+    public function removeEventRequest(Request $request, $id)
+    {
+        $requestType = $this->resolveRequestType($request);
+
+        $req = $requestType === 'event_config' ? null : $this->findEventRequestById($id);
+        if ($req) {
+            $req->update(['status' => 'removed']);
+
+            return $this->success($req, 'Event request removed from request list', 200);
+        }
+
+        $event = $requestType === 'event_request' ? null : MeetingEvent::find($id);
+
+        if (!$event) {
+            return $this->error([], 'Event not found.', 404);
+        }
+
+        $event->update(['status' => 'removed']);
+
+        return $this->success($event, 'Event request removed from request list', 200);
+    }
+
+    private function findEventRequestById($id)
+    {
+        if (!Schema::hasTable('meeting_event_creates')) {
+            return null;
+        }
+
+        return MeetingEventCreates::find($id);
+    }
+
+    private function resolveRequestType(Request $request): ?string
+    {
+        $type = $request->input('request_type');
+
+        if (in_array($type, ['event_request', 'event_config'])) {
+            return $type;
+        }
+
+        return null;
     }
 
     // ---------------------------------------------

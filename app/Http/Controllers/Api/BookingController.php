@@ -3,12 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Appointment;
 use App\Models\MeetingBooking;
 use App\Models\MeetingBookingAvailabilities;
 use App\Models\MeetingBookingAvailabilitySlot;
 use App\Models\MeetingBookingSchedule;
-use App\Models\RoomBookings;
 use App\Models\MeetingBookingCreates;
 use App\Traits\ApiResponse;
 use Carbon\Carbon;
@@ -394,8 +392,14 @@ class BookingController extends Controller
     // -------------------------------------------------------------
     public function requestList()
     {
+        if (!Schema::hasTable('meeting_booking_creates')) {
+            return $this->success([], 'Request list is empty', 200);
+        }
+
         $requests = MeetingBookingCreates::with('meetingBooking.room', 'user')
-            ->where('status', 'pending')
+            ->where(function ($query) {
+                $query->whereNull('status')->orWhere('status', '!=', 'removed');
+            })
             ->get();
 
         if ($requests->isEmpty()) {
@@ -495,6 +499,10 @@ class BookingController extends Controller
     // -------------------------------------------------------------
     public function createBookingRequest(Request $request)
     {
+        if (!Schema::hasTable('meeting_booking_creates')) {
+            return $this->error([], 'Booking request storage is not available in this environment.', 503);
+        }
+
         $validator = Validator::make($request->all(), [
             'meeting_booking_id' => 'required|exists:meeting_bookings,id',
             'date' => 'required|date',
@@ -540,6 +548,10 @@ class BookingController extends Controller
     // -------------------------------------------------------------
     public function myRequests()
     {
+        if (!Schema::hasTable('meeting_booking_creates')) {
+            return $this->success([], 'No booking requests found for the user', 200);
+        }
+
         $userId = Auth::guard('api')->id();
         $requests = MeetingBookingCreates::with('meetingBooking.room')
             ->where('user_id', $userId)
@@ -572,12 +584,87 @@ class BookingController extends Controller
     }
 
     // -------------------------------------------------------------
+    // ADMIN REQUEST LIST (booking configs + user booking requests)
+    // -------------------------------------------------------------
+    public function adminRequests()
+    {
+        $requestRows = collect();
+
+        if (Schema::hasTable('meeting_booking_creates')) {
+            $requestRows = MeetingBookingCreates::with('meetingBooking.room', 'user')
+                ->where(function ($query) {
+                    $query->whereNull('status')->orWhere('status', '!=', 'removed');
+                })
+                ->get()
+                ->map(function ($b) {
+                    return [
+                        'id' => $b->id,
+                        'request_type' => 'booking_request',
+                        'target_id' => $b->id,
+                        'booking_name' => $b->meetingBooking->booking_name ?? null,
+                        'date' => $b->date,
+                        'start_time' => $b->start_time,
+                        'end_time' => $b->end_time,
+                        'status' => $b->status,
+                        'room' => $b->meetingBooking && $b->meetingBooking->room ? [
+                            'id' => $b->meetingBooking->room->id,
+                            'name' => $b->meetingBooking->room->room_name,
+                            'area' => $b->meetingBooking->room->area ?? null,
+                        ] : null,
+                        'user' => [
+                            'id' => $b->user->id ?? null,
+                            'name' => $b->user->name ?? null,
+                        ],
+                        'created_at' => $b->created_at,
+                    ];
+                });
+        }
+
+        $configRows = MeetingBooking::where(function ($query) {
+            $query->whereNull('status')->orWhere('status', '!=', 'removed');
+        })
+            ->with('room', 'creator')
+            ->get()
+            ->map(function ($c) {
+                return [
+                    'id' => $c->id,
+                    'request_type' => 'booking_config',
+                    'target_id' => $c->id,
+                    'booking_name' => $c->booking_name,
+                    'date' => $c->booking_date,
+                    'start_time' => null,
+                    'end_time' => null,
+                    'status' => $c->status,
+                    'room' => $c->room ? [
+                        'id' => $c->room->id,
+                        'name' => $c->room->room_name,
+                        'area' => $c->room->area ?? null,
+                    ] : null,
+                    'user' => [
+                        'id' => $c->creator->id ?? null,
+                        'name' => $c->creator->name ?? null,
+                    ],
+                    'created_at' => $c->created_at,
+                ];
+            });
+
+        $combined = $requestRows
+            ->merge($configRows)
+            ->sortByDesc('created_at')
+            ->values();
+
+        return $this->success($combined, 'Booking requests retrieved successfully', 200);
+    }
+
+    // -------------------------------------------------------------
     // APPROVE / REJECT / CANCEL BOOKING (handles both booking configs and user requests)
     // -------------------------------------------------------------
-    public function acceptBooking($id)
+    public function acceptBooking(Request $request, $id)
     {
+        $requestType = $this->resolveRequestType($request);
+
         // Try user booking request first (if table exists in current environment)
-        $bookingReq = $this->findBookingRequestById($id);
+        $bookingReq = $requestType === 'booking_config' ? null : $this->findBookingRequestById($id);
         if ($bookingReq) {
             if (!in_array($bookingReq->status, ['pending', 'requested'])) {
                 return $this->error([], "Only requested or pending bookings can be approved.", 422);
@@ -588,7 +675,7 @@ class BookingController extends Controller
             return $this->success($bookingReq, 'Booking request approved successfully', 200);
         }
 
-        $booking = MeetingBooking::find($id);
+        $booking = $requestType === 'booking_request' ? null : MeetingBooking::find($id);
 
         if (!$booking) {
             return $this->error([], 'Booking not found', 404);
@@ -603,9 +690,11 @@ class BookingController extends Controller
         return $this->success($booking, 'Booking request approved successfully', 200);
     }
 
-    public function rejectBooking($id)
+    public function rejectBooking(Request $request, $id)
     {
-        $bookingReq = $this->findBookingRequestById($id);
+        $requestType = $this->resolveRequestType($request);
+
+        $bookingReq = $requestType === 'booking_config' ? null : $this->findBookingRequestById($id);
         if ($bookingReq) {
             if (!in_array($bookingReq->status, ['pending', 'requested'])) {
                 return $this->error([], "Only requested or pending bookings can be rejected.", 422);
@@ -616,7 +705,7 @@ class BookingController extends Controller
             return $this->success($bookingReq, 'Booking request rejected successfully', 200);
         }
 
-        $booking = MeetingBooking::find($id);
+        $booking = $requestType === 'booking_request' ? null : MeetingBooking::find($id);
 
         if (!$booking) {
             return $this->error([], 'Booking not found', 404);
@@ -631,9 +720,11 @@ class BookingController extends Controller
         return $this->success($booking, 'Booking request rejected successfully', 200);
     }
 
-    public function cancelBooking($id)
+    public function cancelBooking(Request $request, $id)
     {
-        $bookingReq = $this->findBookingRequestById($id);
+        $requestType = $this->resolveRequestType($request);
+
+        $bookingReq = $requestType === 'booking_config' ? null : $this->findBookingRequestById($id);
         if ($bookingReq) {
             if (!in_array($bookingReq->status, ['approved', 'requested', 'pending'])) {
                 return $this->error([], "Only approved, requested, or pending bookings can be cancelled.", 422);
@@ -644,7 +735,7 @@ class BookingController extends Controller
             return $this->success($bookingReq, 'Booking cancelled successfully', 200);
         }
 
-        $booking = MeetingBooking::find($id);
+        $booking = $requestType === 'booking_request' ? null : MeetingBooking::find($id);
 
         if (!$booking) {
             return $this->error([], 'Booking not found', 404);
@@ -659,6 +750,28 @@ class BookingController extends Controller
         return $this->success($booking, 'Booking cancelled successfully', 200);
     }
 
+    public function removeRequest(Request $request, $id)
+    {
+        $requestType = $this->resolveRequestType($request);
+
+        $bookingReq = $requestType === 'booking_config' ? null : $this->findBookingRequestById($id);
+        if ($bookingReq) {
+            $bookingReq->update(['status' => 'removed']);
+
+            return $this->success($bookingReq, 'Booking request removed from request list', 200);
+        }
+
+        $booking = $requestType === 'booking_request' ? null : MeetingBooking::find($id);
+
+        if (!$booking) {
+            return $this->error([], 'Booking not found', 404);
+        }
+
+        $booking->update(['status' => 'removed']);
+
+        return $this->success($booking, 'Booking request removed from request list', 200);
+    }
+
     private function findBookingRequestById($id)
     {
         if (!Schema::hasTable('meeting_booking_creates')) {
@@ -666,6 +779,17 @@ class BookingController extends Controller
         }
 
         return MeetingBookingCreates::find($id);
+    }
+
+    private function resolveRequestType(Request $request): ?string
+    {
+        $type = $request->input('request_type');
+
+        if (in_array($type, ['booking_request', 'booking_config'])) {
+            return $type;
+        }
+
+        return null;
     }
 
 

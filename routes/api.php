@@ -29,7 +29,6 @@ use App\Http\Controllers\Api\TicketAttachmentController;
 use App\Http\Controllers\Api\TicketController;
 use App\Http\Controllers\Api\TicketMessageController;
 use App\Http\Controllers\Api\UserController;
-use App\Http\Controllers\MeetingBookingController;
 
 Route::controller(AuthController::class)->group(function () {
     // user login and logout
@@ -189,8 +188,12 @@ Route::controller(MeetingController::class)->group(function () {
 
     Route::post('/meeting/request', 'requestMeeting');
     Route::get('/meeting/{id}/accept', 'acceptMeeting');
+    Route::post('/meeting/{meeting_id}/accept', 'acceptMeeting');
     Route::get('/meeting/{id}/reject', 'rejectMeeting');
+    Route::post('/meeting/{meeting_id}/reject', 'rejectMeeting');
     Route::get('/meeting/{id}/cancel', 'cancelMeeting');
+    Route::post('/meeting/{meeting_id}/cancel', 'cancelMeeting');
+    Route::match(['get', 'post'], '/meeting/{meeting_id}/remove-request', 'removeMeetingRequest');
 });
 
 // Public: list and view events
@@ -206,9 +209,10 @@ Route::controller(MeetingEventController::class)->group(function () {
     Route::get('/meeting-events/request/my', 'myRequests')->middleware('auth:api');
 
     // Approve / Reject / Cancel event requests (handles both event configs and user requests)
-    Route::get('/meeting-events/{id}/accept', 'acceptEvent');
-    Route::get('/meeting-events/{id}/reject', 'rejectEvent');
-    Route::get('/meeting-events/{id}/cancel', 'cancelEvent');
+    Route::match(['get', 'post'], '/meeting-events/{event_id}/accept', 'acceptEvent');
+    Route::match(['get', 'post'], '/meeting-events/{event_id}/reject', 'rejectEvent');
+    Route::match(['get', 'post'], '/meeting-events/{event_id}/cancel', 'cancelEvent');
+    Route::match(['get', 'post'], '/meeting-events/{event_id}/remove-request', 'removeEventRequest');
 });
 
 // Protected: company users can create/update/delete their event requests
@@ -240,6 +244,7 @@ Route::controller(BookingController::class)->group(function () {
     Route::match(['get', 'post'], '/meeting-bookings/{booking_id}/accept', 'acceptBooking');
     Route::match(['get', 'post'], '/meeting-bookings/{booking_id}/reject', 'rejectBooking');
     Route::match(['get', 'post'], '/meeting-bookings/{booking_id}/cancel', 'cancelBooking');
+    Route::match(['get', 'post'], '/meeting-bookings/{booking_id}/remove-request', 'removeRequest');
     Route::get('/meeting-bookings/cancel/{id}', 'cancelBooking');
 });
 
@@ -265,7 +270,7 @@ Route::controller(CalendarController::class)->group(function () {
 Route::middleware('auth:api')->group(function () {
     Route::get('/meeting/requests', [MeetingController::class, 'getmeetingRequest']);
     Route::get('/meeting-events/requests', [MeetingEventController::class, 'getEventRequests']);
-    Route::get('/bookings/request/admin', [MeetingBookingController::class, 'requestsAll']);
+    Route::get('/bookings/request/admin', [BookingController::class, 'adminRequests']);
 });
 
 

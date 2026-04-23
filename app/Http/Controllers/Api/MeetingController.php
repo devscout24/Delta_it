@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 class MeetingController extends Controller
 {
@@ -525,62 +526,113 @@ class MeetingController extends Controller
         return $this->success($meeting, "Meeting Requested submitted successfully.", 201);
     }
 
-    public function acceptMeeting($id)
+    public function acceptMeeting(Request $request, $id)
     {
-        $meeting = Meeting::find($id);
+        $requestType = $request->input('request_type');
 
-        if (!$meeting) {
-            return $this->error([], "Meeting not found.", 404);
+        $meeting = $requestType === 'metting_book_request' ? null : Meeting::find($id);
+
+        if ($meeting) {
+            if (!in_array($meeting->status, ['requested', 'pending'])) {
+                return $this->error([], "Only requested or pending meetings can be approved.", 422);
+            }
+
+            $meeting->update([
+                'status' => 'approved'
+            ]);
+
+            return $this->success($meeting, "Meeting request approved successfully.", 200);
         }
 
-        if (!in_array($meeting->status, ['requested', 'pending'])) {
-            return $this->error([], "Only requested or pending meetings can be approved.", 422);
+        if (Schema::hasTable('metting_book_requests')) {
+            $mettingRequest = MettingBookRequest::find($id);
+            if ($mettingRequest) {
+                if (!in_array($mettingRequest->status, ['requested', 'pending'])) {
+                    return $this->error([], "Only requested or pending meetings can be approved.", 422);
+                }
+
+                $mettingRequest->update([
+                    'status' => 'approved'
+                ]);
+
+                return $this->success($mettingRequest, "Meeting request approved successfully.", 200);
+            }
         }
 
-        $meeting->update([
-            'status' => 'approved'
-        ]);
-
-        return $this->success($meeting, "Meeting request approved successfully.", 200);
+        return $this->error([], "Meeting not found.", 404);
     }
 
-    public function rejectMeeting($id)
+    public function rejectMeeting(Request $request, $id)
     {
-        $meeting = Meeting::find($id);
+        $requestType = $request->input('request_type');
 
-        if (!$meeting) {
-            return $this->error([], "Meeting not found.", 404);
+        $meeting = $requestType === 'metting_book_request' ? null : Meeting::find($id);
+
+        if ($meeting) {
+            if (!in_array($meeting->status, ['requested', 'pending'])) {
+                return $this->error([], "Only requested or pending meetings can be rejected.", 422);
+            }
+
+            $meeting->update([
+                'status' => 'rejected'
+            ]);
+
+            return $this->success($meeting, "Meeting request rejected successfully.", 200);
         }
 
-        if (!in_array($meeting->status, ['requested', 'pending'])) {
-            return $this->error([], "Only requested or pending meetings can be rejected.", 422);
+        if (Schema::hasTable('metting_book_requests')) {
+            $mettingRequest = MettingBookRequest::find($id);
+            if ($mettingRequest) {
+                if (!in_array($mettingRequest->status, ['requested', 'pending'])) {
+                    return $this->error([], "Only requested or pending meetings can be rejected.", 422);
+                }
+
+                $mettingRequest->update([
+                    'status' => 'rejected'
+                ]);
+
+                return $this->success($mettingRequest, "Meeting request rejected successfully.", 200);
+            }
         }
 
-        $meeting->update([
-            'status' => 'rejected'
-        ]);
-
-        return $this->success($meeting, "Meeting request rejected successfully.", 200);
+        return $this->error([], "Meeting not found.", 404);
     }
 
-    public function cancelMeeting($id)
+    public function cancelMeeting(Request $request, $id)
     {
-        $meeting = Meeting::find($id);
+        $requestType = $request->input('request_type');
 
-        if (!$meeting) {
-            return $this->error([], "Meeting not found.", 404);
+        $meeting = $requestType === 'metting_book_request' ? null : Meeting::find($id);
+
+        if ($meeting) {
+            // Allowed statuses before cancellation
+            if (!in_array($meeting->status, ['approved', 'requested', 'pending'])) {
+                return $this->error([], "Only approved, requested, or pending meetings can be cancelled.", 422);
+            }
+
+            $meeting->update([
+                'status' => 'cancelled'
+            ]);
+
+            return $this->success($meeting, "Meeting cancelled successfully.", 200);
         }
 
-        // Allowed statuses before cancellation
-        if (!in_array($meeting->status, ['approved', 'requested', 'pending'])) {
-            return $this->error([], "Only approved, requested, or pending meetings can be cancelled.", 422);
+        if (Schema::hasTable('metting_book_requests')) {
+            $mettingRequest = MettingBookRequest::find($id);
+            if ($mettingRequest) {
+                if (!in_array($mettingRequest->status, ['approved', 'requested', 'pending'])) {
+                    return $this->error([], "Only approved, requested, or pending meetings can be cancelled.", 422);
+                }
+
+                $mettingRequest->update([
+                    'status' => 'cancelled'
+                ]);
+
+                return $this->success($mettingRequest, "Meeting cancelled successfully.", 200);
+            }
         }
 
-        $meeting->update([
-            'status' => 'cancelled'
-        ]);
-
-        return $this->success($meeting, "Meeting cancelled successfully.", 200);
+        return $this->error([], "Meeting not found.", 404);
     }
 
 
@@ -890,11 +942,19 @@ class MeetingController extends Controller
     public function getmeetingRequest()
     {
         // Include Meeting model requests (status requested/pending) and MettingBookRequest
-        $meetingModelRequests = Meeting::whereIn('status', ['requested', 'pending'])
+        $meetingModelRequests = Meeting::where(function ($query) {
+            $query->whereNull('status')->orWhere('status', '!=', 'removed');
+        })
             ->with(['room', 'company', 'creator'])
             ->get();
 
-        $mettingBookRequests = MettingBookRequest::all();
+        $mettingBookRequests = collect();
+
+        if (Schema::hasTable('metting_book_requests')) {
+            $mettingBookRequests = MettingBookRequest::where(function ($query) {
+                $query->whereNull('status')->orWhere('status', '!=', 'removed');
+            })->get();
+        }
 
         if ($meetingModelRequests->isEmpty() && $mettingBookRequests->isEmpty()) {
             return $this->error([], 'No meeting requests found.', 404);
@@ -904,5 +964,29 @@ class MeetingController extends Controller
             'meeting_model_requests' => $meetingModelRequests,
             'metting_book_requests'  => $mettingBookRequests,
         ], 'All meeting requests retrieved successfully.', 200);
+    }
+
+    public function removeMeetingRequest(Request $request, $id)
+    {
+        $requestType = $request->input('request_type');
+
+        $meeting = $requestType === 'metting_book_request' ? null : Meeting::find($id);
+
+        if ($meeting) {
+            $meeting->update(['status' => 'removed']);
+
+            return $this->success($meeting, "Meeting request removed from request list.", 200);
+        }
+
+        if (Schema::hasTable('metting_book_requests')) {
+            $mettingRequest = MettingBookRequest::find($id);
+            if ($mettingRequest) {
+                $mettingRequest->update(['status' => 'removed']);
+
+                return $this->success($mettingRequest, "Meeting request removed from request list.", 200);
+            }
+        }
+
+        return $this->error([], "Meeting not found.", 404);
     }
 }
