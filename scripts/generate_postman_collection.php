@@ -109,13 +109,13 @@ function requestSample(string $uri, string $method): ?array
 
     if (preg_match('#^meeting-events/\{[^}]+\}/(accept|reject|cancel|remove-request)$#', $uri)) {
         return ['body' => rawJsonBody([
-            'request_type' => 'event_config',
+            'request_type' => 'event_request',
         ])];
     }
 
     if (preg_match('#^meeting-bookings/\{[^}]+\}/(accept|reject|cancel|remove-request)$#', $uri)) {
         return ['body' => rawJsonBody([
-            'request_type' => 'booking_config',
+            'request_type' => 'booking_request',
         ])];
     }
 

@@ -162,7 +162,7 @@ class MeetingEventController extends Controller
         }
     }
 
-    // Admin: list event requests (pending configurations created by companies)
+    // Admin: list event requests
     public function getEventRequests()
     {
         $eventRequests = collect();
@@ -198,41 +198,11 @@ class MeetingEventController extends Controller
                 });
         }
 
-        $events = MeetingEvent::where(function ($query) {
-            $query->whereNull('status')->orWhere('status', '!=', 'removed');
-        })
-            ->with(['company:id,name,logo', 'room:id,room_name', 'creator:id,profile_photo'])
-            ->get()
-            ->map(function ($event) {
-                return [
-                    'id' => $event->id,
-                    'request_type' => 'event_config',
-                    'target_id' => $event->id,
-                    'event_name' => $event->event_name,
-                    'date' => $event->event_date,
-                    'start_time' => null,
-                    'end_time' => null,
-                    'invitees' => $event->max_invitees,
-                    'status' => $event->status,
-                    'room' => $event->room ? [
-                        'id' => $event->room->id,
-                        'name' => $event->room->room_name,
-                    ] : null,
-                    'user' => [
-                        'id' => $event->creator->id ?? null,
-                        'name' => $event->creator->name ?? null,
-                    ],
-                    'created_at' => $event->created_at,
-                ];
-            });
-
-        $combined = $eventRequests->merge($events)->sortByDesc('created_at')->values();
-
-        if ($combined->isEmpty()) {
+        if ($eventRequests->isEmpty()) {
             return $this->success([], 'No event requests found.', 200);
         }
 
-        return $this->success($combined, 'Event requests fetched successfully', 200);
+        return $this->success($eventRequests->sortByDesc('created_at')->values(), 'Event requests fetched successfully', 200);
     }
 
     // GET REQUEST LIST (only user event booking requests)
