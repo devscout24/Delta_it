@@ -118,6 +118,16 @@ class DatabaseSeeder extends Seeder
             ],
         ]);
 
+        $adminUser = User::where('email', 'admin@example.com')->first();
+        if ($adminUser) {
+            $adminUser->syncRoles(['admin']);
+        }
+
+        $companyUser = User::where('email', 'jane.doe@technova.com')->first();
+        if ($companyUser) {
+            $companyUser->syncRoles(['company_user']);
+        }
+
         DB::table('contracts')->insert([
             'company_id' => 1,
             'name' => 'TechNova Employment Agreement',

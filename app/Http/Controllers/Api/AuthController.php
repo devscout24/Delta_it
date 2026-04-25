@@ -11,16 +11,80 @@ use App\Http\Controllers\Controller;
 use App\Models\UserPreference;
 use App\Traits\ApiResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\Password;
 
 
 class AuthController extends Controller
 {
     use ApiResponse;
+
+    private function buildAuthPayload(User $user, string $token): array
+    {
+        $user->loadMissing('roles');
+
+        return [
+            'id' => $user->id,
+            'token' => $token,
+            'name' => $user->name ?? '',
+            'last_name' => $user->last_name ?? '',
+            'email' => $user->email,
+            'username' => $user->username,
+            'user_type' => $user->user_type,
+            'status' => $user->status,
+            'company_id' => $user->company_id,
+            'roles' => $user->roles->pluck('name')->values()->all(),
+            'avatar' => asset($user->avatar ?: 'user.png'),
+        ];
+    }
+
+    private function loginForPortal(Request $request, array $allowedUserTypes, string $successMessage, string $forbiddenMessage)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'password' => 'required|string|min:6',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->error($validator->errors(), $validator->errors()->first(), 422);
+        }
+
+        $user = User::where('email', $request->email)->first();
+
+        if (! $user) {
+            return $this->error([], 'Hmm, that didn’t work. Double-check your login details', 401);
+        }
+
+        if (! in_array($user->user_type, $allowedUserTypes, true)) {
+            return $this->error([], $forbiddenMessage, 403);
+        }
+
+        if ($user->status !== 'active') {
+            return $this->error([], 'Your account is inactive. Please contact support.', 403);
+        }
+
+        $credentials = $request->only('email', 'password');
+        $token = Auth::guard('api')->attempt($credentials);
+
+        if (! $token) {
+            return $this->error([], 'Hmm, that didn’t work. Double-check your login details', 401);
+        }
+
+        $user = Auth::guard('api')->user();
+        $user->last_login_at = now();
+        $user->save();
+
+        return $this->success(
+            $this->buildAuthPayload($user, $token),
+            $successMessage,
+            200
+        );
+    }
 
     // ================
     // Auth Methods
@@ -28,7 +92,8 @@ class AuthController extends Controller
 
     public function signup(Request $request)
     {
-        $validator = Validator::make($request->all(),
+        $validator = Validator::make(
+            $request->all(),
             [
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|max:255|unique:users,email',
@@ -54,70 +119,41 @@ class AuthController extends Controller
             'name'          => $request->name,
             'email'         => $request->email,
             'password'      => bcrypt($request->password),
-            'last_login_at' => now()
+            'last_login_at' => now(),
+            'user_type'     => 'user',
+            'status'        => 'active',
         ]);
 
-        // Attempt token-based login (JWT)
         $credentials = $request->only('email', 'password');
-        $token = Auth::guard('api')->attempt($credentials);
-
-        if (!$token) {
+        if (! $token = Auth::guard('api')->attempt($credentials)) {
             return $this->error([], 'Registration successful but token generation failed.', 500);
         }
 
-        // Format user data
-        $userData = [
-            'id'     => $user->id,
-            'token'  => $token,
-            'name'   => $user->name,
-            'email'  => $user->email,
-            'avatar' => asset($user->avatar == null ? asset('user.png') : asset($user->avatar)),
-        ];
-
-        return $this->success($userData, 'Registration and login successful', 200);
+        return $this->success(
+            $this->buildAuthPayload($user, $token),
+            'Registration and login successful',
+            200
+        );
     }
 
     public function login(Request $request)
     {
-        // Validate request inputs
-        $validate = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'password' => 'required|string|min:6',
-        ]);
+        return $this->loginForPortal(
+            $request,
+            ['user', 'company_user', 'reception'],
+            'Login Successful',
+            'This account is not allowed to access the mobile app.'
+        );
+    }
 
-        if ($validate->fails()) {
-            return $this->error($validate->errors(), $validate->errors()->first(), 422);
-        }
-
-        // Attempt login with email and password
-        $credentials = $request->only('email', 'password');
-        $token = Auth::guard('api')->attempt($credentials);
-
-        // Return error if credentials are invalid
-        if (!$token) {
-            return $this->error([], 'Hmm, that didn’t work. Double-check your login details', 401);
-        }
-
-        // Retrieve authenticated user
-        $user = Auth::guard('api')->user();
-
-        // Update last login timestamp
-        $user->last_login_at = now();
-        $user->save();
-
-        // Format user data
-        $userData = [
-            'id'            => $user->id,
-            'token'         => $token,
-            'name'          => $user->name == null ? '' : $user->name,
-            'last_name'     => $user->last_name == null ? '' : $user->last_name,
-            'email'         => $user->email,
-            'username'      => $user->username,
-            'avatar' => asset($user->avatar == null ? 'user.png' : $user->avatar),
-        ];
-
-
-        return $this->success($userData, 'Login Successful', 200);
+    public function adminLogin(Request $request)
+    {
+        return $this->loginForPortal(
+            $request,
+            ['admin'],
+            'Admin Login Successful',
+            'This account is not allowed to access the admin portal.'
+        );
     }
 
 
@@ -308,17 +344,11 @@ class AuthController extends Controller
             return $this->error([], 'Unable to login. Please try again.', 401);
         }
 
-        // ✅ Prepare user data
-        $userData = [
-            'id'       => $user->id,
-            'token'    => $token,
-            'name'     => $user->name ?? 'User_name_' . uniqid(),
-            'email'    => $user->email,
-            'username' => $user->username,
-            'avatar'   => asset($user->avatar ?? 'user.png'),
-        ];
-
-        return $this->success($userData, 'Password reset & login successful', 200);
+        return $this->success(
+            $this->buildAuthPayload($user, $token),
+            'Password reset & login successful',
+            200
+        );
     }
 
     // ================

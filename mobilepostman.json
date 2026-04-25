@@ -1,0 +1,1060 @@
+{
+    "info": {
+        "_postman_id": "ffb7a4a25fc3dc3b9331462d523a1a99",
+        "name": "Delta IT Mobile API",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Authentication",
+            "item": [
+                {
+                    "name": "POST /user-login",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/user-login",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "user-login"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"user@example.com\",\n    \"password\": \"password\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /user-logout",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/user-logout",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "user-logout"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /send-otp",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/send-otp",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "send-otp"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"user@example.com\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /verify-otp",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/verify-otp",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "verify-otp"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"user@example.com\",\n    \"otp\": \"1234\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /reset-password",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/reset-password",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "reset-password"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"user@example.com\",\n    \"reset_token\": \"reset-token\",\n    \"password\": \"NewPass123!\",\n    \"password_confirmation\": \"NewPass123!\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /store-user-fcm-token",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/store-user-fcm-token",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "store-user-fcm-token"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"device_id\": \"device-123\",\n    \"token\": \"fcm-token\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /delete-user-fcm-token",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/delete-user-fcm-token",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "delete-user-fcm-token"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"device_id\": \"device-123\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /update-user",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/update-user",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "update-user"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"John Doe\",\n    \"phone\": \"+1234567890\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /delete-account",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/delete-account",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "delete-account"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /user/profile/reset-password",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/user/profile/reset-password",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "user",
+                                "profile",
+                                "reset-password"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"current_password\": \"CurrentPass123!\",\n    \"new_password\": \"NewPass123!\",\n    \"new_password_confirmation\": \"NewPass123!\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /create-account",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/create-account",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "create-account"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"user@example.com\",\n    \"password\": \"password123\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Profile",
+            "item": [
+                {
+                    "name": "GET /mobile/profile-info",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/mobile/profile-info",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "profile-info"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /mobile/profile-update",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/mobile/profile-update",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "profile-update"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Sample Name\",\n    \"last_name\": \"sample_last_name\",\n    \"phone\": \"sample_phone\",\n    \"address\": \"sample_address\",\n    \"zipcode\": \"sample_zipcode\",\n    \"profile_photo\": \"file-upload-placeholder\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /mobile/profile-change-password",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/mobile/profile-change-password",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "profile-change-password"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"current_password\": \"password123\",\n    \"new_password\": \"password123\",\n    \"new_password_confirmation\": \"password123\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Company Info",
+            "item": [
+                {
+                    "name": "GET /mobile/account/company-info",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/mobile/account/company-info",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "account",
+                                "company-info"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /mobile/account/company-update",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/mobile/account/company-update",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "account",
+                                "company-update"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"company_id\": 1,\n    \"logo\": \"file-upload-placeholder\",\n    \"name\": {\n        \"required\": \"sample_required\"\n    },\n    \"fiscal_name\": \"sample_fiscal_name\",\n    \"email\": {\n        \"unique\": \"sample_unique\"\n    },\n    \"nif\": \"sample_nif\",\n    \"phone\": \"sample_phone\",\n    \"incubation_type\": {\n        \"required\": \"sample_required\"\n    },\n    \"business_area\": [\n        1,\n        2\n    ],\n    \"manager\": \"sample_manager\",\n    \"description\": \"Sample description\",\n    \"status\": \"active\",\n    \"rooms\": [\n        1,\n        2\n    ]\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Collaborators",
+            "item": [
+                {
+                    "name": "GET /mobile/account/collaborators",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/mobile/account/collaborators",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "account",
+                                "collaborators"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /mobile/account/collaborator/{id}",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/mobile/account/collaborator/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "account",
+                                "collaborator",
+                                "{{id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /mobile/account/collaborator-add",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/mobile/account/collaborator-add",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "account",
+                                "collaborator-add"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"first_name\": \"sample_first_name\",\n    \"last_name\": \"sample_last_name\",\n    \"job_position\": \"sample_job_position\",\n    \"email\": \"user@example.com\",\n    \"phone_extension\": \"sample_phone_extension\",\n    \"phone_number\": \"sample_phone_number\",\n    \"access_card_number\": \"sample_access_card_number\",\n    \"parking_card\": true,\n    \"company_id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /mobile/account/collaborator-update/{id}",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/mobile/account/collaborator-update/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "account",
+                                "collaborator-update",
+                                "{{id}}"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1,\n    \"first_name\": \"sample_first_name\",\n    \"last_name\": \"sample_last_name\",\n    \"job_position\": \"sample_job_position\",\n    \"email\": \"user@example.com\",\n    \"phone_extension\": \"sample_phone_extension\",\n    \"phone_number\": \"sample_phone_number\",\n    \"access_card_number\": \"sample_access_card_number\",\n    \"parking_card\": true\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /mobile/account/collaborator-delete",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/mobile/account/collaborator-delete",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "account",
+                                "collaborator-delete"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Contracts",
+            "item": [
+                {
+                    "name": "GET /mobile/account/contracts",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/mobile/account/contracts",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "account",
+                                "contracts"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /mobile/account/contract/{id}",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/mobile/account/contract/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "account",
+                                "contract",
+                                "{{id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /mobile/account/contract-update/{id}",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/mobile/account/contract-update/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "account",
+                                "contract-update",
+                                "{{id}}"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Sample Name\",\n    \"type\": \"request\",\n    \"start_date\": \"2026-04-26\",\n    \"end_date\": \"2026-04-26\",\n    \"renewal_date\": \"2026-04-26\",\n    \"status\": \"active\",\n    \"associate_companies\": [\n        1,\n        2\n    ],\n    \"files_to_add\": [\n        1,\n        2\n    ],\n    \"files_to_remove\": [\n        1,\n        2\n    ]\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /mobile/account/contract-file-add",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/mobile/account/contract-file-add",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "account",
+                                "contract-file-add"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"file\": \"file-upload-placeholder\",\n    \"company_id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Access Cards",
+            "item": [
+                {
+                    "name": "GET /mobile/account/access-cards/{id}",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/mobile/account/access-cards/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "account",
+                                "access-cards",
+                                "{{id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /mobile/account/access-cards-update/{id}",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/mobile/account/access-cards-update/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "account",
+                                "access-cards-update",
+                                "{{id}}"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"active_card\": 1,\n    \"lost_damage_card\": 1,\n    \"active_parking_card\": 1,\n    \"max_parking_card\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://127.0.0.1:8000/api"
+        },
+        {
+            "key": "token",
+            "value": ""
+        }
+    ]
+}

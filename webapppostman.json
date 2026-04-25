@@ -1,0 +1,4216 @@
+{
+    "info": {
+        "_postman_id": "74d4a7b619fb345492a97250212c695c",
+        "name": "Delta IT WebApp API",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Authentication",
+            "item": [
+                {
+                    "name": "POST /admin-login",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/admin-login",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "admin-login"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"admin@example.com\",\n    \"password\": \"password\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /admin-logout",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/admin-logout",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "admin-logout"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Profile",
+            "item": [
+                {
+                    "name": "GET /profile-info",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/profile-info",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "profile-info"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /profile-update",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/profile-update",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "profile-update"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Sample Name\",\n    \"last_name\": \"sample_last_name\",\n    \"phone\": \"sample_phone\",\n    \"address\": \"sample_address\",\n    \"zipcode\": \"sample_zipcode\",\n    \"profile_photo\": \"file-upload-placeholder\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /profile-change-password",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/profile-change-password",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "profile-change-password"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"current_password\": \"password123\",\n    \"new_password\": \"password123\",\n    \"new_password_confirmation\": \"password123\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /user-profile",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/user-profile",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "user-profile"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /update-profile",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/update-profile",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "update-profile"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Sample Name\",\n    \"last_name\": \"sample_last_name\",\n    \"phone\": \"sample_phone\",\n    \"address\": \"sample_address\",\n    \"zipcode\": \"sample_zipcode\",\n    \"profile_photo\": \"file-upload-placeholder\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /change-password",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/change-password",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "change-password"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"current_password\": \"password123\",\n    \"new_password\": \"password123\",\n    \"new_password_confirmation\": \"password123\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Auth",
+            "item": [
+                {
+                    "name": "POST /profile-forgot-password",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/profile-forgot-password",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "profile-forgot-password"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"user@example.com\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Dashboard",
+            "item": [
+                {
+                    "name": "GET /dashboard/stats",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/dashboard/stats",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "dashboard",
+                                "stats"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Room",
+            "item": [
+                {
+                    "name": "GET /map/rooms/stats",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/map/rooms/stats",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "map",
+                                "rooms",
+                                "stats"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /map/rooms",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/map/rooms",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "map",
+                                "rooms"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /get-rooms",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/get-rooms",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get-rooms"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /add-room",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/add-room",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "add-room"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"floor\": \"sample_floor\",\n    \"room_name\": \"Sample Name\",\n    \"area\": 1,\n    \"polygon_points\": [\n        1,\n        2\n    ],\n    \"status\": \"active\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /assign-associate_company",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/assign-associate_company",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "assign-associate_company"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"room_id\": 1,\n    \"company_id\": 1,\n    \"status\": \"active\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /get-assign-associate_company-info/{id}",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/get-assign-associate_company-info/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get-assign-associate_company-info",
+                                "{{id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /show-room-details/{id}",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/show-room-details/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "show-room-details",
+                                "{{id}}"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /room-status-change/{status}/{id}",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/room-status-change/{{status}}/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "room-status-change",
+                                "{{status}}",
+                                "{{id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /map/rooms/remove-company",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/map/rooms/remove-company",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "map",
+                                "rooms",
+                                "remove-company"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"room_id\": 1,\n    \"status\": \"active\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Company",
+            "item": [
+                {
+                    "name": "GET /get-company",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/get-company",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get-company"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /add-company",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/add-company",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "add-company"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Sample Name\",\n    \"email\": \"user@example.com\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /update-company",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/update-company",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "update-company"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Sample Name\",\n    \"email\": \"user@example.com\",\n    \"fiscal_name\": \"sample_fiscal_name\",\n    \"nif\": \"sample_nif\",\n    \"phone\": \"sample_phone\",\n    \"incubation_type\": \"virtual\",\n    \"business_area\": [\n        \"Technology\"\n    ],\n    \"manager\": \"sample_manager\",\n    \"description\": \"Sample description\",\n    \"logo\": \"file-upload-placeholder\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /update-general-company",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/update-general-company",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "update-general-company"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"company_id\": 1,\n    \"logo\": \"file-upload-placeholder\",\n    \"name\": {\n        \"required\": \"sample_required\"\n    },\n    \"fiscal_name\": \"sample_fiscal_name\",\n    \"email\": {\n        \"unique\": \"sample_unique\"\n    },\n    \"nif\": \"sample_nif\",\n    \"phone\": \"sample_phone\",\n    \"incubation_type\": {\n        \"required\": \"sample_required\"\n    },\n    \"business_area\": [\n        1,\n        2\n    ],\n    \"manager\": \"sample_manager\",\n    \"description\": \"Sample description\",\n    \"status\": \"active\",\n    \"rooms\": [\n        1,\n        2\n    ]\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /upload_logo",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/upload_logo",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "upload_logo"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"logo\": \"file-upload-placeholder\",\n    \"company_id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /upload-delete",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/upload-delete",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "upload-delete"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"company_id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /delete-company",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/delete-company",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "delete-company"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /get-specific-company",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/get-specific-company",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get-specific-company"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /show-company/{id}",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/show-company/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "show-company",
+                                "{{id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /archive-company/{id}",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/archive-company/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "archive-company",
+                                "{{id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /restore-company/{id}",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/restore-company/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "restore-company",
+                                "{{id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Collaborator",
+            "item": [
+                {
+                    "name": "GET /collaborators-list",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/collaborators-list",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "collaborators-list"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /collaborator-info/{id}",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/collaborator-info/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "collaborator-info",
+                                "{{id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /collaborators-add",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/collaborators-add",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "collaborators-add"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"first_name\": \"sample_first_name\",\n    \"last_name\": \"sample_last_name\",\n    \"job_position\": \"sample_job_position\",\n    \"email\": \"user@example.com\",\n    \"phone_extension\": \"sample_phone_extension\",\n    \"phone_number\": \"sample_phone_number\",\n    \"access_card_number\": \"sample_access_card_number\",\n    \"parking_card\": true,\n    \"company_id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /collaborators-update/{id}",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/collaborators-update/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "collaborators-update",
+                                "{{id}}"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1,\n    \"first_name\": \"sample_first_name\",\n    \"last_name\": \"sample_last_name\",\n    \"job_position\": \"sample_job_position\",\n    \"email\": \"user@example.com\",\n    \"phone_extension\": \"sample_phone_extension\",\n    \"phone_number\": \"sample_phone_number\",\n    \"access_card_number\": \"sample_access_card_number\",\n    \"parking_card\": true\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /collaborators-delete",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/collaborators-delete",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "collaborators-delete"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Contract",
+            "item": [
+                {
+                    "name": "GET /get-company-contracts",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/get-company-contracts",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get-company-contracts"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /get-company-contracts-details/{id}",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/get-company-contracts-details/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get-company-contracts-details",
+                                "{{id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /update-contract-info/{id}",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/update-contract-info/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "update-contract-info",
+                                "{{id}}"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Sample Name\",\n    \"type\": \"request\",\n    \"start_date\": \"2026-04-26\",\n    \"end_date\": \"2026-04-26\",\n    \"renewal_date\": \"2026-04-26\",\n    \"status\": \"active\",\n    \"associate_companies\": [\n        1,\n        2\n    ],\n    \"files_to_add\": [\n        1,\n        2\n    ],\n    \"files_to_remove\": [\n        1,\n        2\n    ]\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /add-contract-file",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/add-contract-file",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "add-contract-file"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"file\": \"file-upload-placeholder\",\n    \"company_id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /remove-contract-file",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/remove-contract-file",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "remove-contract-file"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"file_id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /get-all-company-contracts",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/get-all-company-contracts",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get-all-company-contracts"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Document",
+            "item": [
+                {
+                    "name": "GET /get-all-documents/{id}",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/get-all-documents/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get-all-documents",
+                                "{{id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /add-documents/{id}",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/add-documents/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "add-documents",
+                                "{{id}}"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"document_name\": \"sample_document_name\",\n    \"document_type\": \"sample_document_type\",\n    \"file\": \"file-upload-placeholder\",\n    \"tags\": [\n        1,\n        2\n    ],\n    \"document_path\": \"sample_document_path\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /delete-document",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/delete-document",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "delete-document"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Account",
+            "item": [
+                {
+                    "name": "GET /get-company-user/{id}",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/get-company-user/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get-company-user",
+                                "{{id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /get-company-user-details/{id}",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/get-company-user-details/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get-company-user-details",
+                                "{{id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /add-company-user",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/add-company-user",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "add-company-user"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Sample Name\",\n    \"last_name\": \"sample_last_name\",\n    \"job_position\": \"sample_job_position\",\n    \"email\": \"user@example.com\",\n    \"password\": \"password123\",\n    \"password_confirmation\": \"password123\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /update-company-account/{id}",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/update-company-account/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "update-company-account",
+                                "{{id}}"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Sample Name\",\n    \"last_name\": \"sample_last_name\",\n    \"job_position\": \"sample_job_position\",\n    \"email\": \"user@example.com\",\n    \"password\": \"password123\",\n    \"password_confirmation\": \"password123\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /delete-company-account/{id}",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/delete-company-account/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "delete-company-account",
+                                "{{id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Access Card",
+            "item": [
+                {
+                    "name": "GET /get-cards/{id}",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/get-cards/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get-cards",
+                                "{{id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /access_card/update/{id}",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/access_card/update/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "access_card",
+                                "update",
+                                "{{id}}"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"active_card\": 1,\n    \"lost_damage_card\": 1,\n    \"active_parking_card\": 1,\n    \"max_parking_card\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Payment",
+            "item": [
+                {
+                    "name": "GET /company-payments-get",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/company-payments-get",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "company-payments-get"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /company-payments-add",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/company-payments-add",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "company-payments-add"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"company_id\": 1,\n    \"year\": 1,\n    \"month\": 1,\n    \"status\": \"active\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /company-payments-update/{id}",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/company-payments-update/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "company-payments-update",
+                                "{{id}}"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1,\n    \"value_non_vat\": 1,\n    \"value_vat\": 1,\n    \"printings_non_vat\": 1,\n    \"printings_vat\": 1,\n    \"status\": \"active\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /company-payments-yearly-info",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/company-payments-yearly-info",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "company-payments-yearly-info"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /get-all-company-payments-info",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/get-all-company-payments-info",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get-all-company-payments-info"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Internal Note",
+            "item": [
+                {
+                    "name": "GET /get-note/{id}",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/get-note/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get-note",
+                                "{{id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /add-note",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/add-note",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "add-note"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"company_id\": 1,\n    \"title\": \"sample_title\",\n    \"note\": \"sample_note\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /update-note/{id}",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/update-note/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "update-note",
+                                "{{id}}"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"title\": \"sample_title\",\n    \"note\": \"sample_note\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /delete-note/{id}",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/delete-note/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "delete-note",
+                                "{{id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Internal Contract",
+            "item": [
+                {
+                    "name": "GET /get-internal-contracts",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/get-internal-contracts",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get-internal-contracts"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /get-internal-contracts-details/{id}",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/get-internal-contracts-details/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get-internal-contracts-details",
+                                "{{id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /get-internal-contracts-store",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/get-internal-contracts-store",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get-internal-contracts-store"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Sample Name\",\n    \"type\": \"request\",\n    \"start_date\": \"2026-04-26\",\n    \"end_date\": \"2026-04-26\",\n    \"renewal_date\": \"2026-04-26\",\n    \"status\": \"active\",\n    \"associate_companies\": [\n        1,\n        2\n    ],\n    \"files\": [\n        1,\n        2\n    ]\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /get-internal-contracts-update/{id}",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/get-internal-contracts-update/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get-internal-contracts-update",
+                                "{{id}}"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Sample Name\",\n    \"type\": \"request\",\n    \"start_date\": \"2026-04-26\",\n    \"end_date\": \"2026-04-26\",\n    \"renewal_date\": \"2026-04-26\",\n    \"status\": \"active\",\n    \"associate_companies\": [\n        1,\n        2\n    ],\n    \"files_to_add\": [\n        1,\n        2\n    ],\n    \"files_to_remove\": [\n        1,\n        2\n    ]\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /get-internal-contracts-destroy/{id}",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/get-internal-contracts-destroy/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get-internal-contracts-destroy",
+                                "{{id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Internal Document",
+            "item": [
+                {
+                    "name": "GET /internal-documents/company",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/internal-documents/company",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "internal-documents",
+                                "company"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /internal-documents/store",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/internal-documents/store",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "internal-documents",
+                                "store"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"company_id\": 1,\n    \"name\": \"Sample Name\",\n    \"type\": \"request\",\n    \"files\": [\n        1,\n        2\n    ],\n    \"tags\": [\n        1,\n        2\n    ],\n    \"document_path\": \"sample_document_path\",\n    \"file_path\": \"sample_file_path\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /internal-documents/show/{id}",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/internal-documents/show/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "internal-documents",
+                                "show",
+                                "{{id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /internal-documents/delete/{id}",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/internal-documents/delete/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "internal-documents",
+                                "delete",
+                                "{{id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Ticket",
+            "item": [
+                {
+                    "name": "GET /tickets/list",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/tickets/list",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "tickets",
+                                "list"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /tickets/create",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/tickets/create",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "tickets",
+                                "create"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"subject\": \"Sample subject\",\n    \"company_id\": 1,\n    \"type\": \"request\",\n    \"room_id\": 1,\n    \"message\": \"Sample message\",\n    \"assigned_to\": \"sample_assigned_to\",\n    \"unique_id\": 1,\n    \"status\": \"active\",\n    \"action\": \"sample_action\",\n    \"message_type\": \"sample_message_type\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /tickets/show/{id}",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/tickets/show/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "tickets",
+                                "show",
+                                "{{id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /tickets/update/{id}",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/tickets/update/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "tickets",
+                                "update",
+                                "{{id}}"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"status\": \"active\",\n    \"action\": \"2026-04-26\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /tickets/delete/{id}",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/tickets/delete/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "tickets",
+                                "delete",
+                                "{{id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Ticket Message",
+            "item": [
+                {
+                    "name": "GET /tickets/{ticket_id}/messages",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/tickets/{{ticket_id}}/messages",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "tickets",
+                                "{{ticket_id}}",
+                                "messages"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /tickets/{ticket_id}/messages/send",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/tickets/{{ticket_id}}/messages/send",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "tickets",
+                                "{{ticket_id}}",
+                                "messages",
+                                "send"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"message\": \"Sample message\",\n    \"type\": \"request\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Ticket Attachment",
+            "item": [
+                {
+                    "name": "POST /tickets/messages/{message_id}/upload-file",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/tickets/messages/{{message_id}}/upload-file",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "tickets",
+                                "messages",
+                                "{{message_id}}",
+                                "upload-file"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"file\": \"file-upload-placeholder\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "DELETE /tickets/messages/{message_id}/delete-file",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/tickets/messages/{{message_id}}/delete-file",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "tickets",
+                                "messages",
+                                "{{message_id}}",
+                                "delete-file"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Meeting",
+            "item": [
+                {
+                    "name": "GET /get-meeting",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/get-meeting",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get-meeting"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /get-meeting/latest",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/get-meeting/latest",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get-meeting",
+                                "latest"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /get-meeting/mobile",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/get-meeting/mobile",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get-meeting",
+                                "mobile"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /get-todays-meetings",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/get-todays-meetings",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "get-todays-meetings"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /create-meetings",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/create-meetings",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "create-meetings"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"company_id\": 1,\n    \"meeting_name\": \"sample_meeting_name\",\n    \"date\": \"2026-04-26\",\n    \"start_time\": \"10:00\",\n    \"end_time\": \"10:00\",\n    \"meeting_type\": \"sample_meeting_type\",\n    \"online_link\": \"sample_online_link\",\n    \"location\": \"sample_location\",\n    \"add_emails\": [\n        1,\n        2\n    ],\n    \"status\": \"active\",\n    \"warning\": \"sample_warning\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /update-meetings/{id}",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/update-meetings/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "update-meetings",
+                                "{{id}}"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"company_id\": 1,\n    \"meeting_name\": \"sample_meeting_name\",\n    \"date\": \"sample_date\",\n    \"start_time\": \"10:00\",\n    \"end_time\": \"10:00\",\n    \"meeting_type\": \"sample_meeting_type\",\n    \"online_link\": \"sample_online_link\",\n    \"location\": \"sample_location\",\n    \"add_emails\": [\n        1,\n        2\n    ]\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /meeting-details/{id}",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting-details/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting-details",
+                                "{{id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /update-meeting-status",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/update-meeting-status",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "update-meeting-status"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1,\n    \"status\": \"active\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /meeting/request",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting/request",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting",
+                                "request"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"room_id\": 1,\n    \"meeting_name\": \"sample_meeting_name\",\n    \"company_id\": 1,\n    \"date\": \"2026-04-26\",\n    \"start_time\": \"2026-04-26\",\n    \"end_time\": \"2026-04-26\",\n    \"status\": \"active\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /meeting/{id}/accept",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting/{{id}}/accept",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting",
+                                "{{id}}",
+                                "accept"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /meeting/{meeting_id}/accept",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting/{{meeting_id}}/accept",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting",
+                                "{{meeting_id}}",
+                                "accept"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"status\": \"active\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /meeting/{id}/reject",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting/{{id}}/reject",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting",
+                                "{{id}}",
+                                "reject"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /meeting/{meeting_id}/reject",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting/{{meeting_id}}/reject",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting",
+                                "{{meeting_id}}",
+                                "reject"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"status\": \"active\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /meeting/{id}/cancel",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting/{{id}}/cancel",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting",
+                                "{{id}}",
+                                "cancel"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /meeting/{meeting_id}/cancel",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting/{{meeting_id}}/cancel",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting",
+                                "{{meeting_id}}",
+                                "cancel"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"status\": \"active\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /meeting/{meeting_id}/remove-request",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting/{{meeting_id}}/remove-request",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting",
+                                "{{meeting_id}}",
+                                "remove-request"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /meeting/{meeting_id}/remove-request",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting/{{meeting_id}}/remove-request",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting",
+                                "{{meeting_id}}",
+                                "remove-request"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"status\": \"active\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /meeting/requests",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting/requests",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting",
+                                "requests"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Meeting Event",
+            "item": [
+                {
+                    "name": "GET /meeting-events",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting-events",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting-events"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /meeting-events-show/{id}",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting-events-show/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting-events-show",
+                                "{{id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /meeting-events/request/list",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting-events/request/list",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting-events",
+                                "request",
+                                "list"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /meeting-events/request/create",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting-events/request/create",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting-events",
+                                "request",
+                                "create"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"meeting_event_id\": 1,\n    \"date\": \"2026-04-26\",\n    \"start_time\": \"10:00\",\n    \"end_time\": \"10:00\",\n    \"invitees\": \"sample_invitees\",\n    \"status\": \"active\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /meeting-events/request/my",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting-events/request/my",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting-events",
+                                "request",
+                                "my"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /meeting-events/{event_id}/accept",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting-events/{{event_id}}/accept",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting-events",
+                                "{{event_id}}",
+                                "accept"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /meeting-events/{event_id}/accept",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting-events/{{event_id}}/accept",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting-events",
+                                "{{event_id}}",
+                                "accept"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"status\": \"active\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /meeting-events/{event_id}/reject",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting-events/{{event_id}}/reject",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting-events",
+                                "{{event_id}}",
+                                "reject"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /meeting-events/{event_id}/reject",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting-events/{{event_id}}/reject",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting-events",
+                                "{{event_id}}",
+                                "reject"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"status\": \"active\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /meeting-events/{event_id}/cancel",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting-events/{{event_id}}/cancel",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting-events",
+                                "{{event_id}}",
+                                "cancel"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /meeting-events/{event_id}/cancel",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting-events/{{event_id}}/cancel",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting-events",
+                                "{{event_id}}",
+                                "cancel"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"status\": \"active\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /meeting-events/{event_id}/remove-request",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting-events/{{event_id}}/remove-request",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting-events",
+                                "{{event_id}}",
+                                "remove-request"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /meeting-events/{event_id}/remove-request",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting-events/{{event_id}}/remove-request",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting-events",
+                                "{{event_id}}",
+                                "remove-request"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"status\": \"active\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /meeting-events/create",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting-events/create",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting-events",
+                                "create"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"event_name\": \"Sample Name\",\n    \"event_date\": \"2026-04-26\",\n    \"event_color\": \"#2563eb\",\n    \"online_link\": \"sample_online_link\",\n    \"location\": \"sample_location\",\n    \"max_invitees\": 1,\n    \"description\": \"Sample description\",\n    \"company_id\": 1,\n    \"room_id\": 1,\n    \"duration\": 1,\n    \"timezone\": \"10:00\",\n    \"schedule_mode\": \"future\",\n    \"future_days\": 1,\n    \"date_from\": \"2026-04-26\",\n    \"date_to\": \"2026-04-26\",\n    \"availabilities\": [\n        1,\n        2\n    ],\n    \"status\": \"active\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /meeting-events/update/{id}",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting-events/update/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting-events",
+                                "update",
+                                "{{id}}"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"event_name\": \"Sample Name\",\n    \"event_date\": \"2026-04-26\",\n    \"event_color\": \"#2563eb\",\n    \"online_link\": \"sample_online_link\",\n    \"location\": \"sample_location\",\n    \"max_invitees\": 1,\n    \"description\": \"Sample description\",\n    \"duration\": 1,\n    \"timezone\": \"10:00\",\n    \"schedule_mode\": \"future\",\n    \"future_days\": 1,\n    \"date_from\": \"2026-04-26\",\n    \"date_to\": \"2026-04-26\",\n    \"availabilities\": [\n        1,\n        2\n    ]\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /meeting-events/delete/{id}",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting-events/delete/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting-events",
+                                "delete",
+                                "{{id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /meeting-events/requests",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting-events/requests",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting-events",
+                                "requests"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Booking",
+            "item": [
+                {
+                    "name": "GET /meeting-bookings",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting-bookings",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting-bookings"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /meeting-bookings-show/{id}",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting-bookings-show/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting-bookings-show",
+                                "{{id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /meeting-bookings/create",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting-bookings/create",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting-bookings",
+                                "create"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"booking_name\": \"sample_booking_name\",\n    \"booking_date\": \"2026-04-26\",\n    \"booking_color\": \"sample_booking_color\",\n    \"online_link\": \"sample_online_link\",\n    \"location\": \"sample_location\",\n    \"max_invitees\": 1,\n    \"description\": \"Sample description\",\n    \"duration\": 1,\n    \"timezone\": \"10:00\",\n    \"schedule_mode\": \"future\",\n    \"future_days\": 1,\n    \"date_from\": \"2026-04-26\",\n    \"date_to\": \"2026-04-26\",\n    \"availabilities\": [\n        1,\n        2\n    ],\n    \"errors\": \"sample_errors\",\n    \"status\": \"active\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /meeting-bookings/update/{id}",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting-bookings/update/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting-bookings",
+                                "update",
+                                "{{id}}"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"booking_name\": \"sample_booking_name\",\n    \"booking_date\": \"2026-04-26\",\n    \"booking_color\": \"sample_booking_color\",\n    \"online_link\": \"sample_online_link\",\n    \"location\": \"sample_location\",\n    \"max_invitees\": 1,\n    \"description\": \"Sample description\",\n    \"duration\": 1,\n    \"timezone\": \"10:00\",\n    \"schedule_mode\": \"future\",\n    \"future_days\": 1,\n    \"date_from\": \"2026-04-26\",\n    \"date_to\": \"2026-04-26\",\n    \"availabilities\": [\n        1,\n        2\n    ]\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /meeting-bookings/delete/{id}",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting-bookings/delete/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting-bookings",
+                                "delete",
+                                "{{id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /meeting-bookings/request/list",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting-bookings/request/list",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting-bookings",
+                                "request",
+                                "list"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /meeting-bookings/request/details/{id}",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting-bookings/request/details/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting-bookings",
+                                "request",
+                                "details",
+                                "{{id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /meeting-bookings/request/create",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting-bookings/request/create",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting-bookings",
+                                "request",
+                                "create"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"meeting_booking_id\": 1,\n    \"date\": \"2026-04-26\",\n    \"start_time\": \"10:00\",\n    \"end_time\": \"10:00\",\n    \"invitees\": \"sample_invitees\",\n    \"status\": \"active\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /meeting-bookings/request/my",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting-bookings/request/my",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting-bookings",
+                                "request",
+                                "my"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /meeting-bookings/{booking_id}/accept",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting-bookings/{{booking_id}}/accept",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting-bookings",
+                                "{{booking_id}}",
+                                "accept"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /meeting-bookings/{booking_id}/accept",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting-bookings/{{booking_id}}/accept",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting-bookings",
+                                "{{booking_id}}",
+                                "accept"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"status\": \"active\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /meeting-bookings/{booking_id}/reject",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting-bookings/{{booking_id}}/reject",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting-bookings",
+                                "{{booking_id}}",
+                                "reject"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /meeting-bookings/{booking_id}/reject",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting-bookings/{{booking_id}}/reject",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting-bookings",
+                                "{{booking_id}}",
+                                "reject"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"status\": \"active\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /meeting-bookings/{booking_id}/cancel",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting-bookings/{{booking_id}}/cancel",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting-bookings",
+                                "{{booking_id}}",
+                                "cancel"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /meeting-bookings/{booking_id}/cancel",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting-bookings/{{booking_id}}/cancel",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting-bookings",
+                                "{{booking_id}}",
+                                "cancel"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"status\": \"active\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /meeting-bookings/{booking_id}/remove-request",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting-bookings/{{booking_id}}/remove-request",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting-bookings",
+                                "{{booking_id}}",
+                                "remove-request"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /meeting-bookings/{booking_id}/remove-request",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting-bookings/{{booking_id}}/remove-request",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting-bookings",
+                                "{{booking_id}}",
+                                "remove-request"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"status\": \"active\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /meeting-bookings/cancel/{id}",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/meeting-bookings/cancel/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "meeting-bookings",
+                                "cancel",
+                                "{{id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /bookings/request/admin",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/bookings/request/admin",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "bookings",
+                                "request",
+                                "admin"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Calendar",
+            "item": [
+                {
+                    "name": "GET /calendar/overview",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/calendar/overview",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "calendar",
+                                "overview"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Notification",
+            "item": [
+                {
+                    "name": "GET /notifications",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/notifications",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "notifications"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET /notifications/unread",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/notifications/unread",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "notifications",
+                                "unread"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /notifications/create",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/notifications/create",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "notifications",
+                                "create"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"user_id\": 1,\n    \"title\": \"sample_title\",\n    \"description\": \"Sample description\",\n    \"time\": \"10:00\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /notifications/read",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/notifications/read",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "notifications",
+                                "read"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /notifications/delete",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/notifications/delete",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "notifications",
+                                "delete"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "User",
+            "item": [
+                {
+                    "name": "GET /company-users/list",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/company-users/list",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "company-users",
+                                "list"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /create-company-user",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/create-company-user",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "create-company-user"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"company_id\": 1,\n    \"name\": \"Sample Name\",\n    \"last_name\": \"sample_last_name\",\n    \"job_position\": \"sample_job_position\",\n    \"email\": \"user@example.com\",\n    \"password\": \"password123\",\n    \"password_confirmation\": \"password123\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://127.0.0.1:8000/api"
+        },
+        {
+            "key": "token",
+            "value": ""
+        }
+    ]
+}
