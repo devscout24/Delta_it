@@ -7,6 +7,7 @@ use App\Notifications\NewSystemNotification;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class NotificationSeeder extends Seeder
 {
@@ -15,72 +16,75 @@ class NotificationSeeder extends Seeder
      */
     public function run(): void
     {
-        $users = User::query()
-            ->whereIn('user_type', ['user', 'company_user', 'reception'])
-            ->take(3)
-            ->get();
+        $user = User::query()
+            ->where('username', 'mobileuser')
+            ->orWhere('email', 'mobile@example.com')
+            ->first();
 
-        if ($users->isEmpty()) {
+        if (! $user) {
             return;
         }
 
-        foreach ($users as $user) {
-            DB::table('notifications')
-                ->where('notifiable_type', User::class)
-                ->where('notifiable_id', $user->id)
-                ->delete();
+        DB::table('notifications')
+            ->where('notifiable_type', User::class)
+            ->where('notifiable_id', $user->id)
+            ->delete();
 
-            $items = [
-                [
-                    'title' => 'Maintenance ticket updated',
-                    'description' => 'Your maintenance request is now in progress.',
-                    'created_at' => Carbon::now()->subMinutes(1),
-                    'read_at' => null,
-                ],
-                [
-                    'title' => 'Contract reminder',
-                    'description' => 'Please review your contract renewal details.',
-                    'created_at' => Carbon::now()->subMinutes(24),
-                    'read_at' => null,
-                ],
-                [
-                    'title' => 'Access card notice',
-                    'description' => 'A new access card request has been approved.',
-                    'created_at' => Carbon::now()->subHours(2),
-                    'read_at' => Carbon::now()->subHours(2),
-                ],
-                [
-                    'title' => 'Meeting schedule changed',
-                    'description' => 'Your next meeting has a new start time.',
-                    'created_at' => Carbon::now()->subHours(17),
-                    'read_at' => Carbon::now()->subHours(15),
-                ],
-                [
-                    'title' => 'Document uploaded',
-                    'description' => 'A new shared document is available in your workspace.',
-                    'created_at' => Carbon::now()->subDays(2),
-                    'read_at' => Carbon::now()->subDays(2),
-                ],
+        $now = Carbon::now();
+        $items = [
+            [
+                'title' => 'Ticket status updated',
+                'description' => 'Your support ticket has moved to in progress.',
+                'created_at' => $now->copy()->subMinute(),
+                'read_at' => null,
+            ],
+            [
+                'title' => 'Company activity updated',
+                'description' => 'A new activity update is available for your company.',
+                'created_at' => $now->copy()->subMinutes(5),
+                'read_at' => null,
+            ],
+            [
+                'title' => 'Contract reminder',
+                'description' => 'Please review the latest contract renewal details.',
+                'created_at' => $now->copy()->subMinutes(24),
+                'read_at' => null,
+            ],
+            [
+                'title' => 'Meeting schedule changed',
+                'description' => 'Your next meeting has a new start time.',
+                'created_at' => $now->copy()->subHours(2),
+                'read_at' => $now->copy()->subHours(2),
+            ],
+            [
+                'title' => 'Document uploaded',
+                'description' => 'A new document is available in your workspace.',
+                'created_at' => $now->copy()->subHours(5),
+                'read_at' => $now->copy()->subHours(5),
+            ],
+            [
+                'title' => 'Access card approved',
+                'description' => 'Your access card request has been approved.',
+                'created_at' => $now->copy()->subHours(17),
+                'read_at' => $now->copy()->subHours(17),
+            ],
+        ];
+
+        DB::table('notifications')->insert(array_map(function (array $item) use ($user) {
+            return [
+                'id' => (string) Str::uuid(),
+                'type' => NewSystemNotification::class,
+                'notifiable_type' => User::class,
+                'notifiable_id' => $user->id,
+                'data' => json_encode([
+                    'title' => $item['title'],
+                    'description' => $item['description'],
+                    'time' => $item['created_at']->toDateTimeString(),
+                ]),
+                'read_at' => $item['read_at'],
+                'created_at' => $item['created_at'],
+                'updated_at' => $item['created_at'],
             ];
-
-            foreach ($items as $item) {
-                $notification = new NewSystemNotification(
-                    $item['title'],
-                    $item['description'],
-                    $item['created_at']->toDateTimeString()
-                );
-
-                $user->notify($notification);
-
-                $saved = $user->notifications()->latest()->first();
-                if ($saved) {
-                    $saved->forceFill([
-                        'created_at' => $item['created_at'],
-                        'updated_at' => $item['created_at'],
-                        'read_at' => $item['read_at'],
-                    ])->save();
-                }
-            }
-        }
+        }, $items));
     }
 }

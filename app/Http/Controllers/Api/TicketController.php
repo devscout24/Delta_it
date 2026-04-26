@@ -263,7 +263,7 @@ class TicketController extends Controller
         }
 
         if (! $user->company_id) {
-            return $this->error([], 'User is not assigned to a company', 422);
+            return $this->error([], 'You are not assigned to any company', 422);
         }
 
         if ($request->filled('room_id')) {
@@ -272,7 +272,7 @@ class TicketController extends Controller
                 ->exists();
 
             if (! $roomBelongsToCompany) {
-                return $this->error([], 'Selected room is not linked to your company', 422);
+                return $this->error([], "The room_id {$request->room_id} is not assigned to your company id {$user->company_id}", 422);
             }
         }
 
