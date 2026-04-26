@@ -17,6 +17,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
@@ -146,20 +147,30 @@ class DatabaseSeeder extends Seeder
             'updated_at' => now(),
         ]);
 
-        DB::table('access_cards')->updateOrInsert(
-            ['card_number' => 'seed-company-1-summary'],
-            [
-                'company_id' => 1,
-                'type' => 'access',
-                'status' => 'active',
-                'active_card' => 25,
-                'lost_damage_card' => 2,
-                'active_parking_card' => 10,
-                'max_parking_card' => 15,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]
-        );
+        $accessCardLookup = ['company_id' => 1];
+        $accessCardData = [
+            'active_card' => 25,
+            'lost_damage_card' => 2,
+            'active_parking_card' => 10,
+            'max_parking_card' => 15,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ];
+
+        if (Schema::hasColumn('access_cards', 'card_number')) {
+            $accessCardLookup = ['card_number' => 'seed-company-1-summary'];
+            $accessCardData['company_id'] = 1;
+        }
+
+        if (Schema::hasColumn('access_cards', 'type')) {
+            $accessCardData['type'] = 'access';
+        }
+
+        if (Schema::hasColumn('access_cards', 'status')) {
+            $accessCardData['status'] = 'active';
+        }
+
+        DB::table('access_cards')->updateOrInsert($accessCardLookup, $accessCardData);
 
         $documents = [
             [

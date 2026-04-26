@@ -60,18 +60,20 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            foreach ([
-                'terms_and_conditions',
-                'status',
-                'email_verified_at',
-                'user_type',
-                'phone',
-                'last_name',
-                'username',
-                'profile_photo',
-                'job_position',
-                'company_id',
-            ] as $column) {
+            foreach (
+                [
+                    'terms_and_conditions',
+                    'status',
+                    'email_verified_at',
+                    'user_type',
+                    'phone',
+                    'last_name',
+                    'username',
+                    'profile_photo',
+                    'job_position',
+                    'company_id',
+                ] as $column
+            ) {
                 if (Schema::hasColumn('users', $column)) {
                     $table->dropColumn($column);
                 }
