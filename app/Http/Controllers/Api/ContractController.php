@@ -7,6 +7,7 @@ use App\Models\Contract;
 use App\Traits\ApiResponse;
 use App\Models\ContractFile;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Services\ContractService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ContractRequest;
@@ -18,11 +19,13 @@ class ContractController extends Controller
 
     public function index(Request $request)
     {
-        if ($request->company_id == null) {
-            return $this->success([], 'Company ID is required', 400);
+        if (Auth::guard('api')->user()->company_id == null) {
+            return $this->error([], 'Unauthorized', 401);
         }
 
-        $contract = Contract::where('company_id', $request->company_id)
+        $company_id = Auth::guard('api')->user()->company_id;
+
+        $contract = Contract::where('company_id', $company_id)
             ->with(['files', 'associates:id,name'])
             ->first();
 

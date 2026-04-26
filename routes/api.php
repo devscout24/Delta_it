@@ -292,15 +292,9 @@ Route::middleware('auth:api')->prefix('mobile/account')->group(function () {
 
     // Contracts
     Route::get('/contracts', [\App\Http\Controllers\Api\ContractController::class, 'index']);
-    Route::get('/contract/{id}', [\App\Http\Controllers\Api\ContractController::class, 'details']);
-    Route::post('/contract-update/{id}', [\App\Http\Controllers\Api\ContractController::class, 'update']);
-    Route::post('/contract-file-add', [\App\Http\Controllers\Api\ContractController::class, 'storeFile']);
-    // If you have a destroy method for contract files, add it here:
-    // Route::post('/contract-file-remove', [\App\Http\Controllers\Api\ContractController::class, 'destroy']);
 
     // Access Cards
-    Route::get('/access-cards/{id}', [\App\Http\Controllers\Api\AccessCardController::class, 'getCardStats']);
-    Route::post('/access-cards-update/{id}', [\App\Http\Controllers\Api\AccessCardController::class, 'updateAccessCode']);
+    Route::get('/access-cards', [\App\Http\Controllers\Api\AccessCardController::class, 'getCardStats']);
 });
 // Account Settings APIS End
 

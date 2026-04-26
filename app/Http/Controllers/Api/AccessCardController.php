@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Validator;
 class AccessCardController extends Controller
 {
     use ApiResponse;
-    public function updateAccessCode(Request $request, $company_id)
+    public function updateAccessCode(Request $request)
     {
         // Validate request
         $validator = Validator::make($request->all(), [
@@ -27,9 +27,13 @@ class AccessCardController extends Controller
         }
 
         // Get or create specific company's access card row
-        $accessCard = AccessCard::firstOrNew([
-            'company_id' => $company_id
-        ]);
+        if (Auth::guard('api')->user()->company_id != null) {
+            $companyId = Auth::guard('api')->user()->company_id;
+        } else {
+            return $this->error([], 'Unauthorized', 401);
+        }
+
+        $accessCard = AccessCard::firstOrNew(['company_id' => $companyId]);
 
         // Fill only valid updatable fields
         $accessCard->fill($request->only([
