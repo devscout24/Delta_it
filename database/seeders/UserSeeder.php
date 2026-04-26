@@ -15,7 +15,7 @@ class UserSeeder extends Seeder
     public function run(): void
     {
 
-        foreach (['admin', 'user'] as $roleName) {
+        foreach (['admin', 'user', 'company_user'] as $roleName) {
             Role::firstOrCreate([
                 'name' => $roleName,
                 'guard_name' => 'web',
@@ -34,7 +34,7 @@ class UserSeeder extends Seeder
         ];
 
         $adminUser = User::updateOrCreate(
-            ['email' => $adminData['email']],
+            ['username' => $adminData['username']],
             $adminData
         );
 
@@ -52,7 +52,7 @@ class UserSeeder extends Seeder
         ];
 
         $mobileUser = User::updateOrCreate(
-            ['email' => $mobileData['email']],
+            ['username' => $mobileData['username']],
             $mobileData
         );
 

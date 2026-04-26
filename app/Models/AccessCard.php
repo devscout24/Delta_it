@@ -10,6 +10,7 @@ class AccessCard extends Model
       'id',
       'company_id',
       "active_card",
+      "lost_damage_card",
       "active_parking_card",
       "max_parking_card",
    ];

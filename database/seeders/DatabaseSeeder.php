@@ -34,7 +34,7 @@ class DatabaseSeeder extends Seeder
             // MeetingSeeder::class,
         ]);
 
-        DB::table('companies')->insert([
+        $companies = [
             [
                 'name' => 'TechNova Solutions',
                 'email' => 'info@technova.com',
@@ -80,13 +80,20 @@ class DatabaseSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-        ]);
+        ];
+
+        foreach ($companies as $company) {
+            DB::table('companies')->updateOrInsert(
+                ['email' => $company['email']],
+                $company
+            );
+        }
 
 
-        DB::table('users')->insert([
+        User::updateOrCreate(
+            ['username' => 'admin'],
             [
                 'company_id' => null,
-                'username' => 'admin',
                 'name' => 'System',
                 'last_name' => 'Admin',
                 'email' => 'admin@example.com',
@@ -97,12 +104,13 @@ class DatabaseSeeder extends Seeder
                 'email_verified_at' => now(),
                 'status' => 'active',
                 'terms_and_conditions' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
+            ]
+        );
+
+        User::updateOrCreate(
+            ['username' => 'companyuser'],
             [
                 'company_id' => 1,
-                'username' => 'companyuser',
                 'name' => 'Jane',
                 'last_name' => 'Doe',
                 'email' => 'jane.doe@technova.com',
@@ -113,10 +121,8 @@ class DatabaseSeeder extends Seeder
                 'email_verified_at' => now(),
                 'status' => 'active',
                 'terms_and_conditions' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-        ]);
+            ]
+        );
 
         $adminUser = User::where('email', 'admin@example.com')->first();
         if ($adminUser) {
@@ -140,15 +146,20 @@ class DatabaseSeeder extends Seeder
             'updated_at' => now(),
         ]);
 
-        DB::table('access_cards')->insert([
-            'company_id' => 1,
-            'active_card' => 25,
-            'lost_damage_card' => 2,
-            'active_parking_card' => 10,
-            'max_parking_card' => 15,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        DB::table('access_cards')->updateOrInsert(
+            ['card_number' => 'seed-company-1-summary'],
+            [
+                'company_id' => 1,
+                'type' => 'access',
+                'status' => 'active',
+                'active_card' => 25,
+                'lost_damage_card' => 2,
+                'active_parking_card' => 10,
+                'max_parking_card' => 15,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
 
         $documents = [
             [
@@ -171,26 +182,33 @@ class DatabaseSeeder extends Seeder
             ],
         ];
 
+        $documentIds = [];
+
         foreach ($documents as $document) {
-            Document::create($document);
+            $savedDocument = Document::updateOrCreate(
+                ['document_path' => $document['document_path']],
+                $document
+            );
+
+            $documentIds[$document['document_path']] = $savedDocument->id;
         }
 
         $tags = [
-            ['document_id' => 1, 'tag' => 'company-policy'],
-            ['document_id' => 1, 'tag' => 'hr'],
-            ['document_id' => 1, 'tag' => 'internal'],
+            ['document_id' => $documentIds['uploads/documents/company_policy.pdf'], 'tag' => 'company-policy'],
+            ['document_id' => $documentIds['uploads/documents/company_policy.pdf'], 'tag' => 'hr'],
+            ['document_id' => $documentIds['uploads/documents/company_policy.pdf'], 'tag' => 'internal'],
 
-            ['document_id' => 2, 'tag' => 'contract'],
-            ['document_id' => 2, 'tag' => 'employee'],
-            ['document_id' => 2, 'tag' => 'template'],
+            ['document_id' => $documentIds['uploads/documents/employee_contract.pdf'], 'tag' => 'contract'],
+            ['document_id' => $documentIds['uploads/documents/employee_contract.pdf'], 'tag' => 'employee'],
+            ['document_id' => $documentIds['uploads/documents/employee_contract.pdf'], 'tag' => 'template'],
 
-            ['document_id' => 3, 'tag' => 'office'],
-            ['document_id' => 3, 'tag' => 'layout'],
-            ['document_id' => 3, 'tag' => 'floor-plan'],
+            ['document_id' => $documentIds['uploads/documents/office_layout.pdf'], 'tag' => 'office'],
+            ['document_id' => $documentIds['uploads/documents/office_layout.pdf'], 'tag' => 'layout'],
+            ['document_id' => $documentIds['uploads/documents/office_layout.pdf'], 'tag' => 'floor-plan'],
         ];
 
         foreach ($tags as $tag) {
-            Tag::create($tag);
+            Tag::updateOrCreate($tag, []);
         }
 
         $rooms = [
@@ -225,7 +243,13 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($rooms as $room) {
-            Room::create($room);
+            Room::updateOrCreate(
+                [
+                    'floor' => $room['floor'],
+                    'room_name' => $room['room_name'],
+                ],
+                $room
+            );
         }
 
         $meetings = [
@@ -275,11 +299,14 @@ class DatabaseSeeder extends Seeder
         $year = 2025;
 
         for ($month = 1; $month <= 12; $month++) {
-            CompanyPayment::create([
-                'company_id' => $companyId,
-                'year'       => $year,
-                'month'      => $month,
-            ]);
+            CompanyPayment::updateOrCreate(
+                [
+                    'company_id' => $companyId,
+                    'year' => $year,
+                    'month' => $month,
+                ],
+                []
+            );
         }
 
         $now = Carbon::now();

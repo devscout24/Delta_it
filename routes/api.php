@@ -246,6 +246,7 @@ Route::controller(UserController::class)->group(function () {
     Route::post('/create-company-user', 'create');
 });
 
+// WebApp Is End
 
 // =================================================
 // Mobile App Routes
@@ -302,3 +303,5 @@ Route::middleware('auth:api')->prefix('mobile/account')->group(function () {
     Route::post('/access-cards-update/{id}', [\App\Http\Controllers\Api\AccessCardController::class, 'updateAccessCode']);
 });
 // Account Settings APIS End
+
+// End of Mobile App Routes
