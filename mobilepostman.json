@@ -578,6 +578,36 @@
                     "response": []
                 },
                 {
+                    "name": "GET /mobile/account/company-update/meta",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/mobile/account/company-update/meta",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "account",
+                                "company-update",
+                                "meta"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
                     "name": "POST /mobile/account/company-update",
                     "request": {
                         "method": "POST",
@@ -610,7 +640,7 @@
                         },
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"company_id\": 1,\n    \"logo\": \"file-upload-placeholder\",\n    \"name\": {\n        \"required\": \"sample_required\"\n    },\n    \"fiscal_name\": \"sample_fiscal_name\",\n    \"email\": {\n        \"unique\": \"sample_unique\"\n    },\n    \"nif\": \"sample_nif\",\n    \"phone\": \"sample_phone\",\n    \"incubation_type\": {\n        \"required\": \"sample_required\"\n    },\n    \"business_area\": [\n        1,\n        2\n    ],\n    \"manager\": \"sample_manager\",\n    \"description\": \"Sample description\",\n    \"status\": \"active\",\n    \"rooms\": [\n        1,\n        2\n    ]\n}",
+                            "raw": "{\n    \"name\": \"TechNova Solutions\",\n    \"fiscal_name\": \"TechNova S.A.\",\n    \"email\": \"info@technova.com\",\n    \"nif\": \"TNX-12345\",\n    \"phone\": \"+1234567890\",\n    \"incubation_type\": \"on-site\",\n    \"business_area\": [\n        \"Software Development\",\n        \"IT Services\"\n    ],\n    \"manager\": \"John Doe\",\n    \"description\": \"Updated company description\",\n    \"status\": \"active\",\n    \"rooms\": [\n        1,\n        2\n    ]\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -847,9 +877,14 @@
                         }
                     },
                     "response": []
-                },
+                }
+            ]
+        },
+        {
+            "name": "Access Cards",
+            "item": [
                 {
-                    "name": "GET /mobile/account/contract/{id}",
+                    "name": "GET /mobile/account/access-cards",
                     "request": {
                         "method": "GET",
                         "header": [],
@@ -864,22 +899,129 @@
                             ]
                         },
                         "url": {
-                            "raw": "{{base_url}}/mobile/account/contract/{{id}}",
+                            "raw": "{{base_url}}/mobile/account/access-cards",
                             "host": [
                                 "{{base_url}}"
                             ],
                             "path": [
                                 "mobile",
                                 "account",
-                                "contract",
-                                "{{id}}"
+                                "access-cards"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Documents",
+            "item": [
+                {
+                    "name": "GET /mobile/account/documents",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/mobile/account/documents",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "account",
+                                "documents"
                             ]
                         }
                     },
                     "response": []
                 },
                 {
-                    "name": "POST /mobile/account/contract-update/{id}",
+                    "name": "GET /mobile/account/documents/{id}",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/mobile/account/documents/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "account",
+                                "documents",
+                                "{{id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Tickets",
+            "item": [
+                {
+                    "name": "GET /mobile/account/tickets",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/mobile/account/tickets?tab=all&per_page=10",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "account",
+                                "tickets"
+                            ],
+                            "query": [
+                                {
+                                    "key": "tab",
+                                    "value": "all"
+                                },
+                                {
+                                    "key": "per_page",
+                                    "value": "10"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /mobile/account/tickets/create",
                     "request": {
                         "method": "POST",
                         "header": [
@@ -899,20 +1041,20 @@
                             ]
                         },
                         "url": {
-                            "raw": "{{base_url}}/mobile/account/contract-update/{{id}}",
+                            "raw": "{{base_url}}/mobile/account/tickets/create",
                             "host": [
                                 "{{base_url}}"
                             ],
                             "path": [
                                 "mobile",
                                 "account",
-                                "contract-update",
-                                "{{id}}"
+                                "tickets",
+                                "create"
                             ]
                         },
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"name\": \"Sample Name\",\n    \"type\": \"request\",\n    \"start_date\": \"2026-04-26\",\n    \"end_date\": \"2026-04-26\",\n    \"renewal_date\": \"2026-04-26\",\n    \"status\": \"active\",\n    \"associate_companies\": [\n        1,\n        2\n    ],\n    \"files_to_add\": [\n        1,\n        2\n    ],\n    \"files_to_remove\": [\n        1,\n        2\n    ]\n}",
+                            "raw": "{\n    \"subject\": \"Broken AC\",\n    \"type\": \"Maintenance\",\n    \"room_id\": 1,\n    \"message\": \"AC room is broken\"\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -923,7 +1065,37 @@
                     "response": []
                 },
                 {
-                    "name": "POST /mobile/account/contract-file-add",
+                    "name": "GET /mobile/account/tickets/{id}",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/mobile/account/tickets/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "account",
+                                "tickets",
+                                "{{id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /mobile/account/tickets/{id}/messages/send",
                     "request": {
                         "method": "POST",
                         "header": [
@@ -943,19 +1115,22 @@
                             ]
                         },
                         "url": {
-                            "raw": "{{base_url}}/mobile/account/contract-file-add",
+                            "raw": "{{base_url}}/mobile/account/tickets/{{id}}/messages/send",
                             "host": [
                                 "{{base_url}}"
                             ],
                             "path": [
                                 "mobile",
                                 "account",
-                                "contract-file-add"
+                                "tickets",
+                                "{{id}}",
+                                "messages",
+                                "send"
                             ]
                         },
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"file\": \"file-upload-placeholder\",\n    \"company_id\": 1\n}",
+                            "raw": "{\n    \"type\": \"text\",\n    \"message\": \"We will report this issue to maintenance team\"\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -968,10 +1143,10 @@
             ]
         },
         {
-            "name": "Access Cards",
+            "name": "Notifications",
             "item": [
                 {
-                    "name": "GET /mobile/account/access-cards/{id}",
+                    "name": "GET /notifications",
                     "request": {
                         "method": "GET",
                         "header": [],
@@ -986,22 +1161,58 @@
                             ]
                         },
                         "url": {
-                            "raw": "{{base_url}}/mobile/account/access-cards/{{id}}",
+                            "raw": "{{base_url}}/notifications?tab=all",
                             "host": [
                                 "{{base_url}}"
                             ],
                             "path": [
-                                "mobile",
-                                "account",
-                                "access-cards",
-                                "{{id}}"
+                                "notifications"
+                            ],
+                            "query": [
+                                {
+                                    "key": "tab",
+                                    "value": "all"
+                                }
                             ]
                         }
                     },
                     "response": []
                 },
                 {
-                    "name": "POST /mobile/account/access-cards-update/{id}",
+                    "name": "GET /notifications (Unread)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/notifications?tab=unread",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "notifications"
+                            ],
+                            "query": [
+                                {
+                                    "key": "tab",
+                                    "value": "unread"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /notifications/mark-all-read",
                     "request": {
                         "method": "POST",
                         "header": [
@@ -1021,20 +1232,228 @@
                             ]
                         },
                         "url": {
-                            "raw": "{{base_url}}/mobile/account/access-cards-update/{{id}}",
+                            "raw": "{{base_url}}/notifications/mark-all-read",
                             "host": [
                                 "{{base_url}}"
                             ],
                             "path": [
-                                "mobile",
-                                "account",
-                                "access-cards-update",
-                                "{{id}}"
+                                "notifications",
+                                "mark-all-read"
                             ]
                         },
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"active_card\": 1,\n    \"lost_damage_card\": 1,\n    \"active_parking_card\": 1,\n    \"max_parking_card\": 1\n}",
+                            "raw": "{}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /notifications/mark-all-unread",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/notifications/mark-all-unread",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "notifications",
+                                "mark-all-unread"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /notifications/delete-all",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/notifications/delete-all",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "notifications",
+                                "delete-all"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /notifications/mark-read",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/notifications/mark-read",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "notifications",
+                                "mark-read"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": \"notification-uuid\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /notifications/mark-unread",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/notifications/mark-unread",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "notifications",
+                                "mark-unread"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": \"notification-uuid\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST /notifications/delete",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/notifications/delete",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "notifications",
+                                "delete"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"id\": \"notification-uuid\"\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"

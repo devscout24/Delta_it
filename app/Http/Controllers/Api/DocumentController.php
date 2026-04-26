@@ -16,6 +16,77 @@ class DocumentController extends Controller
 {
     use ApiResponse;
 
+    public function mobileIndex()
+    {
+        $user = Auth::guard('api')->user();
+
+        if (! $user || ! $user->company_id) {
+            return $this->error([], 'Unauthorized', 401);
+        }
+
+        $documents = Document::query()
+            ->where('company_id', $user->company_id)
+            ->orderByDesc('id')
+            ->get()
+            ->map(function ($document) {
+                $relativePath = ltrim((string) $document->document_path, '/');
+                $absolutePath = public_path($relativePath);
+
+                $fileSizeBytes = File::exists($absolutePath) ? (int) File::size($absolutePath) : 0;
+                $fileSizeMb = $fileSizeBytes > 0 ? number_format($fileSizeBytes / 1048576, 2) : '0.00';
+
+                return [
+                    'id' => $document->id,
+                    'name' => $document->document_name ?: basename($relativePath),
+                    'type' => $document->document_type ?: pathinfo($relativePath, PATHINFO_EXTENSION),
+                    'size_mb' => $fileSizeMb,
+                    'size_label' => $fileSizeMb . ' mb',
+                    'file_url' => $relativePath ? asset($relativePath) : null,
+                    'download_url' => $relativePath ? asset($relativePath) : null,
+                ];
+            })
+            ->values();
+
+        return $this->success([
+            'documents' => $documents,
+            'is_empty' => $documents->isEmpty(),
+            'empty_message' => 'No documents have been added to this area yet',
+        ], 'Mobile documents fetched successfully', 200);
+    }
+
+    public function mobileShow($id)
+    {
+        $user = Auth::guard('api')->user();
+
+        if (! $user || ! $user->company_id) {
+            return $this->error([], 'Unauthorized', 401);
+        }
+
+        $document = Document::query()
+            ->where('company_id', $user->company_id)
+            ->find($id);
+
+        if (! $document) {
+            return $this->error([], 'Document not found', 404);
+        }
+
+        $relativePath = ltrim((string) $document->document_path, '/');
+        $absolutePath = public_path($relativePath);
+
+        $fileSizeBytes = File::exists($absolutePath) ? (int) File::size($absolutePath) : 0;
+        $fileSizeMb = $fileSizeBytes > 0 ? number_format($fileSizeBytes / 1048576, 2) : '0.00';
+
+        return $this->success([
+            'id' => $document->id,
+            'name' => $document->document_name ?: basename($relativePath),
+            'type' => $document->document_type ?: pathinfo($relativePath, PATHINFO_EXTENSION),
+            'size_mb' => $fileSizeMb,
+            'size_label' => $fileSizeMb . ' mb',
+            'file_url' => $relativePath ? asset($relativePath) : null,
+            'download_url' => $relativePath ? asset($relativePath) : null,
+        ], 'Mobile document fetched successfully', 200);
+    }
+
     public function allDocuments($id)
     {
         // Validate company exists

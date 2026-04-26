@@ -111,15 +111,16 @@ class CompanyController extends Controller
     public function updateCompanyGeneralData(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'company_id'      => 'required|exists:companies,id',
+            'company_id'      => 'nullable|exists:companies,id',
             'logo'            => 'nullable|image|mimes:jpg,jpeg,png,svg|max:2048',
             'name'            => 'nullable|string|max:255',
             'fiscal_name'     => 'nullable|string|max:255',
             'email'           => 'nullable|email|unique:companies,email,' . $request->company_id,
             'nif'             => 'nullable|string|max:50',
             'phone'           => 'nullable|string|max:20',
-            'incubation_type' => 'required|in:virtual,on-site,cowork,colab',
-            'business_area'   => 'nullable|array',
+            'incubation_type' => 'nullable|in:virtual,on-site,cowork,colab',
+            'business_area'   => 'nullable',
+            'business_area.*' => 'nullable|string|max:255',
             'manager'         => 'nullable|string|max:100',
             'description'     => 'nullable|string',
             'status'          => 'nullable|in:active,archived',
@@ -136,7 +137,13 @@ class CompanyController extends Controller
             return $this->error($validator->errors(), $validator->errors()->first(), 422);
         }
 
-        $company = Company::find($request->company_id);
+        $companyId = $request->company_id ?: Auth::guard('api')->user()?->company_id;
+
+        if (! $companyId) {
+            return $this->error([], 'Company id is required', 422);
+        }
+
+        $company = Company::find($companyId);
 
         if (!$company) {
             return $this->error('', 'Company not found', 404);
@@ -164,8 +171,8 @@ class CompanyController extends Controller
                 'fiscal_name'     => $request->fiscal_name,
                 'nif'             => $request->nif,
                 'phone'           => $request->phone,
-                'incubation_type' => $request->incubation_type,
-                'business_area'   => json_encode($request->business_area),
+                'incubation_type' => $request->incubation_type ?? $company->incubation_type,
+                'business_area'   => $this->normalizeBusinessAreaForStorage($request, $company->business_area),
                 'manager'         => $request->manager,
                 'description'     => $request->description,
                 'logo'            => $uploadPath,
@@ -190,6 +197,190 @@ class CompanyController extends Controller
         } catch (\Exception $e) {
             return $this->error($e->getMessage(), 'Something went wrong', 500);
         }
+    }
+
+    public function mobileCompanyUpdateMeta()
+    {
+        $user = Auth::guard('api')->user();
+
+        if (! $user || ! $user->company_id) {
+            return $this->error([], 'Unauthorized', 401);
+        }
+
+        $company = Company::with(['rooms:id,room_name,floor,area,company_id'])->find($user->company_id);
+
+        if (! $company) {
+            return $this->error([], 'Company not found', 404);
+        }
+
+        $assignedRoomIds = $company->rooms->pluck('id')->values()->all();
+        $occupiedArea = (float) $company->rooms->sum('area');
+
+        $rooms = Room::select('id', 'floor', 'room_name', 'area', 'company_id')
+            ->orderBy('floor')
+            ->orderBy('room_name')
+            ->get()
+            ->map(function ($room) use ($company) {
+                return [
+                    'id' => $room->id,
+                    'label' => 'Sala ' . $room->floor . '.' . $room->room_name,
+                    'room_name' => $room->room_name,
+                    'floor' => $room->floor,
+                    'area' => (float) $room->area,
+                    'assigned_company_id' => $room->company_id,
+                    'is_selectable' => $room->company_id === null || (int) $room->company_id === (int) $company->id,
+                ];
+            })
+            ->values();
+
+        $incubationTypeOptions = [
+            ['value' => 'virtual', 'label' => 'Virtual'],
+            ['value' => 'on-site', 'label' => 'On-site'],
+            ['value' => 'cowork', 'label' => 'Cowork'],
+            ['value' => 'colab', 'label' => 'Colab'],
+        ];
+
+        $defaultBusinessAreas = [
+            'Software Development',
+            'IT Services',
+            'Agritech',
+            'Fintech',
+            'Healthcare',
+            'Education',
+            'E-commerce',
+            'Consulting',
+            'Marketing',
+        ];
+
+        $existingBusinessAreas = Company::query()
+            ->whereNotNull('business_area')
+            ->pluck('business_area')
+            ->flatMap(function ($value) {
+                return $this->extractBusinessAreaValues($value);
+            })
+            ->filter(function ($value) {
+                return $value !== '';
+            })
+            ->unique()
+            ->values()
+            ->all();
+
+        $businessAreaOptions = array_values(array_unique(array_merge($defaultBusinessAreas, $existingBusinessAreas)));
+
+        return $this->success([
+            'dropdowns' => [
+                'incubation_types' => $incubationTypeOptions,
+                'business_areas' => $businessAreaOptions,
+                'occupied_offices' => $rooms,
+            ],
+            'selected' => [
+                'company_id' => $company->id,
+                'incubation_type' => $company->incubation_type,
+                'business_area' => $this->extractBusinessAreaValues($company->business_area),
+                'room_ids' => $assignedRoomIds,
+                'occupied_area' => $occupiedArea,
+                'occupied_area_readonly' => true,
+            ],
+        ], 'Company update form metadata fetched successfully', 200);
+    }
+
+    public function mobileCompanyInfo()
+    {
+        $user = Auth::guard('api')->user();
+
+        if (! $user || ! $user->company_id) {
+            return $this->error([], 'Unauthorized', 401);
+        }
+
+        $company = Company::with(['rooms:id,floor,room_name,area,company_id', 'contract'])
+            ->find($user->company_id);
+
+        if (! $company) {
+            return $this->error([], 'Company not found', 404);
+        }
+
+        $company->logo = $company->logo
+            ? asset($company->logo)
+            : asset('default/default.png');
+
+        $rooms = $company->rooms ?? collect([]);
+
+        $occupiedRooms = $rooms->map(function ($room) {
+            return [
+                'id' => $room->id,
+                'room_name' => $room->room_name,
+                'floor' => $room->floor,
+                'label' => 'Sala ' . $room->floor . '.' . $room->room_name,
+                'area' => (float) $room->area,
+            ];
+        })->values();
+
+        $response = [
+            'id' => $company->id,
+            'name' => $company->name,
+            'email' => $company->email,
+            'fiscal_name' => $company->fiscal_name,
+            'nif' => $company->nif,
+            'phone' => $company->phone,
+            'incubation_type' => $company->incubation_type,
+            'business_area' => $this->extractBusinessAreaValues($company->business_area),
+            'manager' => $company->manager,
+            'description' => $company->description,
+            'logo' => $company->logo,
+            'status' => $company->status,
+            'occupied_rooms' => $occupiedRooms,
+            'room_ids' => $occupiedRooms->pluck('id')->values(),
+            'occupied_area' => (float) $rooms->sum('area'),
+            'start_date' => optional($company->contract)->start_date,
+            'end_date' => optional($company->contract)->end_date,
+        ];
+
+        return $this->success($response, 'Company info fetched successfully', 200);
+    }
+
+    private function normalizeBusinessAreaForStorage(Request $request, $currentValue)
+    {
+        if (! $request->has('business_area')) {
+            return $currentValue;
+        }
+
+        $businessArea = $request->input('business_area');
+
+        if (is_array($businessArea)) {
+            $cleanValues = array_values(array_filter(array_map(function ($value) {
+                return trim((string) $value);
+            }, $businessArea), function ($value) {
+                return $value !== '';
+            }));
+
+            return empty($cleanValues) ? null : json_encode($cleanValues);
+        }
+
+        if (is_string($businessArea)) {
+            $value = trim($businessArea);
+            return $value === '' ? null : $value;
+        }
+
+        return $currentValue;
+    }
+
+    private function extractBusinessAreaValues($value): array
+    {
+        if ($value === null || $value === '') {
+            return [];
+        }
+
+        $decoded = json_decode($value, true);
+
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+            return array_values(array_filter(array_map(function ($item) {
+                return trim((string) $item);
+            }, $decoded), function ($item) {
+                return $item !== '';
+            }));
+        }
+
+        return [trim((string) $value)];
     }
 
     public function uploadLogo(Request $request)

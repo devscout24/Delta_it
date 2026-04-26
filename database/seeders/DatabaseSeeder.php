@@ -30,6 +30,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             // CompanySeeder::class,
             UserSeeder::class,
+            ContractDemoSeeder::class,
+            NotificationSeeder::class,
             // DaySeeder::class,
             // RoomSeeder::class,
             // MeetingSeeder::class,

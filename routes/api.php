@@ -280,7 +280,8 @@ Route::controller(ProfileController::class)->middleware('auth:api')->group(funct
 // Account Settings APIS
 Route::middleware('auth:api')->prefix('mobile/account')->group(function () {
     // General Data (Company Info)
-    Route::get('/company-info', [\App\Http\Controllers\Api\CompanyController::class, 'getCompany']);
+    Route::get('/company-info', [\App\Http\Controllers\Api\CompanyController::class, 'mobileCompanyInfo']);
+    Route::get('/company-update/meta', [\App\Http\Controllers\Api\CompanyController::class, 'mobileCompanyUpdateMeta']);
     Route::post('/company-update', [\App\Http\Controllers\Api\CompanyController::class, 'updateCompanyGeneralData']);
 
     // Collaborators
@@ -293,8 +294,34 @@ Route::middleware('auth:api')->prefix('mobile/account')->group(function () {
     // Contracts
     Route::get('/contracts', [\App\Http\Controllers\Api\ContractController::class, 'index']);
 
+    // Documents
+    Route::get('/documents', [\App\Http\Controllers\Api\DocumentController::class, 'mobileIndex']);
+    Route::get('/documents/{id}', [\App\Http\Controllers\Api\DocumentController::class, 'mobileShow']);
+
     // Access Cards
     Route::get('/access-cards', [\App\Http\Controllers\Api\AccessCardController::class, 'getCardStats']);
+
+    // Tickets
+    Route::get('/tickets', [\App\Http\Controllers\Api\TicketController::class, 'mobileIndex']);
+    Route::post('/tickets/create', [\App\Http\Controllers\Api\TicketController::class, 'mobileStore']);
+    Route::get('/tickets/{id}', [\App\Http\Controllers\Api\TicketController::class, 'mobileShow']);
+    Route::post('/tickets/{id}/messages/send', [\App\Http\Controllers\Api\TicketController::class, 'mobileSendMessage']);
+});
+
+Route::middleware('auth:api')->controller(NotificationController::class)->group(function () {
+    Route::get('/notifications', 'notification');
+
+    // Mark all read / unread
+    Route::post('/notifications/mark-all-read', 'markAllRead');
+    Route::post('/notifications/mark-all-unread', 'markAllUnread');
+
+    // Delete all
+    Route::post('/notifications/delete-all', 'deleteAll');
+
+    // Single operations
+    Route::post('/notifications/delete', 'deleteNotification');
+    Route::post('/notifications/mark-read', 'markNotificationRead');
+    Route::post('/notifications/mark-unread', 'markNotificationUnread');
 });
 // Account Settings APIS End
 

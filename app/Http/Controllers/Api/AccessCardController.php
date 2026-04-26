@@ -53,9 +53,20 @@ class AccessCardController extends Controller
         return $this->success($accessCard, $message, 200);
     }
 
-    public function getCardStats($id)
+    public function getCardStats($id = null)
     {
-        $card = AccessCard::where('company_id', $id)
+        $companyId = $id;
+
+        if (!$companyId) {
+            $user = Auth::guard('api')->user();
+            if (!$user || !$user->company_id) {
+                return $this->error([], 'Company id is required', 422);
+            }
+
+            $companyId = $user->company_id;
+        }
+
+        $card = AccessCard::where('company_id', $companyId)
             ->select('active_card', 'lost_damage_card', 'active_parking_card', 'max_parking_card')
             ->first();
 
