@@ -16,12 +16,9 @@ class CompanyPayment extends Model
         'printings_vat',
         'total_vat',
         'total_amount',
-        'status',
+        'status'
     ];
 
-    /**
-     * Relationship: A company payment belongs to a company
-     */
     public function company()
     {
         return $this->belongsTo(Company::class);

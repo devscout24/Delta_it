@@ -11,10 +11,8 @@ class ContractFile extends Model
         'file_path',
     ];
 
-    protected $hidden = ['created_at', 'updated_at'];
-
-    public function getFileUrlAttribute()
+    public function contract()
     {
-        return asset('uploads/contracts/files/' . $this->file_path);
+        return $this->belongsTo(Contract::class);
     }
 }

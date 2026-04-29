@@ -1,57 +1,16 @@
 {
     "info": {
-        "_postman_id": "ffb7a4a25fc3dc3b9331462d523a1a99",
+        "_postman_id": "8f790540-7ec0-4039-8671-6ec4aa5c351d",
         "name": "Delta IT Mobile API",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
     "item": [
         {
-            "name": "Authentication",
+            "name": "AccessCard",
             "item": [
                 {
-                    "name": "POST /user-login",
+                    "name": "GET mobile/access-cards",
                     "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "auth": {
-                            "type": "noauth"
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/user-login",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "user-login"
-                            ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"email\": \"user@example.com\",\n    \"password\": \"password\"\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "POST /user-logout",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
                         "auth": {
                             "type": "bearer",
                             "bearer": [
@@ -62,850 +21,15 @@
                                 }
                             ]
                         },
-                        "url": {
-                            "raw": "{{base_url}}/user-logout",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "user-logout"
-                            ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "POST /send-otp",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "auth": {
-                            "type": "noauth"
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/send-otp",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "send-otp"
-                            ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"email\": \"user@example.com\"\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "POST /verify-otp",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "auth": {
-                            "type": "noauth"
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/verify-otp",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "verify-otp"
-                            ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"email\": \"user@example.com\",\n    \"otp\": \"1234\"\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "POST /reset-password",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "auth": {
-                            "type": "noauth"
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/reset-password",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "reset-password"
-                            ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"email\": \"user@example.com\",\n    \"reset_token\": \"reset-token\",\n    \"password\": \"NewPass123!\",\n    \"password_confirmation\": \"NewPass123!\"\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "POST /store-user-fcm-token",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/store-user-fcm-token",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "store-user-fcm-token"
-                            ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"device_id\": \"device-123\",\n    \"token\": \"fcm-token\"\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "POST /delete-user-fcm-token",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/delete-user-fcm-token",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "delete-user-fcm-token"
-                            ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"device_id\": \"device-123\"\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "POST /update-user",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/update-user",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "update-user"
-                            ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"name\": \"John Doe\",\n    \"phone\": \"+1234567890\"\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "POST /delete-account",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/delete-account",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "delete-account"
-                            ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "POST /user/profile/reset-password",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/user/profile/reset-password",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "user",
-                                "profile",
-                                "reset-password"
-                            ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"current_password\": \"CurrentPass123!\",\n    \"new_password\": \"NewPass123!\",\n    \"new_password_confirmation\": \"NewPass123!\"\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "POST /create-account",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "auth": {
-                            "type": "noauth"
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/create-account",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "create-account"
-                            ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"email\": \"user@example.com\",\n    \"password\": \"password123\"\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        }
-                    },
-                    "response": []
-                }
-            ]
-        },
-        {
-            "name": "Profile",
-            "item": [
-                {
-                    "name": "GET /mobile/profile-info",
-                    "request": {
                         "method": "GET",
                         "header": [],
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
                         "url": {
-                            "raw": "{{base_url}}/mobile/profile-info",
+                            "raw": "{{base_url}}/mobile/access-cards",
                             "host": [
                                 "{{base_url}}"
                             ],
                             "path": [
                                 "mobile",
-                                "profile-info"
-                            ]
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "POST /mobile/profile-update",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/mobile/profile-update",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "mobile",
-                                "profile-update"
-                            ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"name\": \"Sample Name\",\n    \"last_name\": \"sample_last_name\",\n    \"phone\": \"sample_phone\",\n    \"address\": \"sample_address\",\n    \"zipcode\": \"sample_zipcode\",\n    \"profile_photo\": \"file-upload-placeholder\"\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "POST /mobile/profile-change-password",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/mobile/profile-change-password",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "mobile",
-                                "profile-change-password"
-                            ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"current_password\": \"password123\",\n    \"new_password\": \"password123\",\n    \"new_password_confirmation\": \"password123\"\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        }
-                    },
-                    "response": []
-                }
-            ]
-        },
-        {
-            "name": "Company Info",
-            "item": [
-                {
-                    "name": "GET /mobile/account/company-info",
-                    "request": {
-                        "method": "GET",
-                        "header": [],
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/mobile/account/company-info",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "mobile",
-                                "account",
-                                "company-info"
-                            ]
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "GET /mobile/account/company-update/meta",
-                    "request": {
-                        "method": "GET",
-                        "header": [],
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/mobile/account/company-update/meta",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "mobile",
-                                "account",
-                                "company-update",
-                                "meta"
-                            ]
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "POST /mobile/account/company-update",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/mobile/account/company-update",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "mobile",
-                                "account",
-                                "company-update"
-                            ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"name\": \"TechNova Solutions\",\n    \"fiscal_name\": \"TechNova S.A.\",\n    \"email\": \"info@technova.com\",\n    \"nif\": \"TNX-12345\",\n    \"phone\": \"+1234567890\",\n    \"incubation_type\": \"on-site\",\n    \"business_area\": [\n        \"Software Development\",\n        \"IT Services\"\n    ],\n    \"manager\": \"John Doe\",\n    \"description\": \"Updated company description\",\n    \"status\": \"active\",\n    \"rooms\": [\n        1,\n        2\n    ]\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        }
-                    },
-                    "response": []
-                }
-            ]
-        },
-        {
-            "name": "Collaborators",
-            "item": [
-                {
-                    "name": "GET /mobile/account/collaborators",
-                    "request": {
-                        "method": "GET",
-                        "header": [],
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/mobile/account/collaborators",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "mobile",
-                                "account",
-                                "collaborators"
-                            ]
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "GET /mobile/account/collaborator/{id}",
-                    "request": {
-                        "method": "GET",
-                        "header": [],
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/mobile/account/collaborator/{{id}}",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "mobile",
-                                "account",
-                                "collaborator",
-                                "{{id}}"
-                            ]
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "POST /mobile/account/collaborator-add",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/mobile/account/collaborator-add",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "mobile",
-                                "account",
-                                "collaborator-add"
-                            ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"first_name\": \"sample_first_name\",\n    \"last_name\": \"sample_last_name\",\n    \"job_position\": \"sample_job_position\",\n    \"email\": \"user@example.com\",\n    \"phone_extension\": \"sample_phone_extension\",\n    \"phone_number\": \"sample_phone_number\",\n    \"access_card_number\": \"sample_access_card_number\",\n    \"parking_card\": true,\n    \"company_id\": 1\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "POST /mobile/account/collaborator-update/{id}",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/mobile/account/collaborator-update/{{id}}",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "mobile",
-                                "account",
-                                "collaborator-update",
-                                "{{id}}"
-                            ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"id\": 1,\n    \"first_name\": \"sample_first_name\",\n    \"last_name\": \"sample_last_name\",\n    \"job_position\": \"sample_job_position\",\n    \"email\": \"user@example.com\",\n    \"phone_extension\": \"sample_phone_extension\",\n    \"phone_number\": \"sample_phone_number\",\n    \"access_card_number\": \"sample_access_card_number\",\n    \"parking_card\": true\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "POST /mobile/account/collaborator-delete",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/mobile/account/collaborator-delete",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "mobile",
-                                "account",
-                                "collaborator-delete"
-                            ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"id\": 1\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        }
-                    },
-                    "response": []
-                }
-            ]
-        },
-        {
-            "name": "Contracts",
-            "item": [
-                {
-                    "name": "GET /mobile/account/contracts",
-                    "request": {
-                        "method": "GET",
-                        "header": [],
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/mobile/account/contracts",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "mobile",
-                                "account",
-                                "contracts"
-                            ]
-                        }
-                    },
-                    "response": []
-                }
-            ]
-        },
-        {
-            "name": "Access Cards",
-            "item": [
-                {
-                    "name": "GET /mobile/account/access-cards",
-                    "request": {
-                        "method": "GET",
-                        "header": [],
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/mobile/account/access-cards",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "mobile",
-                                "account",
                                 "access-cards"
                             ]
                         }
@@ -915,13 +39,11 @@
             ]
         },
         {
-            "name": "Documents",
+            "name": "Collaborator",
             "item": [
                 {
-                    "name": "GET /mobile/account/documents",
+                    "name": "DELETE mobile/collaborators/delete/{id}",
                     "request": {
-                        "method": "GET",
-                        "header": [],
                         "auth": {
                             "type": "bearer",
                             "bearer": [
@@ -932,14 +54,260 @@
                                 }
                             ]
                         },
+                        "method": "DELETE",
+                        "header": [],
                         "url": {
-                            "raw": "{{base_url}}/mobile/account/documents",
+                            "raw": "{{base_url}}/mobile/collaborators/delete/{{id}}",
                             "host": [
                                 "{{base_url}}"
                             ],
                             "path": [
                                 "mobile",
-                                "account",
+                                "collaborators",
+                                "delete",
+                                "{{id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET mobile/collaborators",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/mobile/collaborators",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "collaborators"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST mobile/collaborators/store",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/mobile/collaborators/store",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "collaborators",
+                                "store"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"New Collaborator\",\n    \"email\": \"collab@example.com\",\n    \"phone\": \"+1-555-1234\",\n    \"expertise\": \"Marketing\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST mobile/collaborators/update/{id}",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/mobile/collaborators/update/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "collaborators",
+                                "update",
+                                "{{id}}"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Updated Collaborator\",\n    \"email\": \"collab@example.com\",\n    \"phone\": \"+1-555-5678\",\n    \"expertise\": \"Digital Marketing\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Company",
+            "item": [
+                {
+                    "name": "GET mobile/company/info",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/mobile/company/info",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "company",
+                                "info"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST mobile/company/update",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/mobile/company/update",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "company",
+                                "update"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Updated Company Name\",\n    \"email\": \"newemail@company.com\",\n    \"phone\": \"+1-555-9999\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Contract",
+            "item": [
+                {
+                    "name": "GET mobile/contracts",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/mobile/contracts",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "contracts"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Document",
+            "item": [
+                {
+                    "name": "GET mobile/documents",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/mobile/documents",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
                                 "documents"
                             ]
                         }
@@ -947,10 +315,8 @@
                     "response": []
                 },
                 {
-                    "name": "GET /mobile/account/documents/{id}",
+                    "name": "GET mobile/documents/{id}",
                     "request": {
-                        "method": "GET",
-                        "header": [],
                         "auth": {
                             "type": "bearer",
                             "bearer": [
@@ -961,14 +327,15 @@
                                 }
                             ]
                         },
+                        "method": "GET",
+                        "header": [],
                         "url": {
-                            "raw": "{{base_url}}/mobile/account/documents/{{id}}",
+                            "raw": "{{base_url}}/mobile/documents/{{id}}",
                             "host": [
                                 "{{base_url}}"
                             ],
                             "path": [
                                 "mobile",
-                                "account",
                                 "documents",
                                 "{{id}}"
                             ]
@@ -979,13 +346,11 @@
             ]
         },
         {
-            "name": "Tickets",
+            "name": "Meeting",
             "item": [
                 {
-                    "name": "GET /mobile/account/tickets",
+                    "name": "GET mobile/meetings/events",
                     "request": {
-                        "method": "GET",
-                        "header": [],
                         "auth": {
                             "type": "bearer",
                             "bearer": [
@@ -996,40 +361,25 @@
                                 }
                             ]
                         },
+                        "method": "GET",
+                        "header": [],
                         "url": {
-                            "raw": "{{base_url}}/mobile/account/tickets?tab=all&per_page=10",
+                            "raw": "{{base_url}}/mobile/meetings/events",
                             "host": [
                                 "{{base_url}}"
                             ],
                             "path": [
                                 "mobile",
-                                "account",
-                                "tickets"
-                            ],
-                            "query": [
-                                {
-                                    "key": "tab",
-                                    "value": "all"
-                                },
-                                {
-                                    "key": "per_page",
-                                    "value": "10"
-                                }
+                                "meetings",
+                                "events"
                             ]
                         }
                     },
                     "response": []
                 },
                 {
-                    "name": "POST /mobile/account/tickets/create",
+                    "name": "GET mobile/meetings/events/{id}",
                     "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
                         "auth": {
                             "type": "bearer",
                             "bearer": [
@@ -1040,54 +390,17 @@
                                 }
                             ]
                         },
-                        "url": {
-                            "raw": "{{base_url}}/mobile/account/tickets/create",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "mobile",
-                                "account",
-                                "tickets",
-                                "create"
-                            ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"subject\": \"Broken AC\",\n    \"type\": \"Maintenance\",\n    \"room_id\": 1,\n    \"message\": \"AC room is broken\"\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "GET /mobile/account/tickets/{id}",
-                    "request": {
                         "method": "GET",
                         "header": [],
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
                         "url": {
-                            "raw": "{{base_url}}/mobile/account/tickets/{{id}}",
+                            "raw": "{{base_url}}/mobile/meetings/events/{{id}}",
                             "host": [
                                 "{{base_url}}"
                             ],
                             "path": [
                                 "mobile",
-                                "account",
-                                "tickets",
+                                "meetings",
+                                "events",
                                 "{{id}}"
                             ]
                         }
@@ -1095,15 +408,8 @@
                     "response": []
                 },
                 {
-                    "name": "POST /mobile/account/tickets/{id}/messages/send",
+                    "name": "GET mobile/meetings/events/{id}/slots",
                     "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
                         "auth": {
                             "type": "bearer",
                             "bearer": [
@@ -1114,23 +420,82 @@
                                 }
                             ]
                         },
+                        "method": "GET",
+                        "header": [],
                         "url": {
-                            "raw": "{{base_url}}/mobile/account/tickets/{{id}}/messages/send",
+                            "raw": "{{base_url}}/mobile/meetings/events/{{id}}/slots",
                             "host": [
                                 "{{base_url}}"
                             ],
                             "path": [
                                 "mobile",
-                                "account",
-                                "tickets",
+                                "meetings",
+                                "events",
                                 "{{id}}",
-                                "messages",
-                                "send"
+                                "slots"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET mobile/meetings/my-meetings",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/mobile/meetings/my-meetings",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "meetings",
+                                "my-meetings"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST mobile/meetings/bookings",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/mobile/meetings/bookings",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "meetings",
+                                "bookings"
                             ]
                         },
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"type\": \"text\",\n    \"message\": \"We will report this issue to maintenance team\"\n}",
+                            "raw": "{\n    \"meeting_event_id\": 1,\n    \"date\": \"2026-05-15\",\n    \"start_time\": \"14:00\",\n    \"end_time\": \"15:00\"\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -1143,13 +508,39 @@
             ]
         },
         {
-            "name": "Notifications",
+            "name": "Notification",
             "item": [
                 {
-                    "name": "GET /notifications",
+                    "name": "GET mobile/notifications",
                     "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
                         "method": "GET",
                         "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/mobile/notifications",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "notifications"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST mobile/notifications/delete",
+                    "request": {
                         "auth": {
                             "type": "bearer",
                             "bearer": [
@@ -1160,300 +551,473 @@
                                 }
                             ]
                         },
-                        "url": {
-                            "raw": "{{base_url}}/notifications?tab=all",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "notifications"
-                            ],
-                            "query": [
-                                {
-                                    "key": "tab",
-                                    "value": "all"
-                                }
-                            ]
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "GET /notifications (Unread)",
-                    "request": {
-                        "method": "GET",
+                        "method": "POST",
                         "header": [],
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
                         "url": {
-                            "raw": "{{base_url}}/notifications?tab=unread",
+                            "raw": "{{base_url}}/mobile/notifications/delete",
                             "host": [
                                 "{{base_url}}"
                             ],
                             "path": [
-                                "notifications"
-                            ],
-                            "query": [
-                                {
-                                    "key": "tab",
-                                    "value": "unread"
-                                }
-                            ]
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "POST /notifications/mark-all-read",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/notifications/mark-all-read",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "notifications",
-                                "mark-all-read"
-                            ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "POST /notifications/mark-all-unread",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/notifications/mark-all-unread",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "notifications",
-                                "mark-all-unread"
-                            ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "POST /notifications/delete-all",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/notifications/delete-all",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "notifications",
-                                "delete-all"
-                            ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "POST /notifications/mark-read",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/notifications/mark-read",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "notifications",
-                                "mark-read"
-                            ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"id\": \"notification-uuid\"\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "POST /notifications/mark-unread",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/notifications/mark-unread",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
-                                "notifications",
-                                "mark-unread"
-                            ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"id\": \"notification-uuid\"\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "POST /notifications/delete",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "auth": {
-                            "type": "bearer",
-                            "bearer": [
-                                {
-                                    "key": "token",
-                                    "value": "{{token}}",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        "url": {
-                            "raw": "{{base_url}}/notifications/delete",
-                            "host": [
-                                "{{base_url}}"
-                            ],
-                            "path": [
+                                "mobile",
                                 "notifications",
                                 "delete"
                             ]
                         },
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"id\": \"notification-uuid\"\n}",
+                            "raw": "{\n    \"notification_id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST mobile/notifications/delete-all",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/mobile/notifications/delete-all",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "notifications",
+                                "delete-all"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST mobile/notifications/mark-all-read",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/mobile/notifications/mark-all-read",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "notifications",
+                                "mark-all-read"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "[]",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST mobile/notifications/mark-all-unread",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/mobile/notifications/mark-all-unread",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "notifications",
+                                "mark-all-unread"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST mobile/notifications/mark-read",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/mobile/notifications/mark-read",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "notifications",
+                                "mark-read"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST mobile/notifications/mark-unread",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/mobile/notifications/mark-unread",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "notifications",
+                                "mark-unread"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Space",
+            "item": [
+                {
+                    "name": "GET mobile/spaces",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/mobile/spaces",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "spaces"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET mobile/spaces/my-bookings",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/mobile/spaces/my-bookings",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "spaces",
+                                "my-bookings"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET mobile/spaces/{id}",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/mobile/spaces/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "spaces",
+                                "{{id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET mobile/spaces/{id}/slots",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/mobile/spaces/{{id}}/slots",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "spaces",
+                                "{{id}}",
+                                "slots"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST mobile/spaces/book",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/mobile/spaces/book",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "spaces",
+                                "book"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"space_id\": 1,\n    \"date\": \"2026-05-20\",\n    \"start_time\": \"09:00\",\n    \"end_time\": \"12:00\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Ticket",
+            "item": [
+                {
+                    "name": "GET mobile/tickets",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/mobile/tickets",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "tickets"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GET mobile/tickets/{id}",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/mobile/tickets/{{id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "tickets",
+                                "{{id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST mobile/tickets",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/mobile/tickets",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "tickets"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"title\": \"Need help with onboarding\",\n    \"description\": \"Can someone assist with setting up my workspace?\",\n    \"priority\": \"medium\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "POST mobile/tickets/{id}/messages",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/mobile/tickets/{{id}}/messages",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "mobile",
+                                "tickets",
+                                "{{id}}",
+                                "messages"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"message\": \"Thank you for your response. Can you provide more details?\"\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -1466,10 +1030,34 @@
             ]
         }
     ],
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    ""
+                ]
+            }
+        },
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    ""
+                ]
+            }
+        }
+    ],
     "variable": [
         {
             "key": "base_url",
-            "value": "http://127.0.0.1:8000/api"
+            "value": ""
+        },
+        {
+            "key": "live_url",
+            "value": ""
         },
         {
             "key": "token",

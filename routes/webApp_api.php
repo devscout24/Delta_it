@@ -1,0 +1,273 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\Web\RoomController;
+use App\Http\Controllers\Api\Web\CompanyController;
+use App\Http\Controllers\Api\Web\CompanyPaymentController;
+use App\Http\Controllers\Api\Web\CollaboratorController;
+use App\Http\Controllers\Api\Web\ContractController;
+use App\Http\Controllers\Api\Web\DocumentController;
+use App\Http\Controllers\Api\Web\CompanyUserController;
+use App\Http\Controllers\Api\Web\RequestController;
+use App\Http\Controllers\Api\Web\AccessCardController;
+use App\Http\Controllers\Api\Web\CompanyNoteController;
+use App\Http\Controllers\Api\Web\AdminPaymentController;
+use App\Http\Controllers\Api\Web\AdminContractController;
+use App\Http\Controllers\Api\Web\AdminTicketController;
+use App\Http\Controllers\Api\Web\AdminDocumentController;
+use App\Http\Controllers\Api\Web\RoomManagementController;
+use App\Http\Controllers\Api\Web\MeetingEventController;
+use App\Http\Controllers\Api\Web\UserManagementController;
+
+// =================================================
+// Web Map & Room Management
+// =================================================
+
+Route::middleware('auth:api')
+    ->controller(RoomController::class)
+    ->prefix('web/map/rooms')
+    ->group(function () {
+        Route::get('/floors', 'floors');
+        Route::get('/stats', 'stats');
+        Route::get('/', 'index');
+        Route::post('/', 'store');
+        Route::post('/assign-company', 'assignCompany');
+        Route::post('/remove-company', 'removeCompany');
+        Route::get('/{id}/details', 'details');
+        Route::post('/{id}/status', 'updateStatus');
+    });
+
+// =================================================
+// Web Companies
+// =================================================
+
+Route::middleware('auth:api')
+    ->controller(CompanyController::class)
+    ->prefix('web/companies')
+    ->group(function () {
+        Route::get('/', 'index');
+        Route::post('/', 'store');
+        Route::get('/{id}', 'show');
+        Route::put('/{id}', 'update');
+        Route::post('/{id}/logo', 'uploadLogo');
+        Route::delete('/{id}/logo', 'deleteLogo');
+        Route::post('/{id}/archive', 'archive');
+        Route::post('/{id}/restore', 'restore');
+    });
+
+// =================================================
+// Web Company Payments
+// =================================================
+
+Route::middleware('auth:api')
+    ->controller(CompanyPaymentController::class)
+    ->prefix('web/company-payments')
+    ->group(function () {
+        Route::get('/', 'index');
+        Route::post('/init', 'initYear');
+        Route::put('/{id}', 'update');
+        Route::get('/summary', 'summary');
+    });
+
+// =================================================
+// Web Collaborators
+// =================================================
+
+Route::middleware('auth:api')
+    ->controller(CollaboratorController::class)
+    ->prefix('web/collaborators')
+    ->group(function () {
+        Route::get('/', 'index');
+        Route::get('/{id}', 'show');
+        Route::post('/', 'store');
+        Route::put('/{id}', 'update');
+        Route::delete('/{id}', 'destroy');
+    });
+
+// =================================================
+// Web Contracts
+// =================================================
+
+Route::middleware('auth:api')
+    ->controller(ContractController::class)
+    ->prefix('web/contracts')
+    ->group(function () {
+        Route::get('/{company_id}', 'show');
+        Route::put('/{company_id}', 'update');
+        Route::post('/files', 'uploadFile');
+        Route::delete('/files/{id}', 'deleteFile');
+    });
+
+// =================================================
+// Web Documents
+// =================================================
+
+Route::middleware('auth:api')
+    ->controller(DocumentController::class)
+    ->prefix('web/documents')
+    ->group(function () {
+        Route::get('/{company_id}', 'index');
+        Route::post('/{company_id}', 'store');
+        Route::delete('/{id}', 'destroy');
+    });
+
+// =================================================
+// Web Company Users
+// =================================================
+
+Route::middleware('auth:api')
+    ->controller(CompanyUserController::class)
+    ->prefix('web/company-users')
+    ->group(function () {
+        Route::get('/', 'index');
+        Route::post('/', 'store');
+        Route::get('/{id}', 'show');
+        Route::put('/{id}', 'update');
+        Route::delete('/{id}', 'destroy');
+    });
+
+// =================================================
+// Web Requests
+// =================================================
+
+Route::middleware('auth:api')
+    ->controller(RequestController::class)
+    ->prefix('web/requests')
+    ->group(function () {
+        Route::get('/', 'index');
+    });
+
+// =================================================
+// Web Access Cards
+// =================================================
+
+Route::middleware('auth:api')
+    ->controller(AccessCardController::class)
+    ->prefix('web/access-cards')
+    ->group(function () {
+        Route::get('/{company_id}', 'show');
+        Route::put('/{company_id}', 'update');
+    });
+
+// =================================================
+// Web Company Notes
+// =================================================
+
+Route::middleware('auth:api')
+    ->controller(CompanyNoteController::class)
+    ->prefix('web/company-notes')
+    ->group(function () {
+        Route::get('/{company_id}', 'index');
+        Route::post('/', 'store');
+        Route::delete('/{id}', 'destroy');
+    });
+
+// =================================================
+// Web Admin Payments
+// =================================================
+
+Route::middleware('auth:api')
+    ->controller(AdminPaymentController::class)
+    ->prefix('web/payments')
+    ->group(function () {
+        Route::get('/', 'index');
+        Route::get('/summary', 'summary');
+    });
+
+// =================================================
+// Web Admin Contracts
+// =================================================
+
+Route::middleware('auth:api')
+    ->controller(AdminContractController::class)
+    ->prefix('web/admin/contracts')
+    ->group(function () {
+        Route::get('/', 'index');
+        Route::post('/', 'store');
+        Route::get('/{id}', 'show');
+        Route::put('/{id}', 'update');
+        Route::delete('/{id}', 'destroy');
+        Route::post('/files', 'uploadFile');
+        Route::delete('/files/{id}', 'deleteFile');
+    });
+
+// =================================================
+// Web Admin Tickets
+// =================================================
+
+Route::middleware('auth:api')
+    ->controller(AdminTicketController::class)
+    ->prefix('web/admin/tickets')
+    ->group(function () {
+        Route::get('/', 'index');
+        Route::get('/{id}', 'show');
+        Route::post('/', 'store');
+        Route::post('/{id}/reply', 'reply');
+        Route::post('/{id}/status', 'updateStatus');
+    });
+
+// =================================================
+// Web Admin Documents
+// =================================================
+
+Route::middleware('auth:api')
+    ->controller(AdminDocumentController::class)
+    ->prefix('web/admin/documents')
+    ->group(function () {
+        Route::get('/', 'index');
+        Route::post('/', 'store');
+        Route::get('/{id}', 'show');
+        Route::put('/{id}', 'update');
+        Route::delete('/{id}', 'destroy');
+    });
+
+// =================================================
+// Web Room Management
+// =================================================
+
+Route::middleware('auth:api')
+    ->controller(RoomManagementController::class)
+    ->prefix('web/admin/rooms')
+    ->group(function () {
+        Route::get('/', 'index');
+        Route::post('/', 'store');
+        Route::get('/{id}', 'show');
+        Route::put('/{id}', 'update');
+        Route::post('/{id}/schedule', 'addSchedule');
+        Route::get('/{id}/slots', 'getSlots');
+        Route::get('/calendar/all', 'calendar');
+    });
+
+// =================================================
+// Web Meeting Events
+// =================================================
+
+Route::middleware('auth:api')
+    ->controller(MeetingEventController::class)
+    ->prefix('web/meeting-events')
+    ->group(function () {
+        Route::get('/', 'index');
+        Route::post('/', 'store');
+        Route::get('/{id}', 'show');
+        Route::put('/{id}', 'update');
+        Route::post('/{id}/schedule', 'addSchedule');
+        Route::get('/{id}/slots', 'slots');
+        Route::get('/requests', 'requests');
+        Route::post('/requests/{id}/approve', 'approve');
+        Route::post('/requests/{id}/reject', 'reject');
+    });
+
+// =================================================
+// Web User Management
+// =================================================
+
+Route::middleware('auth:api')
+    ->controller(UserManagementController::class)
+    ->prefix('web/users')
+    ->group(function () {
+        Route::get('/', 'index');
+        Route::post('/', 'store');
+        Route::get('/{id}', 'show');
+        Route::put('/{id}', 'update');
+        Route::delete('/{id}', 'destroy');
+    });

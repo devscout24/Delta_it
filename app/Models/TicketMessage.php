@@ -6,21 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class TicketMessage extends Model
 {
-    // fillable
-    protected $guarded = [];
-
-    public function sender()
-    {
-        return $this->belongsTo(User::class, 'sender_id');
-    }
+    protected $fillable = [
+        'ticket_id',
+        'user_id',
+        'message',
+    ];
 
     public function ticket()
     {
         return $this->belongsTo(Ticket::class);
-    }
-
-    public function files()
-    {
-        return $this->hasMany(TicketMessageFile::class);
     }
 }

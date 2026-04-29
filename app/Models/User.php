@@ -14,48 +14,20 @@ class User extends Authenticatable implements JWTSubject
 
     use  HasRoles, HasFactory, Notifiable, SoftDeletes;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'name',
-        'company_id',
-        'username',
-        'first_name',
-        'last_name',
-        'job_position',
-        'deletion_reason',
         'email',
-        'phone',
         'password',
-        'profile_photo',
         'role',
         'status',
-        'password_otp',
-        'password_otp_expired_at',
-        'password_otp_verified_at',
-        'password_reset_token',
-        'password_reset_token_expires_at',
-        'email_verified_at',
-        'terms_and_conditions',
-        'address',
-        'zipcode',
-        'last_login_at',
-        'user_type'
+        'company_id',
+        'phone',
+        'job_title',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
-        'created_at',
-        'updated_at'
     ];
 
     /**
@@ -76,11 +48,10 @@ class User extends Authenticatable implements JWTSubject
         return $this->profile_photo;
     }
 
-    public function preference()
+    public function company()
     {
-        return $this->hasOne(UserPreference::class);
+        return $this->belongsTo(Company::class);
     }
-
 
     // implement 2 methods for token get
     public function getJWTIdentifier()

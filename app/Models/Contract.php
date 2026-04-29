@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Contract extends Model
 {
@@ -14,28 +13,16 @@ class Contract extends Model
         'start_date',
         'end_date',
         'renewal_date',
-        'status'
+        'status',
     ];
-
-    protected $hidden = ['created_at', 'updated_at'];
-
-    public function files()
-    {
-        return $this->hasMany(ContractFile::class, 'contract_id');
-    }
 
     public function company()
     {
-        return $this->belongsTo(Company::class, 'company_id');
+        return $this->belongsTo(Company::class);
     }
 
-    public function associates()
+    public function files()
     {
-        return $this->belongsToMany(
-            Company::class,
-            'contract_associate_companies',
-            'contract_id',
-            'company_id'
-        );
+        return $this->hasMany(ContractFile::class);
     }
 }

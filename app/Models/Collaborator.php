@@ -12,11 +12,17 @@ class Collaborator extends Model
         'last_name',
         'job_position',
         'email',
-        'phone_extension',
         'phone_number',
+        'phone_extension',
         'access_card_number',
         'parking_card',
     ];
 
-    protected $hidden = ['created_at', 'updated_at'];
+    // ======================
+    // RELATION
+    // ======================
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
+    }
 }

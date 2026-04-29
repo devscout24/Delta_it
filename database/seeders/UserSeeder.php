@@ -2,60 +2,73 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Seeder;
+use App\Models\User;
 use Illuminate\Support\Facades\Hash;
-use Spatie\Permission\Models\Role;
+use App\Models\Company;
 
 class UserSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
-    public function run(): void
+    public function run()
     {
+        // Admin User
+        User::updateOrCreate([
+            'email' => 'admin@demo.com',
+        ], [
+            'name' => 'Admin User',
+            'password' => Hash::make('password'),
+            'role' => 'admin',
+            'status' => 'active',
+            'company_id' => null,
+            'phone' => '0000000000',
+            'job_title' => 'System Admin',
+        ]);
 
-        foreach (['admin', 'user', 'company_user'] as $roleName) {
-            Role::firstOrCreate([
-                'name' => $roleName,
-                'guard_name' => 'web',
+        // Get companies
+        $companies = Company::all();
+
+        foreach ($companies as $company) {
+            $baseEmail = strtolower(str_replace(' ', '', $company->name));
+
+            // Company Manager
+            User::updateOrCreate([
+                'email' => $baseEmail . '@manager.com',
+            ], [
+                'name' => $company->name . ' Manager',
+                'password' => Hash::make('password'),
+                'role' => 'company_user',
+                'status' => 'active',
+                'company_id' => $company->id,
+                'phone' => '123456789',
+                'job_title' => 'Manager',
+            ]);
+
+            User::updateOrCreate([
+                'email' => 'user@user.com',
+            ], [
+                'name' => $company->name . ' Manager',
+                'password' => Hash::make('password'),
+                'role' => 'company_user',
+                'status' => 'active',
+                'company_id' => $company->id,
+                'phone' => '123456789',
+                'job_title' => 'Manager',
+            ]);
+
+
+
+            // Another Employee
+            User::updateOrCreate([
+                'email' => $baseEmail . '@employee.com',
+            ], [
+                'name' => $company->name . ' Employee',
+                'password' => Hash::make('password'),
+                'role' => 'company_user',
+                'status' => 'active',
+                'company_id' => $company->id,
+                'phone' => '987654321',
+                'job_title' => 'Staff',
             ]);
         }
-
-        // Admin web account
-        $adminData = [
-            'name' => 'Admin User',
-            'username' => 'admin',
-            'email' => 'admin@example.com',
-            'password' => Hash::make('12345678'),
-            'user_type' => 'admin',
-            'status' => 'active',
-            'terms_and_conditions' => true,
-        ];
-
-        $adminUser = User::updateOrCreate(
-            ['username' => $adminData['username']],
-            $adminData
-        );
-
-        $adminUser->syncRoles(['admin']);
-
-        // Mobile app account
-        $mobileData = [
-            'name' => 'Mobile User',
-            'username' => 'mobileuser',
-            'email' => 'mobile@example.com',
-            'password' => Hash::make('12345678'),
-            'user_type' => 'user',
-            'status' => 'active',
-            'terms_and_conditions' => true,
-        ];
-
-        $mobileUser = User::updateOrCreate(
-            ['username' => $mobileData['username']],
-            $mobileData
-        );
-
-        $mobileUser->syncRoles(['user']);
     }
 }

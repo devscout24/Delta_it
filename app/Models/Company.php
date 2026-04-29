@@ -7,36 +7,30 @@ use Illuminate\Database\Eloquent\Model;
 class Company extends Model
 {
     protected $fillable = [
-        'logo',
         'name',
         'email',
-        'fiscal_name',
-        'nif',
         'phone',
+        'nif',
         'incubation_type',
         'business_area',
-        'manager',
+        'manager_name',
         'description',
-        'status'
+        'logo',
+        'status',
     ];
-    protected $hidden = ['created_at', 'updated_at'];
 
-    public function room()
+    public function users()
     {
-        return $this->hasOne(Room::class);
+        return $this->hasMany(User::class);
     }
 
-    public function rooms()
+    public function roomAllocations()
     {
-        return $this->hasMany(Room::class);
+        return $this->hasMany(RoomAllocation::class);
     }
 
-    public function contract()
-    {
-        return $this->hasOne(Contract::class);
-    }
     public function contracts()
     {
-        return $this->hasOne(Contract::class);
+        return $this->hasMany(Contract::class);
     }
 }

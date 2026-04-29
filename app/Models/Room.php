@@ -6,22 +6,51 @@ use Illuminate\Database\Eloquent\Model;
 
 class Room extends Model
 {
-    protected $fillable = [
-        'floor',
+    protected $appends = [
         'room_name',
+        'floor_no',
+    ];
+
+    protected $fillable = [
+        'floor_id',
+        'name',
         'area',
         'polygon_points',
-        'company_id',
         'status',
     ];
-    protected $hidden = [
-        'created_at',
-        'updated_at',
+
+    protected $casts = [
+        'polygon_points' => 'array',
     ];
 
-
-    public function company()
+    public function floor()
     {
-        return $this->belongsTo(Company::class, 'company_id', 'id');
+        return $this->belongsTo(Floor::class);
+    }
+
+    public function getRoomNameAttribute(): ?string
+    {
+        return $this->name;
+    }
+
+    public function getFloorNoAttribute(): ?int
+    {
+        return $this->floor?->level;
+    }
+
+    public function allocations()
+    {
+        return $this->hasMany(RoomAllocation::class);
+    }
+
+    public function activeAllocation()
+    {
+        return $this->hasOne(RoomAllocation::class)
+            ->where('status', 'active');
+    }
+
+    public function currentAllocation()
+    {
+        return $this->activeAllocation();
     }
 }

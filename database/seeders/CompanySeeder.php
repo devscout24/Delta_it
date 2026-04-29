@@ -2,67 +2,47 @@
 
 namespace Database\Seeders;
 
-use App\Models\Company;
 use Illuminate\Database\Seeder;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Company;
 
 class CompanySeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
-    public function run(): void
+    public function run()
     {
+        Company::create([
+            'name' => 'TechNova Solutions',
+            'email' => 'info@technova.com',
+            'phone' => '+1234567890',
+            'nif' => 'TNX-12345',
+            'incubation_type' => 'virtual',
+            'business_area' => 'Software Development',
+            'manager_name' => 'John Doe',
+            'description' => 'SaaS product company',
+            'status' => 'active',
+        ]);
 
-        Company::insert([
-            [
-                'commercial_name' => 'TechNova Solutions',
-                'company_email' => 'info@technova.com',
-                'fiscal_name' => 'TechNova Solutions Ltd.',
-                'nif' => '23456',
-                'phone_number' => '01770001111',
-                'incubation_type' => 'on-site',
-                'occupied_office' => 'Office A-201',
-                'occupied_area' => '350 sq ft',
-                'bussiness_area' => 'Software Development',
-                'company_manager' => 'Rashed Karim',
-                'description' => 'A software company specializing in Laravel and AI-based products.',
-                'logo' => 'uploads/company_logos/technova.png',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'commercial_name' => 'GreenLeaf Industries',
-                'company_email' => 'contact@greenleaf.com',
-                'fiscal_name' => 'GreenLeaf Agro Industries',
-                'nif' => '654321',
-                'phone_number' => '01888002222',
-                'incubation_type' => 'on-site',
-                'occupied_office' => 'Office B-102',
-                'occupied_area' => '420 sq ft',
-                'bussiness_area' => 'Agriculture & Biotech',
-                'company_manager' => 'Mariam Sultana',
-                'description' => 'Leading provider of organic and eco-friendly agricultural products.',
-                'logo' => 'uploads/company_logos/greenleaf.png',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'commercial_name' => 'Delta IT Hub',
-                'company_email' => 'support@deltahub.com',
-                'fiscal_name' => 'Delta IT Hub Pvt. Ltd.',
-                'nif' => '789456',
-                'phone_number' => '01999003333',
-                'incubation_type' => 'virtual',
-                'occupied_office' => 'Office C-301',
-                'occupied_area' => '600 sq ft',
-                'bussiness_area' => 'IT & Digital Services',
-                'company_manager' => 'Sajid Ahmed',
-                'description' => 'Incubating tech startups and providing IT consultancy services.',
-                'logo' => 'uploads/company_logos/delta.png',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
+        Company::create([
+            'name' => 'GreenField Labs',
+            'email' => 'contact@greenfieldlabs.io',
+            'phone' => '+1987654321',
+            'nif' => 'GFL-67890',
+            'incubation_type' => 'on-site',
+            'business_area' => 'Agritech',
+            'manager_name' => 'Sarah Johnson',
+            'description' => 'Agri innovation startup',
+            'status' => 'active',
+        ]);
+
+        Company::create([
+            'name' => 'BlueSky Ventures',
+            'email' => 'hello@bluesky.com',
+            'phone' => '+44123456789',
+            'nif' => 'BSV-33445',
+            'incubation_type' => 'cowork',
+            'business_area' => 'Investment',
+            'manager_name' => 'Michael Smith',
+            'description' => 'VC firm',
+            'status' => 'archived',
         ]);
     }
 }
