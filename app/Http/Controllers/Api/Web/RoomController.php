@@ -15,19 +15,29 @@ class RoomController extends Controller
 {
     use ApiResponse;
 
+    // ==============================
+    // STATS
+    // ==============================
     public function stats()
     {
         $rooms = Room::with(['activeAllocation'])->get();
 
         $stats = [
-            'available' => $rooms->whereNull('activeAllocation')->count(),
+            'available' => $rooms->where('status', '!=', 'maintenance')
+                ->whereNull('activeAllocation')
+                ->count(),
+
             'occupied' => $rooms->whereNotNull('activeAllocation')->count(),
+
             'maintenance' => $rooms->where('status', 'maintenance')->count(),
         ];
 
         return $this->success($stats, 'Stats fetched');
     }
 
+    // ==============================
+    // LIST ROOMS (MAP)
+    // ==============================
     public function index(Request $request)
     {
         $query = Room::with(['activeAllocation.company', 'floor']);
@@ -37,16 +47,28 @@ class RoomController extends Controller
         }
 
         $rooms = $query->get()->map(function ($room) {
+
             $allocation = $room->activeAllocation;
+
+            $status = $room->status === 'maintenance'
+                ? 'maintenance'
+                : ($allocation ? 'occupied' : 'available');
 
             return [
                 'id' => $room->id,
-                'floor_no' => $room->floor_no,
                 'floor_id' => $room->floor_id,
-                'room_name' => $room->room_name,
+                'floor_no' => $room->floor?->level,
+                'room_name' => $room->name,
                 'area' => $room->area,
                 'polygon_points' => $room->polygon_points,
-                'status' => $allocation ? 'occupied' : 'available',
+
+                'status' => $status,
+                'color' => match ($status) {
+                    'available' => 'green',
+                    'occupied' => 'red',
+                    'maintenance' => 'yellow',
+                },
+
                 'company_id' => $allocation?->company_id,
                 'company_name' => $allocation?->company?->name,
             ];
@@ -55,6 +77,9 @@ class RoomController extends Controller
         return $this->success($rooms, 'Rooms fetched');
     }
 
+    // ==============================
+    // CREATE ROOM
+    // ==============================
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -74,7 +99,7 @@ class RoomController extends Controller
             $converted = [];
 
             for ($i = 0; $i < count($points); $i += 2) {
-                $converted[] = [(float) $points[$i], (float) $points[$i + 1]];
+                $converted[] = [(float)$points[$i], (float)$points[$i + 1]];
             }
 
             $room = Room::create([
@@ -82,6 +107,7 @@ class RoomController extends Controller
                 'name' => $request->room_name,
                 'area' => $request->area,
                 'polygon_points' => json_encode($converted),
+                'status' => 'available',
             ]);
 
             DB::commit();
@@ -93,16 +119,21 @@ class RoomController extends Controller
         }
     }
 
+    // ==============================
+    // FLOORS LIST
+    // ==============================
     public function floors()
     {
-        $floors = Floor::query()
-            ->select(['id', 'name', 'level'])
+        $floors = Floor::select(['id', 'name', 'level'])
             ->orderBy('level')
             ->get();
 
         return $this->success($floors, 'Floors fetched');
     }
 
+    // ==============================
+    // ASSIGN COMPANY
+    // ==============================
     public function assignCompany(Request $request)
     {
         $request->validate([
@@ -112,9 +143,7 @@ class RoomController extends Controller
 
         DB::beginTransaction();
         try {
-            $room = Room::find($request->room_id);
-
-            $exists = RoomAllocation::where('room_id', $room->id)
+            $exists = RoomAllocation::where('room_id', $request->room_id)
                 ->where('status', 'active')
                 ->exists();
 
@@ -123,7 +152,7 @@ class RoomController extends Controller
             }
 
             RoomAllocation::create([
-                'room_id' => $room->id,
+                'room_id' => $request->room_id,
                 'company_id' => $request->company_id,
                 'status' => 'active',
                 'start_date' => now(),
@@ -138,6 +167,9 @@ class RoomController extends Controller
         }
     }
 
+    // ==============================
+    // REMOVE COMPANY
+    // ==============================
     public function removeCompany(Request $request)
     {
         $request->validate([
@@ -168,6 +200,9 @@ class RoomController extends Controller
         }
     }
 
+    // ==============================
+    // ROOM DETAILS
+    // ==============================
     public function details($id)
     {
         $room = Room::with([
@@ -184,18 +219,28 @@ class RoomController extends Controller
 
         return $this->success([
             'floor_id' => $room->floor_id,
-            'floor_no' => $room->floor_no,
-            'room_name' => $room->room_name,
-            'status' => $allocation ? 'occupied' : 'available',
+            'floor_no' => $room->floor?->level,
+            'room_name' => $room->name,
+
+            'status' => $room->status === 'maintenance'
+                ? 'maintenance'
+                : ($allocation ? 'occupied' : 'available'),
+
             'company_name' => $company?->name,
             'incubation_type' => $company?->incubation_type,
             'manager_name' => $company?->manager_name,
             'start_date' => optional($company?->contracts->first())->start_date,
             'end_date' => optional($company?->contracts->first())->end_date,
             'description' => $company?->description,
+
+            // static for now (you mentioned)
+            'last_request' => null,
         ], 'Room details fetched');
     }
 
+    // ==============================
+    // UPDATE ROOM STATUS
+    // ==============================
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
@@ -208,6 +253,10 @@ class RoomController extends Controller
             return $this->error([], 'Room not found', 404);
         }
 
-        return $this->success([], 'Status updated (logic placeholder)');
+        $room->update([
+            'status' => $request->status,
+        ]);
+
+        return $this->success([], 'Status updated');
     }
 }

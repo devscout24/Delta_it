@@ -23,19 +23,16 @@ use App\Http\Controllers\Api\Web\UserManagementController;
 // Web Map & Room Management
 // =================================================
 
-Route::middleware('auth:api')
-    ->controller(RoomController::class)
-    ->prefix('web/map/rooms')
-    ->group(function () {
-        Route::get('/floors', 'floors');
-        Route::get('/stats', 'stats');
-        Route::get('/', 'index');
-        Route::post('/', 'store');
-        Route::post('/assign-company', 'assignCompany');
-        Route::post('/remove-company', 'removeCompany');
-        Route::get('/{id}/details', 'details');
-        Route::post('/{id}/status', 'updateStatus');
-    });
+Route::middleware('auth:api')->controller(RoomController::class)->prefix('web/map/rooms')->group(function () {
+    Route::get('/floors', 'floors');
+    Route::get('/stats', 'stats');
+    Route::get('/', 'index');
+    Route::post('/', 'store');
+    Route::post('/assign-company', 'assignCompany');
+    Route::post('/remove-company', 'removeCompany');
+    Route::get('/{id}/details', 'details');
+    Route::post('/{id}/status', 'updateStatus');
+});
 
 // =================================================
 // Web Companies
