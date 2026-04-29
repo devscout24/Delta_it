@@ -15,55 +15,37 @@ use App\Http\Controllers\Api\Mobile\SpaceController;
 // Mobile App Routes
 // =================================================
 
-Route::middleware('auth:api')
-    ->controller(CompanyController::class)
-    ->prefix('mobile/company')
-    ->group(function () {
-        Route::get('/info', 'info');
-        Route::post('/update', 'update');
-    });
+Route::middleware('auth:api')->controller(CompanyController::class)->prefix('mobile/company')->group(function () {
+    Route::get('/info', 'info');
+    Route::post('/update', 'update');
+});
 
-Route::middleware('auth:api')
-    ->controller(CollaboratorController::class)
-    ->prefix('mobile/collaborators')
-    ->group(function () {
-        Route::get('/', 'index');
-        Route::post('/store', 'store');
-        Route::post('/update/{id}', 'update');
-        Route::delete('/delete/{id}', 'destroy');
-    });
+Route::middleware('auth:api')->controller(CollaboratorController::class)->prefix('mobile/collaborators')->group(function () {
+    Route::get('/', 'index');
+    Route::post('/store', 'store');
+    Route::post('/update/{id}', 'update');
+    Route::delete('/delete/{id}', 'destroy');
+});
 
-Route::middleware('auth:api')
-    ->controller(ContractController::class)
-    ->prefix('mobile/contracts')
-    ->group(function () {
-        Route::get('/', 'index');
-    });
+Route::middleware('auth:api')->controller(ContractController::class)->prefix('mobile/contracts')->group(function () {
+    Route::get('/', 'index');
+});
 
-Route::middleware('auth:api')
-    ->controller(AccessCardController::class)
-    ->prefix('mobile/access-cards')
-    ->group(function () {
-        Route::get('/', 'index');
-    });
+Route::middleware('auth:api')->controller(AccessCardController::class)->prefix('mobile/access-cards')->group(function () {
+    Route::get('/', 'index');
+});
 
-Route::middleware('auth:api')
-    ->controller(DocumentController::class)
-    ->prefix('mobile/documents')
-    ->group(function () {
-        Route::get('/', 'index');
-        Route::get('/{id}', 'show');
-    });
+Route::middleware('auth:api')->controller(DocumentController::class)->prefix('mobile/documents')->group(function () {
+    Route::get('/', 'index');
+    Route::get('/{id}', 'show');
+});
 
-Route::middleware('auth:api')
-    ->controller(TicketController::class)
-    ->prefix('mobile/tickets')
-    ->group(function () {
-        Route::get('/', 'mobileIndex');
-        Route::post('/', 'mobileStore');
-        Route::get('/{id}', 'mobileShow');
-        Route::post('/{id}/messages', 'mobileSendMessage');
-    });
+Route::middleware('auth:api')->controller(TicketController::class)->prefix('mobile/tickets')->group(function () {
+    Route::get('/', 'mobileIndex');
+    Route::post('/', 'mobileStore');
+    Route::get('/{id}', 'mobileShow');
+    Route::post('/{id}/messages', 'mobileSendMessage');
+});
 
 Route::middleware('auth:api')
     ->controller(NotificationController::class)

@@ -7,7 +7,6 @@ use App\Models\RoomAllocation;
 use App\Models\Ticket;
 use App\Models\TicketAttachment;
 use App\Models\TicketMessage;
-use App\Models\TicketMessageFile;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -92,7 +91,7 @@ class TicketController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'subject' => 'required|string|max:255',
-            'type' => 'required|string|max:100',
+            'type' => 'required|in:maintenance,access,support,other',
             'room_id' => 'nullable|exists:rooms,id',
             'message' => 'required|string',
         ]);
@@ -124,6 +123,7 @@ class TicketController extends Controller
             $t = Ticket::create([
                 'unique_id' => 'TIC-' . strtoupper(Str::random(8)),
                 'company_id' => $user->company_id,
+                'user_id' => $user->id,
                 'requester_id' => $user->id,
                 'requester_role' => $user->role === 'admin' ? 'admin' : 'user',
                 'subject' => $request->subject,
@@ -136,7 +136,9 @@ class TicketController extends Controller
 
             TicketMessage::create([
                 'ticket_id' => $t->id,
+                'user_id' => $user->id,
                 'sender_id' => $user->id,
+                'message' => $request->message,
                 'message_type' => 'text',
                 'message_text' => $request->message,
                 'is_read' => false,
@@ -166,7 +168,7 @@ class TicketController extends Controller
 
         $ticket = Ticket::with([
             'requester:id,name,email,role',
-            'messages.sender:id,name,email,role,profile_photo',
+            'messages.sender:id,name,email,role',
             'messages.files:id,ticket_message_id,file_path,file_type,file_size',
         ])
             ->where('company_id', $user->company_id)
@@ -235,7 +237,9 @@ class TicketController extends Controller
 
             $msg = TicketMessage::create([
                 'ticket_id' => $ticket->id,
+                'user_id' => $user->id,
                 'sender_id' => $user->id,
+                'message' => $request->message ?? '',
                 'message_type' => $request->type,
                 'message_text' => $request->message,
                 'is_read' => false,
@@ -244,7 +248,7 @@ class TicketController extends Controller
             if ($request->hasFile('files')) {
                 foreach ($request->file('files') as $file) {
 
-                    $path = $this->uploadFile($file, 'ticket_files');
+                    $path = $this->fileUpload($file, 'ticket_files');
 
                     TicketAttachment::create([
                         'ticket_message_id' => $msg->id,

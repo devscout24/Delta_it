@@ -61,7 +61,7 @@ class CompanyController extends Controller
             'manager_name' => $company->manager_name,
             'description' => $company->description,
             'status' => $company->status,
-
+            'logo' => $company->logo ? asset($company->logo) : null,
             'occupied_rooms' => $rooms,
             'occupied_area' => $rooms->sum('area'),
 
@@ -92,6 +92,7 @@ class CompanyController extends Controller
             'business_area' => 'nullable|string',
             'manager_name' => 'nullable|string|max:100',
             'description' => 'nullable|string',
+            'logo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         if ($validator->fails()) {
@@ -104,7 +105,7 @@ class CompanyController extends Controller
             return $this->error([], 'Company not found', 404);
         }
 
-        $company->update($request->only([
+        $data = $request->only([
             'name',
             'email',
             'phone',
@@ -113,8 +114,24 @@ class CompanyController extends Controller
             'business_area',
             'manager_name',
             'description',
-        ]));
+        ]);
 
-        return $this->success([], 'Company updated successfully');
+        // ✅ USE YOUR HELPER HERE
+        if ($request->hasFile('logo')) {
+            $data['logo'] = $this->uploadImage(
+                $request->file('logo'),
+                $company->logo,              // old image
+                'uploads/company',           // folder
+                200,                         // width
+                200,                         // height
+                'company-logo'               // custom name
+            );
+        }
+
+        $company->update($data);
+
+        return $this->success([
+            'logo_url' => $company->logo ? asset($company->logo) : null
+        ], 'Company updated successfully');
     }
 }
