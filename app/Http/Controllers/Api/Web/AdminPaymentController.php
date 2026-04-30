@@ -7,6 +7,7 @@ use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\CompanyPayment;
+use Carbon\Carbon;
 
 class AdminPaymentController extends Controller
 {
@@ -26,7 +27,7 @@ class AdminPaymentController extends Controller
             return $this->error($validator->errors(), 'Validation error', 422);
         }
 
-        $query = CompanyPayment::with('company')
+        $query = CompanyPayment::with(['company.contracts'])
             ->where('month', $request->month)
             ->where('year', $request->year);
 
@@ -44,9 +45,10 @@ class AdminPaymentController extends Controller
                 'id' => $p->id,
 
                 'company_name' => $p->company?->name,
-                'contract_end_date' => $p->company?->end_date,
 
-                'month' => $p->month,
+                'contract_end_date' => optional($p->company?->contracts?->first())->end_date,
+
+                'month' => Carbon::create()->month($p->month)->format('F'),
 
                 'value_non_vat' => $p->value_non_vat,
                 'value_vat' => $p->value_vat,
@@ -55,7 +57,8 @@ class AdminPaymentController extends Controller
                 'printings_vat' => $p->printings_vat,
 
                 'total' => $p->total_amount,
-                'status' => $p->status,
+
+                'status' => ucfirst($p->status),
             ];
         });
 
@@ -84,22 +87,26 @@ class AdminPaymentController extends Controller
         }
 
         // ---------- MONTH ----------
-        $monthly = CompanyPayment::where('month', $request->month)
+        $monthTotal = CompanyPayment::where('month', $request->month)
             ->where('year', $request->year)
-            ->get();
+            ->sum('total_amount');
 
-        $monthTotal = $monthly->sum('total_amount');
-        $monthPaid = $monthly->where('status', 'paid')->sum('total_amount');
+        $monthPaid = CompanyPayment::where('month', $request->month)
+            ->where('year', $request->year)
+            ->where('status', 'paid')
+            ->sum('total_amount');
 
         $monthPaidPercent = $monthTotal > 0
             ? round(($monthPaid / $monthTotal) * 100, 2)
             : 0;
 
         // ---------- YEAR ----------
-        $yearly = CompanyPayment::where('year', $request->year)->get();
+        $yearTotal = CompanyPayment::where('year', $request->year)
+            ->sum('total_amount');
 
-        $yearTotal = $yearly->sum('total_amount');
-        $yearPaid = $yearly->where('status', 'paid')->sum('total_amount');
+        $yearPaid = CompanyPayment::where('year', $request->year)
+            ->where('status', 'paid')
+            ->sum('total_amount');
 
         $yearPaidPercent = $yearTotal > 0
             ? round(($yearPaid / $yearTotal) * 100, 2)

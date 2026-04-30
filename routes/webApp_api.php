@@ -138,60 +138,51 @@ Route::middleware('auth:api')->prefix('web/company-notes')->controller(CompanyNo
 // Web Admin Payments
 // =================================================
 
-Route::middleware('auth:api')
-    ->controller(AdminPaymentController::class)
-    ->prefix('web/payments')
-    ->group(function () {
-        Route::get('/', 'index');
-        Route::get('/summary', 'summary');
-    });
+Route::middleware('auth:api')->controller(AdminPaymentController::class)->prefix('web/payments')->group(function () {
+    Route::get('/', 'index');
+    Route::get('/summary', 'summary');
+});
 
 // =================================================
 // Web Admin Contracts
 // =================================================
 
-Route::middleware('auth:api')
-    ->controller(AdminContractController::class)
-    ->prefix('web/admin/contracts')
-    ->group(function () {
-        Route::get('/', 'index');
-        Route::post('/', 'store');
-        Route::get('/{id}', 'show');
-        Route::put('/{id}', 'update');
-        Route::delete('/{id}', 'destroy');
-        Route::post('/files', 'uploadFile');
-        Route::delete('/files/{id}', 'deleteFile');
-    });
+Route::middleware('auth:api')->prefix('web/admin/contracts')->controller(AdminContractController::class)->group(function () {
+    Route::get('/', 'index');
+    Route::post('/', 'store');
+    Route::get('/{id}', 'show');
+    Route::put('/{id}', 'update');
+    Route::delete('/{id}', 'destroy');
+    Route::post('/files', 'uploadFile');
+    Route::delete('/files/{id}', 'deleteFile');
+});
 
 // =================================================
 // Web Admin Tickets
 // =================================================
 
-Route::middleware('auth:api')
-    ->controller(AdminTicketController::class)
-    ->prefix('web/admin/tickets')
-    ->group(function () {
-        Route::get('/', 'index');
-        Route::get('/{id}', 'show');
-        Route::post('/', 'store');
-        Route::post('/{id}/reply', 'reply');
-        Route::post('/{id}/status', 'updateStatus');
-    });
+Route::middleware('auth:api')->prefix('web/admin/tickets')->controller(AdminTicketController::class)->group(function () {
+    Route::get('/', 'index');
+    Route::get('/{id}', 'show');
+    Route::post('/', 'store');
+    Route::post('/{id}/reply', 'reply');
+    Route::post('/{id}/status', 'updateStatus');
+    Route::get('/companies', 'companies');
+    Route::get('/company-users', 'companyUsers');
+    Route::get('/rooms', 'rooms');
+});
 
 // =================================================
 // Web Admin Documents
 // =================================================
 
-Route::middleware('auth:api')
-    ->controller(AdminDocumentController::class)
-    ->prefix('web/admin/documents')
-    ->group(function () {
-        Route::get('/', 'index');
-        Route::post('/', 'store');
-        Route::get('/{id}', 'show');
-        Route::put('/{id}', 'update');
-        Route::delete('/{id}', 'destroy');
-    });
+Route::middleware('auth:api')->prefix('web/admin/documents')->controller(AdminDocumentController::class)->group(function () {
+    Route::get('/', 'index');
+    Route::post('/', 'store');
+    Route::get('/{id}', 'show');
+    Route::put('/{id}', 'update');
+    Route::delete('/{id}', 'destroy');
+});
 
 // =================================================
 // Web Room Management

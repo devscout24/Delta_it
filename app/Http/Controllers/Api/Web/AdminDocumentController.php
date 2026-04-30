@@ -6,17 +6,16 @@ use App\Http\Controllers\Controller;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Document;
-use App\Models\Tag;
 
 class AdminDocumentController extends Controller
 {
     use ApiResponse;
 
     // ======================
-    // LIST ALL DOCUMENTS
+    // LIST
     // ======================
     public function index(Request $request)
     {
@@ -33,21 +32,15 @@ class AdminDocumentController extends Controller
         $documents = $query->latest()->paginate(10);
 
         $data = $documents->getCollection()->map(function ($doc) {
-
-            $path = public_path($doc->document_path);
-            $size = File::exists($path)
-                ? number_format(File::size($path) / 1048576, 2) . ' MB'
-                : '0 MB';
-
             return [
                 'id' => $doc->id,
                 'name' => $doc->document_name,
-                'file_url' => asset($doc->document_path),
-                'size' => $size,
+                'file_url' => Storage::url($doc->document_path),
 
                 'company' => $doc->company?->name,
 
                 'tags' => $doc->tags->pluck('name'),
+
                 'created_at' => $doc->created_at->format('d M Y'),
             ];
         });
@@ -63,14 +56,15 @@ class AdminDocumentController extends Controller
     }
 
     // ======================
-    // STORE DOCUMENT
+    // STORE
     // ======================
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'file' => 'required|file|max:4096',
             'company_id' => 'nullable|exists:companies,id',
-            'tags' => 'nullable|array'
+            'tags' => 'nullable|array',
+            'tags.*' => 'exists:tags,id'
         ]);
 
         if ($validator->fails()) {
@@ -80,34 +74,23 @@ class AdminDocumentController extends Controller
         DB::beginTransaction();
 
         try {
-            $file = $request->file('file');
-            $name = time() . '_' . $file->getClientOriginalName();
-
-            $file->move(public_path('uploads/documents'), $name);
+            $path = $request->file('file')->store('documents', 'public');
 
             $doc = Document::create([
-                'company_id' => $request->company_id, // nullable for internal
-                'document_name' => $file->getClientOriginalName(),
-                'document_path' => 'uploads/documents/' . $name
+                'company_id' => $request->company_id,
+                'document_name' => $request->file('file')->getClientOriginalName(),
+                'document_path' => $path
             ]);
 
-            // TAGS (pivot system)
-            if ($request->tags) {
-                $tagIds = [];
-
-                foreach ($request->tags as $tagName) {
-                    $tag = Tag::firstOrCreate(['name' => $tagName]);
-                    $tagIds[] = $tag->id;
-                }
-
-                $doc->tags()->sync($tagIds);
+            if ($request->filled('tags')) {
+                $doc->tags()->sync($request->tags);
             }
 
             DB::commit();
 
             return $this->success([
                 'id' => $doc->id,
-                'file_url' => asset($doc->document_path)
+                'file_url' => Storage::url($path)
             ], 'Document created');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -116,7 +99,7 @@ class AdminDocumentController extends Controller
     }
 
     // ======================
-    // SHOW (OPTIONAL)
+    // SHOW
     // ======================
     public function show($id)
     {
@@ -126,11 +109,17 @@ class AdminDocumentController extends Controller
             return $this->error([], 'Not found', 404);
         }
 
-        return $this->success($doc, 'Document details');
+        return $this->success([
+            'id' => $doc->id,
+            'name' => $doc->document_name,
+            'file_url' => Storage::url($doc->document_path),
+            'company_id' => $doc->company_id,
+            'tags' => $doc->tags->pluck('id'),
+        ], 'Document details');
     }
 
     // ======================
-    // UPDATE (OPTIONAL)
+    // UPDATE
     // ======================
     public function update(Request $request, $id)
     {
@@ -140,15 +129,34 @@ class AdminDocumentController extends Controller
             return $this->error([], 'Not found', 404);
         }
 
-        if ($request->tags) {
-            $tagIds = [];
+        $validator = Validator::make($request->all(), [
+            'tags' => 'nullable|array',
+            'tags.*' => 'exists:tags,id',
+            'file' => 'nullable|file|max:4096'
+        ]);
 
-            foreach ($request->tags as $tagName) {
-                $tag = Tag::firstOrCreate(['name' => $tagName]);
-                $tagIds[] = $tag->id;
+        if ($validator->fails()) {
+            return $this->error($validator->errors(), 'Validation error', 422);
+        }
+
+        // replace file (optional)
+        if ($request->hasFile('file')) {
+
+            if (Storage::disk('public')->exists($doc->document_path)) {
+                Storage::disk('public')->delete($doc->document_path);
             }
 
-            $doc->tags()->sync($tagIds);
+            $path = $request->file('file')->store('documents', 'public');
+
+            $doc->update([
+                'document_name' => $request->file('file')->getClientOriginalName(),
+                'document_path' => $path
+            ]);
+        }
+
+        // update tags
+        if ($request->filled('tags')) {
+            $doc->tags()->sync($request->tags);
         }
 
         return $this->success([], 'Updated');
@@ -165,12 +173,11 @@ class AdminDocumentController extends Controller
             return $this->error([], 'Not found', 404);
         }
 
-        $path = public_path($doc->document_path);
-
-        if (file_exists($path)) {
-            unlink($path);
+        if (Storage::disk('public')->exists($doc->document_path)) {
+            Storage::disk('public')->delete($doc->document_path);
         }
 
+        $doc->tags()->detach();
         $doc->delete();
 
         return $this->success([], 'Deleted');
