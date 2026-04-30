@@ -17,9 +17,16 @@ class CollaboratorController extends Controller
     // ======================
     public function index(Request $request)
     {
-        $request->validate([
-            'company_id' => 'required|exists:companies,id'
+        $validator = Validator::make($request->all(), [
+            'company_id' => 'required|exists:companies,id',
+            'search'     => 'nullable|string|max:255',
+            'sort_by'    => 'nullable|string|in:first_name,last_name,job_position,email',
+            'sort_order' => 'nullable|string|in:asc,desc',
         ]);
+
+        if ($validator->fails()) {
+            return $this->error($validator->errors()->first(), 'Validation error', 422);
+        }
 
         $query = Collaborator::where('company_id', $request->company_id);
 
@@ -30,10 +37,31 @@ class CollaboratorController extends Controller
             });
         }
 
-        $collaborators = $query->latest()->paginate(10);
+        // Optional sorting
+        if ($request->filled('sort_by')) {
+            $query->orderBy($request->sort_by, $request->get('sort_order', 'asc'));
+        } else {
+            $query->latest();
+        }
+
+        $collaborators = $query->paginate(10);
+
+        $data = $collaborators->getCollection()->map(function ($c) {
+            return [
+                'id' => $c->id,
+                'first_name' => $c->first_name,
+                'last_name' => $c->last_name,
+                'full_name' => $c->first_name . ' ' . $c->last_name,
+                'job_position' => $c->job_position,
+                'email' => $c->email,
+                'phone_number' => $c->phone_number,
+                'access_card_number' => $c->access_card_number,
+                'parking_card' => (bool)$c->parking_card,
+            ];
+        });
 
         return $this->success([
-            'data' => $collaborators->items(),
+            'data' => $data,
             'pagination' => [
                 'current_page' => $collaborators->currentPage(),
                 'last_page' => $collaborators->lastPage(),
@@ -45,9 +73,15 @@ class CollaboratorController extends Controller
     // ======================
     // SHOW
     // ======================
-    public function show($id)
+    public function show(Request $request, $id)
     {
-        $collaborator = Collaborator::find($id);
+        $request->validate([
+            'company_id' => 'required|exists:companies,id'
+        ]);
+
+        $collaborator = Collaborator::where('id', $id)
+            ->where('company_id', $request->company_id)
+            ->first();
 
         if (!$collaborator) {
             return $this->error([], 'Collaborator not found', 404);
@@ -66,7 +100,7 @@ class CollaboratorController extends Controller
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'job_position' => 'nullable|string|max:255',
-            'email' => 'nullable|email|unique:collaborators,email',
+            'email' => 'nullable|email|unique:collaborators,email,NULL,id,company_id,' . $request->company_id,
             'phone_extension' => 'nullable|string|max:20',
             'phone_number' => 'nullable|string|max:20',
             'access_card_number' => 'nullable|string|max:50',
@@ -77,17 +111,7 @@ class CollaboratorController extends Controller
             return $this->error($validator->errors(), 'Validation error', 422);
         }
 
-        $collaborator = Collaborator::create([
-            'company_id' => $request->company_id,
-            'first_name' => $request->first_name,
-            'last_name' => $request->last_name,
-            'job_position' => $request->job_position,
-            'email' => $request->email,
-            'phone_extension' => $request->phone_extension,
-            'phone_number' => $request->phone_number,
-            'access_card_number' => $request->access_card_number,
-            'parking_card' => $request->parking_card ?? false,
-        ]);
+        $collaborator = Collaborator::create($request->all());
 
         return $this->success($collaborator, 'Collaborator created', 201);
     }
@@ -97,7 +121,13 @@ class CollaboratorController extends Controller
     // ======================
     public function update(Request $request, $id)
     {
-        $collaborator = Collaborator::find($id);
+        $request->validate([
+            'company_id' => 'required|exists:companies,id'
+        ]);
+
+        $collaborator = Collaborator::where('id', $id)
+            ->where('company_id', $request->company_id)
+            ->first();
 
         if (!$collaborator) {
             return $this->error([], 'Collaborator not found', 404);
@@ -107,7 +137,7 @@ class CollaboratorController extends Controller
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'job_position' => 'nullable|string|max:255',
-            'email' => 'nullable|email|unique:collaborators,email,' . $id,
+            'email' => 'nullable|email|unique:collaborators,email,' . $id . ',id,company_id,' . $request->company_id,
             'phone_extension' => 'nullable|string|max:20',
             'phone_number' => 'nullable|string|max:20',
             'access_card_number' => 'nullable|string|max:50',
@@ -135,9 +165,15 @@ class CollaboratorController extends Controller
     // ======================
     // DELETE
     // ======================
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
-        $collaborator = Collaborator::find($id);
+        $request->validate([
+            'company_id' => 'required|exists:companies,id'
+        ]);
+
+        $collaborator = Collaborator::where('id', $id)
+            ->where('company_id', $request->company_id)
+            ->first();
 
         if (!$collaborator) {
             return $this->error([], 'Collaborator not found', 404);

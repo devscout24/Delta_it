@@ -5,14 +5,28 @@ namespace App\Http\Controllers\Api\Web;
 use App\Http\Controllers\Controller;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use App\Models\Document;
 use App\Models\Tag;
 
 class DocumentController extends Controller
 {
     use ApiResponse;
+
+    // ======================
+    // GET TAGS
+    // ======================
+    public function tags()
+    {
+        $tags = Tag::select('id', 'name')->get();
+
+        if ($tags->isEmpty()) {
+            return $this->success([], 'No tags found', 200);
+        }
+
+        return $this->success($tags, 'Tags fetched');
+    }
 
     // ======================
     // LIST DOCUMENTS
@@ -22,24 +36,17 @@ class DocumentController extends Controller
         $documents = Document::with('tags')
             ->where('company_id', $company_id)
             ->latest()
-            ->get()
-            ->map(function ($doc) {
+            ->get();
 
-                $path = public_path($doc->document_path);
-                $size = File::exists($path)
-                    ? number_format(File::size($path) / 1048576, 2) . ' MB'
-                    : '0 MB';
+        $data = $documents->map(function ($doc) {
+            return [
+                'id' => $doc->id,
+                'file_url' => Storage::url($doc->file_path),
+                'tags' => $doc->tags->map(fn($t) => $t->name),
+            ];
+        });
 
-                return [
-                    'id' => $doc->id,
-                    'name' => $doc->document_name,
-                    'file_url' => asset($doc->document_path),
-                    'size' => $size,
-                    'tags' => $doc->tags->pluck('tag')
-                ];
-            });
-
-        return $this->success($documents, 'Documents fetched');
+        return $this->success($data, 'Documents fetched');
     }
 
     // ======================
@@ -47,40 +54,33 @@ class DocumentController extends Controller
     // ======================
     public function store(Request $request, $company_id)
     {
-        $request->validate([
-            'file' => 'required|file|max:4096',
-            'tags' => 'nullable|array'
+        $validator = Validator::make($request->all(), [
+            'file' => 'required|file|mimes:pdf|max:10240',
+            'tags' => 'nullable|array',
+            'tags.*' => 'exists:tags,id'
         ]);
 
-        DB::beginTransaction();
-
-        try {
-            $file = $request->file('file');
-            $filename = time() . '_' . $file->getClientOriginalName();
-            $file->move(public_path('uploads/documents'), $filename);
-
-            $doc = Document::create([
-                'company_id' => $company_id,
-                'document_name' => $file->getClientOriginalName(),
-                'document_path' => 'uploads/documents/' . $filename
-            ]);
-
-            if ($request->tags) {
-                foreach ($request->tags as $tag) {
-                    Tag::create([
-                        'document_id' => $doc->id,
-                        'tag' => $tag
-                    ]);
-                }
-            }
-
-            DB::commit();
-
-            return $this->success([], 'Document uploaded');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return $this->error([], $e->getMessage(), 500);
+        if ($validator->fails()) {
+            return $this->error($validator->errors(), 'Validation error', 422);
         }
+
+        // upload file
+        $path = $request->file('file')->store('documents', 'public');
+
+        $document = Document::create([
+            'company_id' => $company_id,
+            'file_path' => $path,
+        ]);
+
+        // attach tags
+        if ($request->filled('tags')) {
+            $document->tags()->sync($request->tags);
+        }
+
+        return $this->success([
+            'id' => $document->id,
+            'file_url' => Storage::url($path)
+        ], 'Document uploaded', 201);
     }
 
     // ======================
@@ -88,19 +88,20 @@ class DocumentController extends Controller
     // ======================
     public function destroy($id)
     {
-        $doc = Document::find($id);
+        $document = Document::find($id);
 
-        if (!$doc) {
+        if (!$document) {
             return $this->error([], 'Document not found', 404);
         }
 
-        $path = public_path($doc->document_path);
-
-        if (file_exists($path)) {
-            unlink($path);
+        // delete file
+        if (Storage::disk('public')->exists($document->file_path)) {
+            Storage::disk('public')->delete($document->file_path);
         }
 
-        $doc->delete();
+        // delete pivot + document
+        $document->tags()->detach();
+        $document->delete();
 
         return $this->success([], 'Document deleted');
     }

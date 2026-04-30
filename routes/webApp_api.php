@@ -65,94 +65,74 @@ Route::middleware('auth:api')->prefix('web/company-payments')->controller(Compan
 // Web Collaborators
 // =================================================
 
-Route::middleware('auth:api')
-    ->controller(CollaboratorController::class)
-    ->prefix('web/collaborators')
-    ->group(function () {
-        Route::get('/', 'index');
-        Route::get('/{id}', 'show');
-        Route::post('/', 'store');
-        Route::put('/{id}', 'update');
-        Route::delete('/{id}', 'destroy');
-    });
+Route::middleware('auth:api')->controller(CollaboratorController::class)->prefix('web/collaborators')->group(function () {
+    Route::get('/', 'index');
+    Route::get('/{id}', 'show');
+    Route::post('/', 'store');
+    Route::put('/{id}', 'update');
+    Route::delete('/{id}', 'destroy');
+});
 
 // =================================================
 // Web Contracts
 // =================================================
 
-Route::middleware('auth:api')
-    ->controller(ContractController::class)
-    ->prefix('web/contracts')
-    ->group(function () {
-        Route::get('/{company_id}', 'show');
-        Route::put('/{company_id}', 'update');
-        Route::post('/files', 'uploadFile');
-        Route::delete('/files/{id}', 'deleteFile');
-    });
+Route::middleware('auth:api')->prefix('web/contracts')->controller(ContractController::class)->group(function () {
+    Route::get('/{company_id}', 'show');
+    Route::put('/{company_id}', 'update');
+    Route::post('/files', 'uploadFile');
+    Route::delete('/files/{id}', 'deleteFile');
+});
 
 // =================================================
 // Web Documents
 // =================================================
 
-Route::middleware('auth:api')
-    ->controller(DocumentController::class)
-    ->prefix('web/documents')
-    ->group(function () {
-        Route::get('/{company_id}', 'index');
-        Route::post('/{company_id}', 'store');
-        Route::delete('/{id}', 'destroy');
-    });
+Route::middleware('auth:api')->prefix('web/documents')->controller(DocumentController::class)->group(function () {
+    Route::get('/tags', 'tags');
+    Route::get('/{company_id}', 'index');
+    Route::post('/{company_id}', 'store');
+    Route::delete('/{id}', 'destroy');
+});
 
 // =================================================
 // Web Company Users
 // =================================================
 
-Route::middleware('auth:api')
-    ->controller(CompanyUserController::class)
-    ->prefix('web/company-users')
-    ->group(function () {
-        Route::get('/', 'index');
-        Route::post('/', 'store');
-        Route::get('/{id}', 'show');
-        Route::put('/{id}', 'update');
-        Route::delete('/{id}', 'destroy');
-    });
+Route::middleware('auth:api')->prefix('web/company-users')->controller(CompanyUserController::class)->group(function () {
+    Route::get('/', 'index');
+    Route::post('/', 'store');
+    Route::get('/{id}', 'show');
+    Route::put('/{id}', 'update');
+    Route::delete('/{id}', 'destroy');
+});
 
 // =================================================
 // Web Requests
 // =================================================
 
-Route::middleware('auth:api')
-    ->controller(RequestController::class)
-    ->prefix('web/requests')
-    ->group(function () {
-        Route::get('/', 'index');
-    });
+Route::middleware('auth:api')->prefix('web/requests')->controller(RequestController::class)->group(function () {
+    Route::get('/', 'index');
+});
 
 // =================================================
 // Web Access Cards
 // =================================================
 
-Route::middleware('auth:api')
-    ->controller(AccessCardController::class)
-    ->prefix('web/access-cards')
-    ->group(function () {
-        Route::get('/{company_id}', 'show');
-        Route::put('/{company_id}', 'update');
-    });
+Route::middleware('auth:api')->prefix('web/access-cards')->controller(AccessCardController::class)->group(function () {
+    Route::get('/{company_id}', 'show');
+    Route::put('/{company_id}', 'update');
+});
 
 // =================================================
 // Web Company Notes
 // =================================================
 
-Route::middleware('auth:api')
-    ->controller(CompanyNoteController::class)
-    ->prefix('web/company-notes')
-    ->group(function () {
-        Route::get('/{company_id}', 'index');
-        Route::post('/', 'store');
-        Route::delete('/{id}', 'destroy');
-    });
+Route::middleware('auth:api')->prefix('web/company-notes')->controller(CompanyNoteController::class)->group(function () {
+    Route::get('/{company_id}', 'index');
+    Route::post('/', 'store');
+    Route::delete('/{id}', 'destroy');
+});
 
 // =================================================
 // Web Admin Payments

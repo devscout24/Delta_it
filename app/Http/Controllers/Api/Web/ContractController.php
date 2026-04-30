@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
 use App\Models\Contract;
 use App\Models\ContractFile;
+use App\Models\Company;
 
 class ContractController extends Controller
 {
@@ -18,6 +20,10 @@ class ContractController extends Controller
     // ======================
     public function show($company_id)
     {
+        if (!Company::where('id', $company_id)->exists()) {
+            return $this->error([], 'Company not found', 404);
+        }
+
         $contract = Contract::with('files')
             ->where('company_id', $company_id)
             ->first();
@@ -29,7 +35,7 @@ class ContractController extends Controller
         $files = $contract->files->map(function ($file) {
             return [
                 'id' => $file->id,
-                'file_url' => asset('uploads/contracts/' . $file->file_path),
+                'file_url' => Storage::url($file->file_path),
             ];
         });
 
@@ -50,6 +56,10 @@ class ContractController extends Controller
     // ======================
     public function update(Request $request, $company_id)
     {
+        if (!Company::where('id', $company_id)->exists()) {
+            return $this->error([], 'Company not found', 404);
+        }
+
         $validator = Validator::make($request->all(), [
             'name' => 'required|string',
             'type' => 'required|string',
@@ -63,19 +73,27 @@ class ContractController extends Controller
             return $this->error($validator->errors(), 'Validation error', 422);
         }
 
-        $contract = Contract::updateOrCreate(
-            ['company_id' => $company_id],
-            $request->only([
-                'name',
-                'type',
-                'start_date',
-                'end_date',
-                'renewal_date',
-                'status'
-            ])
-        );
+        $contract = Contract::where('company_id', $company_id)->first();
 
-        return $this->success($contract, 'Contract saved');
+        if (!$contract) {
+            $contract = new Contract();
+            $contract->company_id = $company_id;
+        }
+
+        $contract->fill($request->only([
+            'name',
+            'type',
+            'start_date',
+            'end_date',
+            'renewal_date',
+            'status'
+        ]));
+
+        $contract->save();
+
+        return $this->success([
+            'contract_id' => $contract->id
+        ], 'Contract saved');
     }
 
     // ======================
@@ -89,17 +107,16 @@ class ContractController extends Controller
         ]);
 
         $file = $request->file('file');
-        $filename = time() . '_' . $file->getClientOriginalName();
-        $file->move(public_path('uploads/contracts'), $filename);
+        $path = $file->store('contracts', 'public');
 
         $saved = ContractFile::create([
             'contract_id' => $request->contract_id,
-            'file_path' => $filename
+            'file_path' => $path
         ]);
 
         return $this->success([
             'id' => $saved->id,
-            'file_url' => asset('uploads/contracts/' . $filename)
+            'file_url' => Storage::url($path)
         ], 'File uploaded');
     }
 
@@ -114,10 +131,9 @@ class ContractController extends Controller
             return $this->error([], 'File not found', 404);
         }
 
-        $path = public_path('uploads/contracts/' . $file->file_path);
-
-        if (file_exists($path)) {
-            unlink($path);
+        // delete file from storage
+        if (Storage::disk('public')->exists($file->file_path)) {
+            Storage::disk('public')->delete($file->file_path);
         }
 
         $file->delete();

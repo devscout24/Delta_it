@@ -26,6 +26,6 @@ class Document extends Model
     }
     public function tags()
     {
-        return $this->belongsToMany(Tag::class, 'document_tag');
+        return $this->belongsToMany(\App\Models\Tag::class, 'document_tag');
     }
 }
