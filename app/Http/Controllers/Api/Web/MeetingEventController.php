@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 
 use App\Models\MeetingEvent;
@@ -31,7 +32,7 @@ class MeetingEventController extends Controller
     // ======================
     public function store(Request $request)
     {
-        $data = $request->validate([
+        $validator = Validator::make($request->all(), [
             'title' => 'required|string',
             'type' => 'required|string',
             'duration' => 'required|integer',
@@ -41,6 +42,12 @@ class MeetingEventController extends Controller
             'description' => 'nullable|string',
             'color' => 'nullable|string',
         ]);
+
+        if ($validator->fails()) {
+            return $this->error($validator->errors(), 'Validation error', 422);
+        }
+
+        $data = $validator->validated();
 
         return $this->success(
             MeetingEvent::create($data),
@@ -92,7 +99,7 @@ class MeetingEventController extends Controller
     // ======================
     public function addSchedule(Request $request, $eventId)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
 
@@ -101,6 +108,10 @@ class MeetingEventController extends Controller
             'days.*.start_time' => 'required',
             'days.*.end_time' => 'required',
         ]);
+
+        if ($validator->fails()) {
+            return $this->error($validator->errors(), 'Validation error', 422);
+        }
 
         $event = MeetingEvent::find($eventId);
 

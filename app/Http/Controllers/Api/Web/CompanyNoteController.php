@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Web;
 use App\Http\Controllers\Controller;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use App\Models\CompanyNote;
 use App\Models\Company;
 
@@ -42,11 +43,17 @@ class CompanyNoteController extends Controller
     // ======================
     public function store(Request $request)
     {
-        $data = $request->validate([
+        $validator = Validator::make($request->all(), [
             'company_id' => 'required|exists:companies,id',
             'title' => 'required|string|max:255',
             'note' => 'required|string'
         ]);
+
+        if ($validator->fails()) {
+            return $this->error($validator->errors(), 'Validation error', 422);
+        }
+
+        $data = $validator->validated();
 
         $note = CompanyNote::create($data);
 
@@ -62,9 +69,13 @@ class CompanyNoteController extends Controller
     // ======================
     public function destroy(Request $request, $id)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'company_id' => 'required|exists:companies,id'
         ]);
+
+        if ($validator->fails()) {
+            return $this->error($validator->errors(), 'Validation error', 422);
+        }
 
         $note = CompanyNote::where('id', $id)
             ->where('company_id', $request->company_id)

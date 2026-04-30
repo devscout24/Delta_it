@@ -6,9 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 use App\Models\User;
-use App\Models\Company;
+use Illuminate\Support\Facades\Auth;
 
 class UserManagementController extends Controller
 {
@@ -49,13 +50,19 @@ class UserManagementController extends Controller
     // ======================
     public function store(Request $request)
     {
-        $data = $request->validate([
+        $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:100',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:6',
             'role' => 'required|in:admin,company',
             'company_id' => 'nullable|exists:companies,id',
         ]);
+
+        if ($validator->fails()) {
+            return $this->error($validator->errors(), 'Validation error', 422);
+        }
+
+        $data = $validator->validated();
 
         // 🚨 RULE: admin must NOT have company
         if ($data['role'] === 'admin') {
@@ -101,13 +108,19 @@ class UserManagementController extends Controller
             return $this->error([], 'User not found', 404);
         }
 
-        $data = $request->validate([
+        $validator = Validator::make($request->all(), [
             'name' => 'nullable|string|max:100',
             'email' => 'nullable|email|unique:users,email,' . $id,
             'password' => 'nullable|min:6',
             'role' => 'nullable|in:admin,company',
             'company_id' => 'nullable|exists:companies,id',
         ]);
+
+        if ($validator->fails()) {
+            return $this->error($validator->errors(), 'Validation error', 422);
+        }
+
+        $data = $validator->validated();
 
         // 🚨 enforce role logic
         if (isset($data['role']) && $data['role'] === 'admin') {
@@ -137,7 +150,7 @@ class UserManagementController extends Controller
         }
 
         // 🚨 prevent deleting self (optional safety)
-        if ($user->id === auth()->id()) {
+        if ($user->id === Auth::user('api')->id) {
             return $this->error([], 'You cannot delete yourself', 422);
         }
 

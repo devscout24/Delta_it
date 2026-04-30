@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Api\Web;
 use App\Http\Controllers\Controller;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use App\Models\CompanyPayment;
-use App\Models\Company;
 
 class AdminPaymentController extends Controller
 {
@@ -17,10 +17,14 @@ class AdminPaymentController extends Controller
     // ======================
     public function index(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'month' => 'required|integer|min:1|max:12',
             'year' => 'required|integer'
         ]);
+
+        if ($validator->fails()) {
+            return $this->error($validator->errors(), 'Validation error', 422);
+        }
 
         $query = CompanyPayment::with('company')
             ->where('month', $request->month)
@@ -70,10 +74,14 @@ class AdminPaymentController extends Controller
     // ======================
     public function summary(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'month' => 'required|integer|min:1|max:12',
             'year' => 'required|integer'
         ]);
+
+        if ($validator->fails()) {
+            return $this->error($validator->errors(), 'Validation error', 422);
+        }
 
         // ---------- MONTH ----------
         $monthly = CompanyPayment::where('month', $request->month)

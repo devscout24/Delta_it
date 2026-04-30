@@ -7,6 +7,7 @@ use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Validator;
 use App\Models\Document;
 use App\Models\Tag;
 
@@ -66,11 +67,15 @@ class AdminDocumentController extends Controller
     // ======================
     public function store(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'file' => 'required|file|max:4096',
             'company_id' => 'nullable|exists:companies,id',
             'tags' => 'nullable|array'
         ]);
+
+        if ($validator->fails()) {
+            return $this->error($validator->errors(), 'Validation error', 422);
+        }
 
         DB::beginTransaction();
 

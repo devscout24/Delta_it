@@ -18,9 +18,13 @@ class CompanyUserController extends Controller
     // ======================
     public function index(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'company_id' => 'required|exists:companies,id'
         ]);
+
+        if ($validator->fails()) {
+            return $this->error($validator->errors(), 'Validation error', 422);
+        }
 
         $query = User::where('company_id', $request->company_id);
 
@@ -97,9 +101,13 @@ class CompanyUserController extends Controller
     // ======================
     public function show(Request $request, $id)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'company_id' => 'required|exists:companies,id'
         ]);
+
+        if ($validator->fails()) {
+            return $this->error($validator->errors(), 'Validation error', 422);
+        }
 
         $user = User::where('id', $id)
             ->where('company_id', $request->company_id)
@@ -123,9 +131,13 @@ class CompanyUserController extends Controller
     // ======================
     public function update(Request $request, $id)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'company_id' => 'required|exists:companies,id'
         ]);
+
+        if ($validator->fails()) {
+            return $this->error($validator->errors(), 'Validation error', 422);
+        }
 
         $user = User::where('id', $id)
             ->where('company_id', $request->company_id)
@@ -171,9 +183,13 @@ class CompanyUserController extends Controller
     // ======================
     public function destroy(Request $request, $id)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'company_id' => 'required|exists:companies,id'
         ]);
+
+        if ($validator->fails()) {
+            return $this->error($validator->errors(), 'Validation error', 422);
+        }
 
         $user = User::where('id', $id)
             ->where('company_id', $request->company_id)

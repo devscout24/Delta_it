@@ -136,10 +136,14 @@ class RoomController extends Controller
     // ==============================
     public function assignCompany(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'room_id' => 'required|exists:rooms,id',
             'company_id' => 'required|exists:companies,id',
         ]);
+
+        if ($validator->fails()) {
+            return $this->error($validator->errors(), 'Validation error', 422);
+        }
 
         DB::beginTransaction();
         try {
@@ -172,9 +176,13 @@ class RoomController extends Controller
     // ==============================
     public function removeCompany(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'room_id' => 'required|exists:rooms,id',
         ]);
+
+        if ($validator->fails()) {
+            return $this->error($validator->errors(), 'Validation error', 422);
+        }
 
         DB::beginTransaction();
         try {
@@ -243,9 +251,13 @@ class RoomController extends Controller
     // ==============================
     public function updateStatus(Request $request, $id)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'status' => 'required|in:maintenance,available',
         ]);
+
+        if ($validator->fails()) {
+            return $this->error($validator->errors(), 'Validation error', 422);
+        }
 
         $room = Room::find($id);
 

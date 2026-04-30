@@ -101,10 +101,14 @@ class ContractController extends Controller
     // ======================
     public function uploadFile(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'contract_id' => 'required|exists:contracts,id',
             'file' => 'required|file|max:4096'
         ]);
+
+        if ($validator->fails()) {
+            return $this->error($validator->errors(), 'Validation error', 422);
+        }
 
         $file = $request->file('file');
         $path = $file->store('contracts', 'public');

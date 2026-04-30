@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Web;
 use App\Http\Controllers\Controller;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use App\Models\AccessCard;
 use App\Models\Company;
 
@@ -40,12 +41,18 @@ class AccessCardController extends Controller
             return $this->error([], 'Company not found', 404);
         }
 
-        $data = $request->validate([
+        $validator = Validator::make($request->all(), [
             'active_cards' => 'nullable|integer|min:0',
             'lost_damage_cards' => 'nullable|integer|min:0',
             'active_parking_cards' => 'nullable|integer|min:0',
             'max_parking_cards' => 'nullable|integer|min:0',
         ]);
+
+        if ($validator->fails()) {
+            return $this->error($validator->errors(), 'Validation error', 422);
+        }
+
+        $data = $validator->validated();
 
         $card = AccessCard::firstOrNew([
             'company_id' => $company_id

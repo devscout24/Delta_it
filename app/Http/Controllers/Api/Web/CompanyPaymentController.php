@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Web;
 use App\Http\Controllers\Controller;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use App\Models\CompanyPayment;
 use Carbon\Carbon;
 
@@ -17,10 +18,14 @@ class CompanyPaymentController extends Controller
     // ======================
     public function index(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'company_id' => 'required|exists:companies,id',
             'year' => 'required|integer'
         ]);
+
+        if ($validator->fails()) {
+            return $this->error($validator->errors(), 'Validation error', 422);
+        }
 
         $payments = CompanyPayment::where('company_id', $request->company_id)
             ->where('year', $request->year)
@@ -59,10 +64,14 @@ class CompanyPaymentController extends Controller
     // ======================
     public function initYear(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'company_id' => 'required|exists:companies,id',
             'year' => 'required|integer'
         ]);
+
+        if ($validator->fails()) {
+            return $this->error($validator->errors(), 'Validation error', 422);
+        }
 
         for ($i = 1; $i <= 12; $i++) {
             CompanyPayment::firstOrCreate(
@@ -91,13 +100,17 @@ class CompanyPaymentController extends Controller
             return $this->error([], 'Payment not found', 404);
         }
 
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'value_non_vat' => 'nullable|numeric',
             'value_vat' => 'nullable|numeric',
             'printings_non_vat' => 'nullable|numeric',
             'printings_vat' => 'nullable|numeric',
             'status' => 'nullable|in:paid,unpaid',
         ]);
+
+        if ($validator->fails()) {
+            return $this->error($validator->errors(), 'Validation error', 422);
+        }
 
         $total =
             ($request->value_non_vat ?? $payment->value_non_vat ?? 0) +

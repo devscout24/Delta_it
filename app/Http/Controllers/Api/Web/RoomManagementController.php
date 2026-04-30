@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 
 use App\Models\Space;
@@ -30,12 +31,18 @@ class RoomManagementController extends Controller
     // =========================
     public function store(Request $request)
     {
-        $data = $request->validate([
+        $validator = Validator::make($request->all(), [
             'name' => 'required|string',
             'capacity' => 'nullable|integer',
             'color' => 'nullable|string',
             'description' => 'nullable|string',
         ]);
+
+        if ($validator->fails()) {
+            return $this->error($validator->errors(), 'Validation error', 422);
+        }
+
+        $data = $validator->validated();
 
         return $this->success(
             Space::create($data),
@@ -83,7 +90,7 @@ class RoomManagementController extends Controller
     // =========================
     public function addSchedule(Request $request, $spaceId)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
 
@@ -94,6 +101,10 @@ class RoomManagementController extends Controller
 
             'duration' => 'required|integer|min:5'
         ]);
+
+        if ($validator->fails()) {
+            return $this->error($validator->errors(), 'Validation error', 422);
+        }
 
         DB::beginTransaction();
 

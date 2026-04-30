@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Web;
 use App\Http\Controllers\Controller;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use App\Models\Ticket;
 
 class RequestController extends Controller
@@ -16,9 +17,13 @@ class RequestController extends Controller
     // ======================
     public function index(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'company_id' => 'required|exists:companies,id'
         ]);
+
+        if ($validator->fails()) {
+            return $this->error($validator->errors(), 'Validation error', 422);
+        }
 
         $query = Ticket::with(['user'])
             ->where('company_id', $request->company_id);

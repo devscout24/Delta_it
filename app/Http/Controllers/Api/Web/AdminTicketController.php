@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Ticket;
 use App\Models\TicketMessage;
-use App\Models\Company;
 
 class AdminTicketController extends Controller
 {
@@ -128,9 +127,13 @@ class AdminTicketController extends Controller
     // ======================
     public function reply(Request $request, $id)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'message' => 'required|string'
         ]);
+
+        if ($validator->fails()) {
+            return $this->error($validator->errors(), 'Validation error', 422);
+        }
 
         $ticket = Ticket::find($id);
 
@@ -152,9 +155,13 @@ class AdminTicketController extends Controller
     // ======================
     public function updateStatus(Request $request, $id)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'status' => 'required|in:pending,in_progress,resolved,closed'
         ]);
+
+        if ($validator->fails()) {
+            return $this->error($validator->errors(), 'Validation error', 422);
+        }
 
         $ticket = Ticket::find($id);
 
