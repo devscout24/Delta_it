@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
 use App\Models\Company;
 
 class CompanyController extends Controller
@@ -13,24 +14,37 @@ class CompanyController extends Controller
     use ApiResponse;
 
     // ======================
-    // LIST COMPANIES
+    // LIST COMPANIES (TABLE)
     // ======================
     public function index(Request $request)
     {
         $query = Company::query();
 
-        // Filter: active / archived
+        // Active / Archived filter
         if ($request->get('type') === 'archived') {
             $query->where('is_active', 0);
         } else {
             $query->where('is_active', 1);
         }
 
+        // Search
         if ($request->filled('search')) {
             $query->where('name', 'like', '%' . $request->search . '%');
         }
 
-        $companies = $query->latest()->paginate(10);
+        // Incubation filter (IMPORTANT)
+        if ($request->filled('incubation_type')) {
+            $query->where('incubation_type', $request->incubation_type);
+        }
+
+        // Optional sorting
+        if ($request->filled('sort_by') && $request->filled('sort_order')) {
+            $query->orderBy($request->sort_by, $request->sort_order);
+        } else {
+            $query->latest();
+        }
+
+        $companies = $query->paginate(10);
 
         $data = $companies->getCollection()->map(function ($c) {
             return [
@@ -40,7 +54,7 @@ class CompanyController extends Controller
                 'incubation_type' => $c->incubation_type,
                 'renewal_date' => $c->renewal_date,
                 'end_date' => $c->end_date,
-                'pending_requests' => $c->pending_requests ?? 0, // optional
+                'pending_requests' => $c->pending_requests ?? 0,
             ];
         });
 
@@ -52,6 +66,19 @@ class CompanyController extends Controller
                 'total' => $companies->total(),
             ]
         ], 'Companies fetched');
+    }
+
+    // ======================
+    // DROPDOWN LIST (ROOM MODULE)
+    // ======================
+    public function list()
+    {
+        $companies = Company::where('is_active', 1)
+            ->select('id', 'name')
+            ->orderBy('name')
+            ->get();
+
+        return $this->success($companies, 'Company list fetched');
     }
 
     // ======================
@@ -107,7 +134,7 @@ class CompanyController extends Controller
     }
 
     // ======================
-    // UPDATE GENERAL DATA
+    // UPDATE COMPANY
     // ======================
     public function update(Request $request, $id)
     {
@@ -163,6 +190,11 @@ class CompanyController extends Controller
             return $this->error([], 'Company not found', 404);
         }
 
+        // delete old logo if exists
+        if ($company->logo && Storage::disk('public')->exists(str_replace('storage/', '', $company->logo))) {
+            Storage::disk('public')->delete(str_replace('storage/', '', $company->logo));
+        }
+
         $file = $request->file('logo');
         $path = $file->store('company_logos', 'public');
 
@@ -186,13 +218,17 @@ class CompanyController extends Controller
             return $this->error([], 'Company not found', 404);
         }
 
+        if ($company->logo && Storage::disk('public')->exists(str_replace('storage/', '', $company->logo))) {
+            Storage::disk('public')->delete(str_replace('storage/', '', $company->logo));
+        }
+
         $company->update(['logo' => null]);
 
         return $this->success([], 'Logo removed');
     }
 
     // ======================
-    // ARCHIVE
+    // ARCHIVE COMPANY
     // ======================
     public function archive($id)
     {
@@ -202,14 +238,15 @@ class CompanyController extends Controller
             return $this->error([], 'Company not found', 404);
         }
 
-        $company->update([
-            'is_active' => !$company->is_active
-        ]);
+        $company->update(['is_active' => 0]);
 
-        return $this->success([], 'Status updated');
+        return $this->success([], 'Company archived');
     }
 
-    public function deactivate($id)
+    // ======================
+    // RESTORE COMPANY
+    // ======================
+    public function restore($id)
     {
         $company = Company::find($id);
 
@@ -217,34 +254,8 @@ class CompanyController extends Controller
             return $this->error([], 'Company not found', 404);
         }
 
-        $company->update(['is_active' => false]);
+        $company->update(['is_active' => 1]);
 
-        return $this->success([], 'Company deactivated');
-    }
-
-    public function activate($id)
-    {
-        $company = Company::find($id);
-
-        if (!$company) {
-            return $this->error([], 'Company not found', 404);
-        }
-
-        $company->update(['is_active' => true]);
-
-        return $this->success([], 'Company activated');
-    }
-
-    public function destroy($id)
-    {
-        $company = Company::find($id);
-
-        if (!$company) {
-            return $this->error([], 'Company not found', 404);
-        }
-
-        $company->delete();
-
-        return $this->success([], 'Company deleted');
+        return $this->success([], 'Company restored');
     }
 }

@@ -38,33 +38,28 @@ Route::middleware('auth:api')->controller(RoomController::class)->prefix('web/ma
 // Web Companies
 // =================================================
 
-Route::middleware('auth:api')
-    ->controller(CompanyController::class)
-    ->prefix('web/companies')
-    ->group(function () {
-        Route::get('/', 'index');
-        Route::post('/', 'store');
-        Route::get('/{id}', 'show');
-        Route::put('/{id}', 'update');
-        Route::post('/{id}/logo', 'uploadLogo');
-        Route::delete('/{id}/logo', 'deleteLogo');
-        Route::post('/{id}/archive', 'archive');
-        Route::post('/{id}/restore', 'restore');
-    });
+Route::middleware('auth:api')->prefix('web/companies')->controller(CompanyController::class)->group(function () {
+    Route::get('/', 'index');
+    Route::post('/', 'store');
+    Route::get('/{id}', 'show');
+    Route::put('/{id}', 'update');
+    Route::post('/{id}/logo', 'uploadLogo');
+    Route::delete('/{id}/logo', 'deleteLogo');
+    Route::patch('/{id}/archive', 'archive');
+    Route::patch('/{id}/restore', 'restore');
+    Route::get('/list', 'list');
+});
 
 // =================================================
 // Web Company Payments
 // =================================================
 
-Route::middleware('auth:api')
-    ->controller(CompanyPaymentController::class)
-    ->prefix('web/company-payments')
-    ->group(function () {
-        Route::get('/', 'index');
-        Route::post('/init', 'initYear');
-        Route::put('/{id}', 'update');
-        Route::get('/summary', 'summary');
-    });
+Route::middleware('auth:api')->prefix('web/company-payments')->controller(CompanyPaymentController::class)->group(function () {
+    Route::get('/', 'index');
+    Route::post('/init', 'initYear');
+    Route::put('/{id}', 'update');
+    Route::get('/summary', 'summary');
+});
 
 // =================================================
 // Web Collaborators
