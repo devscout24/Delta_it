@@ -35,6 +35,11 @@ class Ticket extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function room()
+    {
+        return $this->belongsTo(Room::class);
+    }
+
     public function requester()
     {
         return $this->belongsTo(User::class, 'requester_id');
