@@ -19,10 +19,10 @@ class CalendarController extends Controller
     public function index(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'view' => 'nullable|in:day,week,month',
-            'date' => 'nullable|date_format:Y-m-d',
+            'view'       => 'nullable|in:day,week,month',
+            'date'       => 'nullable|date_format:Y-m-d',
             'start_date' => 'nullable|date_format:Y-m-d',
-            'end_date' => 'nullable|date_format:Y-m-d|after_or_equal:start_date',
+            'end_date'   => 'nullable|date_format:Y-m-d|after_or_equal:start_date',
         ]);
 
         if ($validator->fails()) {
