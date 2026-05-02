@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\Web\RoomManagementController;
 use App\Http\Controllers\Api\Web\MeetingEventController;
 use App\Http\Controllers\Api\Web\UserManagementController;
 use App\Http\Controllers\Api\Web\DashboardStatsController;
+use App\Http\Controllers\Api\Web\CalendarController;
 
 // =================================================
 // Dashboard Stats
@@ -26,6 +27,10 @@ use App\Http\Controllers\Api\Web\DashboardStatsController;
 
 Route::middleware('auth:api')->controller(DashboardStatsController::class)->prefix('web/dashboard')->group(function () {
     Route::get('/stats', 'stats');
+});
+
+Route::controller(CalendarController::class)->prefix('web/calendar')->group(function () {
+    Route::get('/overview', 'index');
 });
 
 // =================================================

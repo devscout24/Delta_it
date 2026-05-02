@@ -7,8 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class MeetingEventSlot extends Model
 {
     protected $fillable = [
-        'event_id',
-        'date',
+        'meeting_event_schedule_id',
         'start_time',
         'end_time',
         'is_booked'
@@ -18,8 +17,10 @@ class MeetingEventSlot extends Model
         'is_booked' => 'boolean'
     ];
 
-    public function event()
+    // event access via schedule->event when needed
+
+    public function schedule()
     {
-        return $this->belongsTo(MeetingEvent::class, 'event_id');
+        return $this->belongsTo(MeetingEventSchedule::class, 'meeting_event_schedule_id');
     }
 }

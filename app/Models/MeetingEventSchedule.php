@@ -8,8 +8,7 @@ class MeetingEventSchedule extends Model
 {
     protected $fillable = [
         'meeting_event_id',
-        'start_date',
-        'end_date'
+        'date'
     ];
 
     public function event()
@@ -20,5 +19,10 @@ class MeetingEventSchedule extends Model
     public function days()
     {
         return $this->hasMany(MeetingEventScheduleDay::class, 'schedule_id');
+    }
+
+    public function slots()
+    {
+        return $this->hasMany(MeetingEventSlot::class, 'meeting_event_schedule_id');
     }
 }
