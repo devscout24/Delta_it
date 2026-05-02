@@ -41,8 +41,14 @@ class DashboardStatsController extends Controller
             ->whereDate('end_date', '<=', $today->copy()->addDays(30))
             ->count();
 
-        $upcomingMeetingsCount = MeetingBooking::join('meeting_event_slots', 'meeting_bookings.meeting_event_slot_id', '=', 'meeting_event_slots.id')
-            ->join('meeting_event_schedules', 'meeting_event_slots.meeting_event_schedule_id', '=', 'meeting_event_schedules.id')
+        $upcomingMeetingsCount = MeetingBooking::join('meeting_event_schedules', function ($join) {
+            $join->on('meeting_bookings.event_id', '=', 'meeting_event_schedules.meeting_event_id')
+                ->on('meeting_bookings.date', '=', 'meeting_event_schedules.date');
+        })
+            ->join('meeting_event_slots', function ($join) {
+                $join->on('meeting_event_slots.meeting_event_schedule_id', '=', 'meeting_event_schedules.id')
+                    ->on('meeting_event_slots.start_time', '=', 'meeting_bookings.start_time');
+            })
             ->whereDate('meeting_event_schedules.date', '>=', $today)
             ->whereDate('meeting_event_schedules.date', '<=', $windowEnd)
             ->whereIn('meeting_bookings.status', ['pending', 'approved'])
@@ -102,15 +108,15 @@ class DashboardStatsController extends Controller
             ];
         })->values();
 
-        $upcomingMeetings = MeetingBooking::select(
-            'meeting_bookings.id',
-            'meeting_bookings.status',
-            'meeting_event_slots.start_time',
-            'meeting_event_slots.end_time',
-            'meeting_event_schedules.date'
-        )
-            ->join('meeting_event_slots', 'meeting_bookings.meeting_event_slot_id', '=', 'meeting_event_slots.id')
-            ->join('meeting_event_schedules', 'meeting_event_slots.meeting_event_schedule_id', '=', 'meeting_event_schedules.id')
+        $upcomingMeetings = MeetingBooking::select('meeting_bookings.*')
+            ->join('meeting_event_schedules', function ($join) {
+                $join->on('meeting_bookings.event_id', '=', 'meeting_event_schedules.meeting_event_id')
+                    ->on('meeting_bookings.date', '=', 'meeting_event_schedules.date');
+            })
+            ->join('meeting_event_slots', function ($join) {
+                $join->on('meeting_event_slots.meeting_event_schedule_id', '=', 'meeting_event_schedules.id')
+                    ->on('meeting_event_slots.start_time', '=', 'meeting_bookings.start_time');
+            })
             ->with('event:id,title,type,location')
             ->whereDate('meeting_event_schedules.date', '>=', $today)
             ->whereDate('meeting_event_schedules.date', '<=', $windowEnd)

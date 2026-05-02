@@ -270,20 +270,22 @@ class MeetingEventController extends Controller
 
         $schedule = MeetingEventSchedule::findOrFail($request->schedule_id);
 
+        $slot = MeetingEventSlot::where([
+            'meeting_event_schedule_id' => $request->schedule_id,
+            'start_time' => $request->start_time
+        ])->first();
+
         $booking = MeetingBooking::create([
-            'meeting_event_slot_id' => MeetingEventSlot::where([
-                'meeting_event_schedule_id' => $request->schedule_id,
-                'start_time' => $request->start_time
-            ])->first()?->id ?? null,
-            'company_id' => $request->company_id ?? 1,
-            'user_id' => auth()->id() ?? 1,
+            'event_id' => $schedule->meeting_event_id,
+            'date' => $schedule->date,
+            'start_time' => $request->start_time,
+            'end_time' => $slot?->end_time,
             'status' => 'approved'
         ]);
 
-        MeetingEventSlot::where([
-            'meeting_event_schedule_id' => $request->schedule_id,
-            'start_time' => $request->start_time
-        ])->update(['is_booked' => true]);
+        if ($slot) {
+            $slot->update(['is_booked' => true]);
+        }
 
         return $this->success($booking, 'Booked');
     }
@@ -315,8 +317,11 @@ class MeetingEventController extends Controller
         DB::beginTransaction();
 
         try {
+
             $exists = MeetingBooking::where([
-                'meeting_event_slot_id' => $booking->meeting_event_slot_id,
+                'event_id' => $booking->event_id,
+                'date' => $booking->date,
+                'start_time' => $booking->start_time,
                 'status' => 'approved'
             ])->where('id', '!=', $id)->exists();
 
@@ -326,8 +331,11 @@ class MeetingEventController extends Controller
 
             $booking->update(['status' => 'approved']);
 
-            MeetingEventSlot::where('id', $booking->meeting_event_slot_id)
-                ->update(['is_booked' => true]);
+            MeetingEventSlot::join('meeting_event_schedules', 'meeting_event_slots.meeting_event_schedule_id', '=', 'meeting_event_schedules.id')
+                ->where('meeting_event_schedules.meeting_event_id', $booking->event_id)
+                ->where('meeting_event_schedules.date', $booking->date)
+                ->where('meeting_event_slots.start_time', $booking->start_time)
+                ->update(['meeting_event_slots.is_booked' => true]);
 
             DB::commit();
 
@@ -345,10 +353,14 @@ class MeetingEventController extends Controller
         DB::beginTransaction();
 
         try {
+
             $booking->update(['status' => 'rejected']);
 
-            MeetingEventSlot::where('id', $booking->meeting_event_slot_id)
-                ->update(['is_booked' => false]);
+            MeetingEventSlot::join('meeting_event_schedules', 'meeting_event_slots.meeting_event_schedule_id', '=', 'meeting_event_schedules.id')
+                ->where('meeting_event_schedules.meeting_event_id', $booking->event_id)
+                ->where('meeting_event_schedules.date', $booking->date)
+                ->where('meeting_event_slots.start_time', $booking->start_time)
+                ->update(['meeting_event_slots.is_booked' => false]);
 
             DB::commit();
 
