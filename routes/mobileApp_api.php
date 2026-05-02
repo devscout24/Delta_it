@@ -79,13 +79,14 @@ Route::middleware('auth:api')->controller(MeetingController::class)->prefix('mob
     Route::get('/my-bookings', 'myBookings');           // physical bookings
 });
 
-Route::middleware('auth:api')
-    ->controller(SpaceController::class)
-    ->prefix('mobile/spaces')
-    ->group(function () {
-        Route::get('/', 'index');
-        Route::get('/{id}', 'details');
-        Route::get('/{id}/slots', 'slots');
-        Route::post('/book', 'book');
-        Route::get('/my-bookings', 'myBookings');
-    });
+Route::middleware('auth:api')->controller(SpaceController::class)->prefix('mobile/spaces')->group(function () {
+    // LIST
+    Route::get('/', 'index');
+    Route::get('/{id}', 'details');
+    // BOOKING FLOW
+    Route::get('/{id}/dates', 'availableDates');
+    Route::get('/{id}/slots', 'slots');
+    Route::post('/book', 'book');
+    // USER BOOKINGS
+    Route::get('/my-bookings', 'myBookings');
+});

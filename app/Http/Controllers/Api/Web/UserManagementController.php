@@ -7,9 +7,9 @@ use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 
 use App\Models\User;
-use Illuminate\Support\Facades\Auth;
 
 class UserManagementController extends Controller
 {
@@ -22,16 +22,26 @@ class UserManagementController extends Controller
     {
         $query = User::with('company')->latest();
 
-        // optional filters
-        if ($request->role) {
+        // filters
+        if ($request->filled('role')) {
             $query->where('role', $request->role);
         }
 
-        if ($request->company_id) {
+        if ($request->filled('company_id')) {
             $query->where('company_id', $request->company_id);
         }
 
-        $users = $query->get()->map(function ($u) {
+        // 🔍 search
+        if ($request->filled('search')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%')
+                    ->orWhere('email', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        $users = $query->paginate(10);
+
+        $data = $users->getCollection()->map(function ($u) {
             return [
                 'id' => $u->id,
                 'name' => $u->name,
@@ -42,7 +52,18 @@ class UserManagementController extends Controller
             ];
         });
 
-        return $this->success($users, 'Users fetched');
+        return $this->success([
+            'data' => $data,
+            'pagination' => [
+                'current_page' => $users->currentPage(),
+                'last_page' => $users->lastPage(),
+                'total' => $users->total(),
+            ],
+            'stats' => [ // 🔥 optional but useful
+                'total_admins' => User::where('role', 'admin')->count(),
+                'total_company_users' => User::where('role', 'company')->count(),
+            ]
+        ], 'Users fetched');
     }
 
     // ======================
@@ -64,16 +85,20 @@ class UserManagementController extends Controller
 
         $data = $validator->validated();
 
-        // 🚨 RULE: admin must NOT have company
+        // 🚨 enforce logic
         if ($data['role'] === 'admin') {
             $data['company_id'] = null;
+        }
+
+        if ($data['role'] === 'company' && empty($data['company_id'])) {
+            return $this->error([], 'Company user must have company_id', 422);
         }
 
         $data['password'] = Hash::make($data['password']);
 
         $user = User::create($data);
 
-        return $this->success($user, 'User created');
+        return $this->success($user, 'User created', 201);
     }
 
     // ======================
@@ -122,11 +147,18 @@ class UserManagementController extends Controller
 
         $data = $validator->validated();
 
-        // 🚨 enforce role logic
-        if (isset($data['role']) && $data['role'] === 'admin') {
-            $data['company_id'] = null;
+        // role logic
+        if (isset($data['role'])) {
+            if ($data['role'] === 'admin') {
+                $data['company_id'] = null;
+            }
+
+            if ($data['role'] === 'company' && empty($data['company_id'])) {
+                return $this->error([], 'Company user must have company_id', 422);
+            }
         }
 
+        // password
         if (!empty($data['password'])) {
             $data['password'] = Hash::make($data['password']);
         } else {
@@ -149,8 +181,8 @@ class UserManagementController extends Controller
             return $this->error([], 'User not found', 404);
         }
 
-        // 🚨 prevent deleting self (optional safety)
-        if ($user->id === Auth::user('api')->id) {
+        // 🚨 correct self-check
+        if ($user->id === Auth::id()) {
             return $this->error([], 'You cannot delete yourself', 422);
         }
 

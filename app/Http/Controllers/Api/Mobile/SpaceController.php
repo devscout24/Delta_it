@@ -20,19 +20,18 @@ class SpaceController extends Controller
     // ======================
     public function index()
     {
-        $spaces = Space::where('is_active', true)
-            ->latest()
-            ->get()
-            ->map(function ($s) {
-                return [
+        return $this->success(
+            Space::where('is_active', true)
+                ->latest()
+                ->get()
+                ->map(fn($s) => [
                     'id' => $s->id,
                     'name' => $s->name,
                     'color' => $s->color,
                     'capacity' => $s->capacity,
-                ];
-            });
-
-        return $this->success($spaces, 'Spaces fetched');
+                ]),
+            'Spaces'
+        );
     }
 
     // ======================
@@ -43,20 +42,34 @@ class SpaceController extends Controller
         $space = Space::find($id);
 
         if (!$space) {
-            return $this->error([], 'Space not found', 404);
+            return $this->error([], 'Not found', 404);
         }
 
         return $this->success([
             'id' => $space->id,
             'name' => $space->name,
-            'location' => $space->name, // or separate later
+            'location' => $space->name,
             'max_invitees' => $space->capacity,
             'description' => $space->description,
-        ], 'Space details');
+        ], 'Details');
     }
 
     // ======================
-    // GET SLOTS
+    // AVAILABLE DATES 🔥
+    // ======================
+    public function availableDates($id)
+    {
+        $dates = SpaceSlot::where('space_id', $id)
+            ->where('is_booked', false)
+            ->pluck('date')
+            ->unique()
+            ->values();
+
+        return $this->success($dates, 'Available dates');
+    }
+
+    // ======================
+    // SLOTS BY DATE
     // ======================
     public function slots(Request $request, $id)
     {
@@ -68,16 +81,14 @@ class SpaceController extends Controller
             ->where('date', $request->date)
             ->orderBy('start_time')
             ->get()
-            ->map(function ($s) {
-                return [
-                    'id' => $s->id,
-                    'start_time' => $s->start_time,
-                    'end_time' => $s->end_time,
-                    'is_booked' => $s->is_booked,
-                ];
-            });
+            ->map(fn($s) => [
+                'id' => $s->id,
+                'start_time' => $s->start_time,
+                'end_time' => $s->end_time,
+                'is_booked' => $s->is_booked,
+            ]);
 
-        return $this->success($slots, 'Slots fetched');
+        return $this->success($slots, 'Slots');
     }
 
     // ======================
@@ -96,14 +107,31 @@ class SpaceController extends Controller
             return $this->error([], 'Unauthorized', 401);
         }
 
-        $slot = SpaceSlot::find($request->slot_id);
+        $slot = SpaceSlot::where('id', $request->slot_id)
+            ->where('space_id', $request->space_id)
+            ->first();
 
-        // 🚨 DOUBLE CHECK
-        if ($slot->is_booked) {
-            return $this->error([], 'Slot already booked', 422);
+        if (!$slot) {
+            return $this->error([], 'Invalid slot', 404);
         }
 
-        // ✅ create booking
+        if ($slot->is_booked) {
+            return $this->error([], 'Already booked', 422);
+        }
+
+        // prevent duplicate pending
+        $exists = SpaceBooking::where([
+            'space_id' => $request->space_id,
+            'date' => $slot->date,
+            'start_time' => $slot->start_time,
+            'user_id' => $user->id,
+            'status' => 'pending'
+        ])->exists();
+
+        if ($exists) {
+            return $this->error([], 'Already requested', 422);
+        }
+
         $booking = SpaceBooking::create([
             'space_id' => $request->space_id,
             'user_id' => $user->id,
@@ -114,11 +142,7 @@ class SpaceController extends Controller
             'status' => 'pending',
         ]);
 
-        // ⚠️ IMPORTANT CHANGE
-        // DO NOT mark slot booked yet (wait for approval)
-        // $slot->update(['is_booked' => true]);
-
-        return $this->success($booking, 'Booking request submitted');
+        return $this->success($booking, 'Request submitted');
     }
 
     // ======================
@@ -128,21 +152,18 @@ class SpaceController extends Controller
     {
         $user = Auth::guard('api')->user();
 
-        $bookings = SpaceBooking::with('space')
+        $data = SpaceBooking::with('space')
             ->where('user_id', $user->id)
             ->latest()
             ->get()
-            ->map(function ($b) {
-                return [
-                    'id' => $b->id,
-                    'space_name' => $b->space->name,
-                    'date' => date('d M', strtotime($b->date)),
-                    'start_time' => $b->start_time,
-                    'end_time' => $b->end_time,
-                    'status' => $b->status,
-                ];
-            });
+            ->map(fn($b) => [
+                'id' => $b->id,
+                'space' => $b->space->name,
+                'date' => date('d M', strtotime($b->date)),
+                'time' => $b->start_time . ' - ' . $b->end_time,
+                'status' => ucfirst($b->status),
+            ]);
 
-        return $this->success($bookings, 'Bookings fetched');
+        return $this->success($data, 'Bookings');
     }
 }

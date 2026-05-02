@@ -13,6 +13,7 @@ use App\Models\Space;
 use App\Models\SpaceSchedule;
 use App\Models\SpaceScheduleDay;
 use App\Models\SpaceSlot;
+use App\Models\SpaceBooking;
 
 class RoomManagementController extends Controller
 {
@@ -23,7 +24,10 @@ class RoomManagementController extends Controller
     // =========================
     public function index()
     {
-        return $this->success(Space::latest()->get(), 'Spaces fetched');
+        return $this->success(
+            Space::latest()->get(),
+            'Spaces fetched'
+        );
     }
 
     // =========================
@@ -31,18 +35,12 @@ class RoomManagementController extends Controller
     // =========================
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $data = $request->validate([
             'name' => 'required|string',
             'capacity' => 'nullable|integer',
             'color' => 'nullable|string',
             'description' => 'nullable|string',
         ]);
-
-        if ($validator->fails()) {
-            return $this->error($validator->errors(), 'Validation error', 422);
-        }
-
-        $data = $validator->validated();
 
         return $this->success(
             Space::create($data),
@@ -55,7 +53,7 @@ class RoomManagementController extends Controller
     // =========================
     public function show($id)
     {
-        $space = Space::with('schedules.days')->find($id);
+        $space = Space::with(['schedules.days'])->find($id);
 
         if (!$space) {
             return $this->error([], 'Not found', 404);
@@ -86,11 +84,20 @@ class RoomManagementController extends Controller
     }
 
     // =========================
-    // ADD SCHEDULE + AUTO SLOT
+    // DELETE SPACE
+    // =========================
+    public function destroy($id)
+    {
+        Space::findOrFail($id)->delete();
+        return $this->success([], 'Deleted');
+    }
+
+    // =========================
+    // ADD SCHEDULE + GENERATE SLOTS
     // =========================
     public function addSchedule(Request $request, $spaceId)
     {
-        $validator = Validator::make($request->all(), [
+        $request->validate([
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
 
@@ -101,10 +108,6 @@ class RoomManagementController extends Controller
 
             'duration' => 'required|integer|min:5'
         ]);
-
-        if ($validator->fails()) {
-            return $this->error($validator->errors(), 'Validation error', 422);
-        }
 
         DB::beginTransaction();
 
@@ -136,7 +139,16 @@ class RoomManagementController extends Controller
     }
 
     // =========================
-    // SLOT GENERATION 🔥
+    // DELETE SCHEDULE
+    // =========================
+    public function deleteSchedule($id)
+    {
+        SpaceSchedule::findOrFail($id)->delete();
+        return $this->success([], 'Schedule deleted');
+    }
+
+    // =========================
+    // SLOT GENERATION
     // =========================
     private function generateSlots($spaceId, $schedule, $days, $duration)
     {
@@ -190,30 +202,110 @@ class RoomManagementController extends Controller
     // =========================
     public function getSlots(Request $request, $spaceId)
     {
-        $query = SpaceSlot::where('space_id', $spaceId);
+        $request->validate([
+            'date' => 'required|date'
+        ]);
 
-        if ($request->date) {
-            $query->where('date', $request->date);
-        }
+        $slots = SpaceSlot::where('space_id', $spaceId)
+            ->where('date', $request->date)
+            ->orderBy('start_time')
+            ->get()
+            ->map(function ($s) {
+                return [
+                    'start_time' => $s->start_time,
+                    'end_time' => $s->end_time,
+                    'is_booked' => $s->is_booked
+                ];
+            });
 
-        return $this->success($query->orderBy('date')->get(), 'Slots');
+        return $this->success($slots, 'Slots');
     }
 
     // =========================
-    // CALENDAR
+    // CALENDAR VIEW
     // =========================
-    public function calendar()
+    public function calendar(Request $request)
     {
-        $slots = SpaceSlot::with('space')->get();
+        $query = SpaceSlot::with('space');
 
-        return $this->success($slots->map(function ($s) {
-            return [
-                'space' => $s->space->name,
-                'date' => $s->date,
-                'start_time' => $s->start_time,
-                'end_time' => $s->end_time,
-                'is_booked' => $s->is_booked
-            ];
-        }), 'Calendar');
+        if ($request->filled('month')) {
+            $query->whereMonth('date', $request->month);
+        }
+
+        $slots = $query->get()->groupBy('date');
+
+        return $this->success($slots, 'Calendar');
+    }
+
+    // =========================
+    // BOOKINGS LIST (ADMIN)
+    // =========================
+    public function bookings()
+    {
+        $data = SpaceBooking::with(['space', 'user', 'company'])
+            ->latest()
+            ->get()
+            ->map(function ($b) {
+                return [
+                    'id' => $b->id,
+                    'space' => $b->space->name,
+                    'company' => $b->company->name ?? null,
+                    'date' => $b->date,
+                    'time' => $b->start_time . ' - ' . $b->end_time,
+                    'status' => $b->status,
+                ];
+            });
+
+        return $this->success($data, 'Bookings');
+    }
+
+    // =========================
+    // APPROVE BOOKING
+    // =========================
+    public function approveBooking($id)
+    {
+        $booking = SpaceBooking::findOrFail($id);
+
+        DB::beginTransaction();
+
+        try {
+            $exists = SpaceBooking::where([
+                'space_id' => $booking->space_id,
+                'date' => $booking->date,
+                'start_time' => $booking->start_time,
+                'status' => 'approved'
+            ])->exists();
+
+            if ($exists) {
+                return $this->error([], 'Already booked', 422);
+            }
+
+            $booking->update(['status' => 'approved']);
+
+            SpaceSlot::where([
+                'space_id' => $booking->space_id,
+                'date' => $booking->date,
+                'start_time' => $booking->start_time
+            ])->update(['is_booked' => true]);
+
+            DB::commit();
+
+            return $this->success([], 'Approved');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->error([], $e->getMessage(), 500);
+        }
+    }
+
+    // =========================
+    // REJECT BOOKING
+    // =========================
+    public function rejectBooking($id)
+    {
+        SpaceBooking::findOrFail($id)->update([
+            'status' => 'rejected'
+        ]);
+
+        return $this->success([], 'Rejected');
     }
 }

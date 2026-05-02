@@ -18,6 +18,15 @@ use App\Http\Controllers\Api\Web\AdminDocumentController;
 use App\Http\Controllers\Api\Web\RoomManagementController;
 use App\Http\Controllers\Api\Web\MeetingEventController;
 use App\Http\Controllers\Api\Web\UserManagementController;
+use App\Http\Controllers\Api\Web\DashboardStatsController;
+
+// =================================================
+// Dashboard Stats
+// =================================================
+
+Route::middleware('auth:api')->controller(DashboardStatsController::class)->prefix('web/dashboard')->group(function () {
+    Route::get('/stats', 'stats');
+});
 
 // =================================================
 // Web Map & Room Management
@@ -188,25 +197,35 @@ Route::middleware('auth:api')->prefix('web/admin/documents')->controller(AdminDo
 // Web Room Management
 // =================================================
 
-Route::middleware('auth:api')
-    ->controller(RoomManagementController::class)
-    ->prefix('web/admin/rooms')
-    ->group(function () {
-        Route::get('/', 'index');
-        Route::post('/', 'store');
-        Route::get('/{id}', 'show');
-        Route::put('/{id}', 'update');
-        Route::post('/{id}/schedule', 'addSchedule');
-        Route::get('/{id}/slots', 'getSlots');
-        Route::get('/calendar/all', 'calendar');
-    });
+Route::middleware('auth:api')->controller(RoomManagementController::class)->prefix('web/admin/rooms')->group(function () {
+    // SPACES
+    Route::get('/', 'index');
+    Route::post('/', 'store');
+    Route::get('/{id}', 'show');
+    Route::put('/{id}', 'update');
+    Route::delete('/{id}', 'destroy'); // ✅ ADD
+
+    // SCHEDULE
+    Route::post('/{id}/schedule', 'addSchedule');
+    Route::delete('/schedules/{id}', 'deleteSchedule'); // ✅ ADD
+
+    // SLOTS
+    Route::get('/{id}/slots', 'getSlots');
+
+    // CALENDAR
+    Route::get('/calendar/all', 'calendar');
+
+    // BOOKINGS (IMPORTANT)
+    Route::get('/bookings', 'bookings');
+    Route::post('/bookings/{id}/approve', 'approveBooking');
+    Route::post('/bookings/{id}/reject', 'rejectBooking');
+});
 
 // =================================================
 // Web Meeting Events
 // =================================================
 
 Route::middleware('auth:api')->controller(MeetingEventController::class)->prefix('web/meeting-events')->group(function () {
-
     // ======================
     // EVENTS
     // ======================
@@ -254,13 +273,10 @@ Route::middleware('auth:api')->controller(MeetingEventController::class)->prefix
 // Web User Management
 // =================================================
 
-Route::middleware('auth:api')
-    ->controller(UserManagementController::class)
-    ->prefix('web/users')
-    ->group(function () {
-        Route::get('/', 'index');
-        Route::post('/', 'store');
-        Route::get('/{id}', 'show');
-        Route::put('/{id}', 'update');
-        Route::delete('/{id}', 'destroy');
-    });
+Route::middleware('auth:api')->controller(UserManagementController::class)->prefix('web/users')->group(function () {
+    Route::get('/', 'index');
+    Route::post('/', 'store');
+    Route::get('/{id}', 'show');
+    Route::put('/{id}', 'update');
+    Route::delete('/{id}', 'destroy');
+});
