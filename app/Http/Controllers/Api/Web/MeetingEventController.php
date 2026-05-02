@@ -118,22 +118,35 @@ class MeetingEventController extends Controller
         DB::beginTransaction();
 
         try {
-            $schedule = MeetingEventSchedule::create([
-                'meeting_event_id' => $eventId,
-                'start_date' => $request->start_date,
-                'end_date' => $request->end_date,
-            ]);
+            $startDate = Carbon::parse($request->start_date);
+            $endDate = Carbon::parse($request->end_date);
 
-            foreach ($request->days as $day) {
-                MeetingEventScheduleDay::create([
-                    'schedule_id' => $schedule->id,
-                    'day_of_week' => strtolower($day['day']),
-                    'start_time' => $day['start_time'],
-                    'end_time' => $day['end_time'],
-                ]);
+            // Generate schedules for each day in the range that matches recurring days
+            while ($startDate->lte($endDate)) {
+                $dayName = strtolower($startDate->format('l'));
+
+                // Check if this day matches any of the recurring days
+                foreach ($request->days as $day) {
+                    if ($dayName === strtolower($day['day'])) {
+                        $schedule = MeetingEventSchedule::create([
+                            'meeting_event_id' => $eventId,
+                            'date' => $startDate->toDateString(),
+                        ]);
+
+                        MeetingEventScheduleDay::create([
+                            'schedule_id' => $schedule->id,
+                            'day_of_week' => strtolower($day['day']),
+                            'start_time' => $day['start_time'],
+                            'end_time' => $day['end_time'],
+                        ]);
+
+                        $this->generateSlotsForSchedule($event, $schedule, $day);
+                        break;
+                    }
+                }
+
+                $startDate->addDay();
             }
-
-            $this->generateSlots($event, $schedule, $request->days);
 
             DB::commit();
 
@@ -163,50 +176,31 @@ class MeetingEventController extends Controller
     // SLOT GENERATION
     // ======================
 
-    private function generateSlots($event, $schedule, $days)
+    private function generateSlotsForSchedule($event, $schedule, $dayInfo)
     {
-        $start = Carbon::parse($schedule->start_date);
-        $end = Carbon::parse($schedule->end_date);
+        $start = Carbon::createFromFormat('H:i:s', $dayInfo['start_time']);
+        $end = Carbon::createFromFormat('H:i:s', $dayInfo['end_time']);
 
-        while ($start->lte($end)) {
+        while ($start->lt($end)) {
+            $slotEnd = $start->copy()->addMinutes($event->duration);
 
-            $dayName = strtolower($start->format('l'));
+            if ($slotEnd->gt($end)) break;
 
-            foreach ($days as $day) {
+            $exists = MeetingEventSlot::where([
+                'meeting_event_schedule_id' => $schedule->id,
+                'start_time' => $start->format('H:i:s'),
+            ])->exists();
 
-                if ($dayName === strtolower($day['day'])) {
-
-                    $current = Carbon::parse($day['start_time']);
-                    $endTime = Carbon::parse($day['end_time']);
-
-                    while ($current->lt($endTime)) {
-
-                        $slotEnd = $current->copy()->addMinutes($event->duration);
-
-                        if ($slotEnd->gt($endTime)) break;
-
-                        $exists = MeetingEventSlot::where([
-                            'event_id' => $event->id,
-                            'date' => $start->toDateString(),
-                            'start_time' => $current->format('H:i')
-                        ])->exists();
-
-                        if (!$exists) {
-                            MeetingEventSlot::create([
-                                'event_id' => $event->id,
-                                'date' => $start->toDateString(),
-                                'start_time' => $current->format('H:i'),
-                                'end_time' => $slotEnd->format('H:i'),
-                                'is_booked' => false
-                            ]);
-                        }
-
-                        $current->addMinutes($event->duration);
-                    }
-                }
+            if (!$exists) {
+                MeetingEventSlot::create([
+                    'meeting_event_schedule_id' => $schedule->id,
+                    'start_time' => $start->format('H:i:s'),
+                    'end_time' => $slotEnd->format('H:i:s'),
+                    'is_booked' => false
+                ]);
             }
 
-            $start->addDay();
+            $start->addMinutes($event->duration);
         }
     }
 
@@ -218,9 +212,11 @@ class MeetingEventController extends Controller
     {
         $request->validate(['date' => 'required|date']);
 
-        $slots = MeetingEventSlot::where('event_id', $id)
-            ->where('date', $request->date)
-            ->orderBy('start_time')
+        $slots = MeetingEventSlot::join('meeting_event_schedules', 'meeting_event_slots.meeting_event_schedule_id', '=', 'meeting_event_schedules.id')
+            ->where('meeting_event_schedules.meeting_event_id', $id)
+            ->whereDate('meeting_event_schedules.date', $request->date)
+            ->select('meeting_event_slots.*')
+            ->orderBy('meeting_event_slots.start_time')
             ->get();
 
         return $this->success($slots, 'Slots');
@@ -230,12 +226,14 @@ class MeetingEventController extends Controller
     {
         $request->validate([
             'event_id' => 'required',
-            'date' => 'required',
+            'schedule_id' => 'required',
             'start_time' => 'required'
         ]);
 
-        MeetingEventSlot::where($request->only('event_id', 'date', 'start_time'))
-            ->update(['is_booked' => true]);
+        MeetingEventSlot::where([
+            'meeting_event_schedule_id' => $request->schedule_id,
+            'start_time' => $request->start_time
+        ])->update(['is_booked' => true]);
 
         return $this->success([], 'Blocked');
     }
@@ -256,7 +254,9 @@ class MeetingEventController extends Controller
         $start = $date->copy()->startOfMonth();
         $end = $date->copy()->endOfMonth();
 
-        $data = MeetingEventSlot::whereBetween('date', [$start, $end])->get();
+        $data = MeetingEventSchedule::whereBetween('date', [$start, $end])
+            ->with('slots')
+            ->get();
 
         return $this->success($data, 'Calendar');
     }
@@ -264,20 +264,26 @@ class MeetingEventController extends Controller
     public function quickBook(Request $request)
     {
         $request->validate([
-            'event_id' => 'required',
-            'date' => 'required|date',
+            'schedule_id' => 'required',
             'start_time' => 'required'
         ]);
 
+        $schedule = MeetingEventSchedule::findOrFail($request->schedule_id);
+
         $booking = MeetingBooking::create([
-            'event_id' => $request->event_id,
-            'date' => $request->date,
-            'start_time' => $request->start_time,
+            'meeting_event_slot_id' => MeetingEventSlot::where([
+                'meeting_event_schedule_id' => $request->schedule_id,
+                'start_time' => $request->start_time
+            ])->first()?->id ?? null,
+            'company_id' => $request->company_id ?? 1,
+            'user_id' => auth()->id() ?? 1,
             'status' => 'approved'
         ]);
 
-        MeetingEventSlot::where($request->only('event_id', 'date', 'start_time'))
-            ->update(['is_booked' => true]);
+        MeetingEventSlot::where([
+            'meeting_event_schedule_id' => $request->schedule_id,
+            'start_time' => $request->start_time
+        ])->update(['is_booked' => true]);
 
         return $this->success($booking, 'Booked');
     }
@@ -310,23 +316,18 @@ class MeetingEventController extends Controller
 
         try {
             $exists = MeetingBooking::where([
-                'event_id' => $booking->event_id,
-                'date' => $booking->date,
-                'start_time' => $booking->start_time,
+                'meeting_event_slot_id' => $booking->meeting_event_slot_id,
                 'status' => 'approved'
-            ])->exists();
+            ])->where('id', '!=', $id)->exists();
 
             if ($exists) {
-                return $this->error([], 'Already booked', 422);
+                return $this->error([], 'Slot already booked', 422);
             }
 
             $booking->update(['status' => 'approved']);
 
-            MeetingEventSlot::where([
-                'event_id' => $booking->event_id,
-                'date' => $booking->date,
-                'start_time' => $booking->start_time
-            ])->update(['is_booked' => true]);
+            MeetingEventSlot::where('id', $booking->meeting_event_slot_id)
+                ->update(['is_booked' => true]);
 
             DB::commit();
 
@@ -339,8 +340,23 @@ class MeetingEventController extends Controller
 
     public function reject($id)
     {
-        MeetingBooking::findOrFail($id)->update(['status' => 'rejected']);
-        return $this->success([], 'Rejected');
+        $booking = MeetingBooking::findOrFail($id);
+
+        DB::beginTransaction();
+
+        try {
+            $booking->update(['status' => 'rejected']);
+
+            MeetingEventSlot::where('id', $booking->meeting_event_slot_id)
+                ->update(['is_booked' => false]);
+
+            DB::commit();
+
+            return $this->success([], 'Rejected');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->error([], $e->getMessage(), 500);
+        }
     }
 
     // ======================
