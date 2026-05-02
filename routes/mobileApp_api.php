@@ -60,16 +60,24 @@ Route::middleware('auth:api')
         Route::post('/mark-unread', 'markNotificationUnread');
     });
 
-Route::middleware('auth:api')
-    ->controller(MeetingController::class)
-    ->prefix('mobile/meetings')
-    ->group(function () {
-        Route::get('/events', 'events');
-        Route::get('/events/{id}', 'eventDetails');
-        Route::get('/events/{id}/slots', 'slots');
-        Route::post('/bookings', 'book');
-        Route::get('/my-meetings', 'myMeetings');
-    });
+Route::middleware('auth:api')->controller(MeetingController::class)->prefix('mobile/meetings')->group(function () {
+    // ======================
+    // EVENTS
+    // ======================
+    Route::get('/events', 'events');                    // list events
+    Route::get('/events/{id}', 'eventDetails');         // details
+    // ======================
+    // BOOKING FLOW
+    // ======================
+    Route::get('/events/{id}/dates', 'availableDates'); // available dates
+    Route::get('/events/{id}/slots', 'slots');          // slots by date
+    Route::post('/bookings', 'book');                   // request booking
+    // ======================
+    // USER DATA
+    // ======================
+    Route::get('/my-meetings', 'myMeetings');           // virtual meetings
+    Route::get('/my-bookings', 'myBookings');           // physical bookings
+});
 
 Route::middleware('auth:api')
     ->controller(SpaceController::class)

@@ -13,11 +13,13 @@ return new class extends Migration
     {
         Schema::create('meeting_event_schedule_days', function (Blueprint $table) {
             $table->id();
+
             $table->foreignId('schedule_id')
                 ->constrained('meeting_event_schedules')
                 ->cascadeOnDelete();
 
-            $table->string('day_of_week'); // monday, tuesday
+            $table->string('day_of_week'); // mon, tue, wed
+
             $table->time('start_time');
             $table->time('end_time');
 

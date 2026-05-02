@@ -6,13 +6,18 @@ use Illuminate\Database\Eloquent\Model;
 
 class MeetingBooking extends Model
 {
+    protected $fillable = [
+        'event_id',
+        'date',
+        'start_time',
+        'end_time',
+        'name',
+        'email',
+        'status'
+    ];
+
     public function event()
     {
-        return $this->belongsTo(MeetingEvent::class, 'meeting_event_id');
-    }
-
-    public function slot()
-    {
-        return $this->belongsTo(MeetingEventSlot::class, 'meeting_event_slot_id');
+        return $this->belongsTo(MeetingEvent::class, 'event_id');
     }
 }

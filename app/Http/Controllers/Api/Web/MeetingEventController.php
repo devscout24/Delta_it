@@ -20,34 +20,41 @@ class MeetingEventController extends Controller
     use ApiResponse;
 
     // ======================
-    // LIST EVENTS
+    // EVENTS
     // ======================
-    public function index()
-    {
-        return $this->success(MeetingEvent::latest()->get(), 'Events fetched');
-    }
 
-    // ======================
-    // CREATE EVENT
-    // ======================
-    public function store(Request $request)
+    public function index(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'title' => 'required|string',
-            'type' => 'required|string',
-            'duration' => 'required|integer',
-            'location' => 'nullable|string',
-            'meeting_link' => 'nullable|string',
-            'max_invites' => 'nullable|integer',
-            'description' => 'nullable|string',
-            'color' => 'nullable|string',
-        ]);
+        $query = MeetingEvent::query();
 
-        if ($validator->fails()) {
-            return $this->error($validator->errors(), 'Validation error', 422);
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
         }
 
-        $data = $validator->validated();
+        if ($request->filled('location')) {
+            $query->where('location', $request->location);
+        }
+
+        if ($request->filled('search')) {
+            $query->where('title', 'like', '%' . $request->search . '%');
+        }
+
+        return $this->success($query->latest()->get(), 'Events fetched');
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'title' => 'required|string',
+            'type' => 'required|in:virtual,physical',
+            'location' => 'nullable|string',
+            'meeting_link' => 'nullable|string',
+            'duration' => 'required|integer|min:1',
+            'max_invitees' => 'nullable|integer|min:1',
+            'description' => 'nullable|string',
+            'color' => 'nullable|string',
+            'timezone' => 'nullable|string'
+        ]);
 
         return $this->success(
             MeetingEvent::create($data),
@@ -55,23 +62,17 @@ class MeetingEventController extends Controller
         );
     }
 
-    // ======================
-    // SHOW EVENT
-    // ======================
     public function show($id)
     {
         $event = MeetingEvent::with('schedules.days')->find($id);
 
         if (!$event) {
-            return $this->error([], 'Not found', 404);
+            return $this->error([], 'Event not found', 404);
         }
 
-        return $this->success($event, 'Details');
+        return $this->success($event, 'Event details');
     }
 
-    // ======================
-    // UPDATE EVENT
-    // ======================
     public function update(Request $request, $id)
     {
         $event = MeetingEvent::find($id);
@@ -80,44 +81,40 @@ class MeetingEventController extends Controller
             return $this->error([], 'Not found', 404);
         }
 
-        $event->update($request->only([
-            'title',
-            'type',
-            'duration',
-            'location',
-            'meeting_link',
-            'max_invites',
-            'description',
-            'color'
-        ]));
+        $event->update($request->all());
 
         return $this->success($event, 'Updated');
     }
 
+    public function destroy($id)
+    {
+        $event = MeetingEvent::find($id);
+
+        if (!$event) {
+            return $this->error([], 'Not found', 404);
+        }
+
+        $event->delete();
+
+        return $this->success([], 'Deleted');
+    }
+
     // ======================
-    // ADD SCHEDULE + AUTO SLOT
+    // SCHEDULING
     // ======================
+
     public function addSchedule(Request $request, $eventId)
     {
-        $validator = Validator::make($request->all(), [
+        $request->validate([
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
-
             'days' => 'required|array',
             'days.*.day' => 'required|string',
             'days.*.start_time' => 'required',
             'days.*.end_time' => 'required',
         ]);
 
-        if ($validator->fails()) {
-            return $this->error($validator->errors(), 'Validation error', 422);
-        }
-
-        $event = MeetingEvent::find($eventId);
-
-        if (!$event) {
-            return $this->error([], 'Event not found', 404);
-        }
+        $event = MeetingEvent::findOrFail($eventId);
 
         DB::beginTransaction();
 
@@ -148,9 +145,25 @@ class MeetingEventController extends Controller
         }
     }
 
+    public function schedules($id)
+    {
+        $data = MeetingEventSchedule::with('days')
+            ->where('meeting_event_id', $id)
+            ->get();
+
+        return $this->success($data, 'Schedules');
+    }
+
+    public function deleteSchedule($id)
+    {
+        MeetingEventSchedule::findOrFail($id)->delete();
+        return $this->success([], 'Deleted');
+    }
+
     // ======================
     // SLOT GENERATION
     // ======================
+
     private function generateSlots($event, $schedule, $days)
     {
         $start = Carbon::parse($schedule->start_date);
@@ -199,13 +212,12 @@ class MeetingEventController extends Controller
     }
 
     // ======================
-    // GET SLOTS
+    // SLOTS
     // ======================
+
     public function slots(Request $request, $id)
     {
-        $request->validate([
-            'date' => 'required|date'
-        ]);
+        $request->validate(['date' => 'required|date']);
 
         $slots = MeetingEventSlot::where('event_id', $id)
             ->where('date', $request->date)
@@ -215,42 +227,98 @@ class MeetingEventController extends Controller
         return $this->success($slots, 'Slots');
     }
 
-    // ======================
-    // REQUEST LIST
-    // ======================
-    public function requests()
+    public function blockSlot(Request $request)
     {
-        $requests = MeetingBooking::with('event')
-            ->latest()
-            ->get();
+        $request->validate([
+            'event_id' => 'required',
+            'date' => 'required',
+            'start_time' => 'required'
+        ]);
 
-        return $this->success($requests, 'Requests');
+        MeetingEventSlot::where($request->only('event_id', 'date', 'start_time'))
+            ->update(['is_booked' => true]);
+
+        return $this->success([], 'Blocked');
     }
 
     // ======================
-    // APPROVE
+    // CALENDAR
     // ======================
+
+    public function calendar(Request $request)
+    {
+        $request->validate([
+            'date' => 'required|date',
+            'view' => 'required|in:day,week,month'
+        ]);
+
+        $date = Carbon::parse($request->date);
+
+        $start = $date->copy()->startOfMonth();
+        $end = $date->copy()->endOfMonth();
+
+        $data = MeetingEventSlot::whereBetween('date', [$start, $end])->get();
+
+        return $this->success($data, 'Calendar');
+    }
+
+    public function quickBook(Request $request)
+    {
+        $request->validate([
+            'event_id' => 'required',
+            'date' => 'required|date',
+            'start_time' => 'required'
+        ]);
+
+        $booking = MeetingBooking::create([
+            'event_id' => $request->event_id,
+            'date' => $request->date,
+            'start_time' => $request->start_time,
+            'status' => 'approved'
+        ]);
+
+        MeetingEventSlot::where($request->only('event_id', 'date', 'start_time'))
+            ->update(['is_booked' => true]);
+
+        return $this->success($booking, 'Booked');
+    }
+
+    // ======================
+    // REQUESTS
+    // ======================
+
+    public function requests()
+    {
+        return $this->success(
+            MeetingBooking::with('event')->latest()->get(),
+            'Requests'
+        );
+    }
+
+    public function requestDetails($id)
+    {
+        return $this->success(
+            MeetingBooking::with('event')->findOrFail($id),
+            'Details'
+        );
+    }
+
     public function approve($id)
     {
-        $booking = MeetingBooking::find($id);
-
-        if (!$booking) {
-            return $this->error([], 'Not found', 404);
-        }
+        $booking = MeetingBooking::findOrFail($id);
 
         DB::beginTransaction();
 
         try {
-            // prevent double booking
-            $alreadyBooked = MeetingBooking::where([
+            $exists = MeetingBooking::where([
                 'event_id' => $booking->event_id,
                 'date' => $booking->date,
                 'start_time' => $booking->start_time,
                 'status' => 'approved'
             ])->exists();
 
-            if ($alreadyBooked) {
-                return $this->error([], 'Slot already taken', 422);
+            if ($exists) {
+                return $this->error([], 'Already booked', 422);
             }
 
             $booking->update(['status' => 'approved']);
@@ -270,19 +338,26 @@ class MeetingEventController extends Controller
         }
     }
 
-    // ======================
-    // REJECT
-    // ======================
     public function reject($id)
     {
-        $booking = MeetingBooking::find($id);
-
-        if (!$booking) {
-            return $this->error([], 'Not found', 404);
-        }
-
-        $booking->update(['status' => 'rejected']);
-
+        MeetingBooking::findOrFail($id)->update(['status' => 'rejected']);
         return $this->success([], 'Rejected');
+    }
+
+    // ======================
+    // SUPPORT
+    // ======================
+
+    public function locations()
+    {
+        return $this->success(
+            MeetingEvent::select('location')->distinct()->pluck('location'),
+            'Locations'
+        );
+    }
+
+    public function types()
+    {
+        return $this->success(['virtual', 'physical'], 'Types');
     }
 }

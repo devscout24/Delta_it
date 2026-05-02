@@ -15,17 +15,19 @@ return new class extends Migration
             $table->id();
 
             $table->string('title');
-            $table->string('type')->default('virtual'); // virtual / physical
 
-            $table->string('location')->nullable(); // if physical
-            $table->string('meeting_link')->nullable(); // if virtual
+            $table->enum('type', ['virtual', 'physical']);
 
-            $table->integer('duration'); // in minutes
+            $table->string('location')->nullable(); // room name
+            $table->string('meeting_link')->nullable();
+
+            $table->integer('duration'); // minutes
             $table->integer('max_invitees')->default(1);
 
             $table->text('description')->nullable();
+            $table->string('color')->nullable();
 
-            $table->string('color')->nullable(); // UI
+            $table->string('timezone')->nullable(); // IMPORTANT ADD
 
             $table->timestamps();
         });

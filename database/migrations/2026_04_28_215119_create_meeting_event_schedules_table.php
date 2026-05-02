@@ -18,7 +18,8 @@ return new class extends Migration
                 ->constrained()
                 ->cascadeOnDelete();
 
-            $table->date('date');
+            $table->date('start_date');
+            $table->date('end_date');
 
             $table->timestamps();
         });

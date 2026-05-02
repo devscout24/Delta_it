@@ -205,20 +205,50 @@ Route::middleware('auth:api')
 // Web Meeting Events
 // =================================================
 
-Route::middleware('auth:api')
-    ->controller(MeetingEventController::class)
-    ->prefix('web/meeting-events')
-    ->group(function () {
-        Route::get('/', 'index');
-        Route::post('/', 'store');
-        Route::get('/{id}', 'show');
-        Route::put('/{id}', 'update');
-        Route::post('/{id}/schedule', 'addSchedule');
-        Route::get('/{id}/slots', 'slots');
-        Route::get('/requests', 'requests');
-        Route::post('/requests/{id}/approve', 'approve');
-        Route::post('/requests/{id}/reject', 'reject');
-    });
+Route::middleware('auth:api')->controller(MeetingEventController::class)->prefix('web/meeting-events')->group(function () {
+
+    // ======================
+    // EVENTS
+    // ======================
+    Route::get('/', 'index');                 // list + filters
+    Route::post('/', 'store');                // create
+    Route::get('/{id}', 'show');              // details
+    Route::put('/{id}', 'update');            // update
+    Route::delete('/{id}', 'destroy');        // delete
+
+    // ======================
+    // SCHEDULING
+    // ======================
+    Route::post('/{id}/schedule', 'addSchedule');   // add schedule + generate slots
+    Route::get('/{id}/schedules', 'schedules');     // get schedules
+    Route::delete('/schedules/{id}', 'deleteSchedule'); // delete schedule
+
+    // ======================
+    // SLOTS
+    // ======================
+    Route::get('/{id}/slots', 'slots');       // get slots by date
+    Route::post('/slots/block', 'blockSlot'); // optional admin block
+
+    // ======================
+    // CALENDAR
+    // ======================
+    Route::get('/calendar', 'calendar');      // day/week/month view
+    Route::post('/quick-book', 'quickBook');  // manual booking
+
+    // ======================
+    // REQUESTS (FROM MOBILE)
+    // ======================
+    Route::get('/requests', 'requests');                  // list requests
+    Route::get('/requests/{id}', 'requestDetails');       // request details
+    Route::post('/requests/{id}/approve', 'approve');     // approve
+    Route::post('/requests/{id}/reject', 'reject');       // reject
+
+    // ======================
+    // SUPPORTING (DROPDOWNS)
+    // ======================
+    Route::get('/locations', 'locations');   // rooms list
+    Route::get('/types', 'types');           // virtual / physical
+});
 
 // =================================================
 // Web User Management

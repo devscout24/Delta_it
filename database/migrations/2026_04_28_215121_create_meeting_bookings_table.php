@@ -14,19 +14,25 @@ return new class extends Migration
         Schema::create('meeting_bookings', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('meeting_event_id')->constrained();
-            $table->foreignId('meeting_event_slot_id')->constrained();
+            $table->foreignId('event_id')
+                ->constrained('meeting_events')
+                ->cascadeOnDelete();
 
-            $table->foreignId('company_id')->constrained();
-            $table->foreignId('user_id')->constrained();
+            $table->date('date');
 
-            $table->enum('status', [
-                'pending',
-                'approved',
-                'rejected'
-            ])->default('pending');
+            $table->time('start_time');
+            $table->time('end_time');
+
+            $table->string('name')->nullable(); // user name (mobile)
+            $table->string('email')->nullable();
+
+            $table->enum('status', ['pending', 'approved', 'rejected'])
+                ->default('pending');
 
             $table->timestamps();
+
+            // ⚡ prevent duplicate bookings
+            $table->index(['event_id', 'date', 'start_time']);
         });
     }
 

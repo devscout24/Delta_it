@@ -14,9 +14,11 @@ return new class extends Migration
         Schema::create('meeting_event_slots', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('meeting_event_schedule_id')
-                ->constrained()
+            $table->foreignId('event_id')
+                ->constrained('meeting_events')
                 ->cascadeOnDelete();
+
+            $table->date('date');
 
             $table->time('start_time');
             $table->time('end_time');
@@ -24,6 +26,8 @@ return new class extends Migration
             $table->boolean('is_booked')->default(false);
 
             $table->timestamps();
+
+            $table->index(['event_id', 'date']);
         });
     }
 
