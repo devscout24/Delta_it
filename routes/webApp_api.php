@@ -203,11 +203,11 @@ Route::middleware('auth:api')->controller(RoomManagementController::class)->pref
     Route::post('/', 'store');
     Route::get('/{id}', 'show');
     Route::put('/{id}', 'update');
-    Route::delete('/{id}', 'destroy'); // ✅ ADD
+    Route::delete('/{id}', 'destroy');
 
     // SCHEDULE
     Route::post('/{id}/schedule', 'addSchedule');
-    Route::delete('/schedules/{id}', 'deleteSchedule'); // ✅ ADD
+    Route::delete('/schedules/{id}', 'deleteSchedule');
 
     // SLOTS
     Route::get('/{id}/slots', 'getSlots');
