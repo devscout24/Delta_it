@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\Mobile\TicketController;
 use App\Http\Controllers\Api\Mobile\NotificationController;
 use App\Http\Controllers\Api\Mobile\MeetingController;
 use App\Http\Controllers\Api\Mobile\SpaceController;
+use App\Http\Controllers\Api\Mobile\RoomController;
 
 // =================================================
 // Mobile App Routes
@@ -77,6 +78,11 @@ Route::middleware('auth:api')->controller(MeetingController::class)->prefix('mob
     // ======================
     Route::get('/my-meetings', 'myMeetings');           // virtual meetings
     Route::get('/my-bookings', 'myBookings');           // physical bookings
+});
+
+Route::middleware('auth:api')->controller(RoomController::class)->prefix('mobile/rooms')->group(function () {
+    Route::get('/', 'index');
+    Route::get('/{id}', 'details');
 });
 
 Route::middleware('auth:api')->controller(SpaceController::class)->prefix('mobile/spaces')->group(function () {

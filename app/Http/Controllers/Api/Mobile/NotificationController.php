@@ -7,6 +7,7 @@ use App\Traits\ApiResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class NotificationController extends Controller
 {
@@ -83,9 +84,13 @@ class NotificationController extends Controller
     // ======================
     public function deleteNotification(Request $request)
     {
-        $request->validate([
-            'id' => 'required'
+        $validator = Validator::make($request->all(), [
+            'id' => 'required',
         ]);
+
+        if ($validator->fails()) {
+            return $this->error($validator->errors(), 'Validation error', 422);
+        }
 
         $user = Auth::guard('api')->user();
 
@@ -99,9 +104,13 @@ class NotificationController extends Controller
     // ======================
     public function markNotificationRead(Request $request)
     {
-        $request->validate([
-            'id' => 'required'
+        $validator = Validator::make($request->all(), [
+            'id' => 'required',
         ]);
+
+        if ($validator->fails()) {
+            return $this->error($validator->errors(), 'Validation error', 422);
+        }
 
         $user = Auth::guard('api')->user();
 
@@ -119,9 +128,13 @@ class NotificationController extends Controller
     // ======================
     public function markNotificationUnread(Request $request)
     {
-        $request->validate([
-            'id' => 'required'
+        $validator = Validator::make($request->all(), [
+            'id' => 'required',
         ]);
+
+        if ($validator->fails()) {
+            return $this->error($validator->errors(), 'Validation error', 422);
+        }
 
         $user = Auth::guard('api')->user();
 

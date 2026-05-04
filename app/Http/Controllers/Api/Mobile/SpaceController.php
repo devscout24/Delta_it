@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Mobile;
 use App\Http\Controllers\Controller;
 use App\Traits\ApiResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 
 use App\Models\Space;
@@ -73,9 +74,13 @@ class SpaceController extends Controller
     // ======================
     public function slots(Request $request, $id)
     {
-        $request->validate([
-            'date' => 'required|date'
+        $validator = Validator::make($request->all(), [
+            'date' => 'required|date',
         ]);
+
+        if ($validator->fails()) {
+            return $this->error($validator->errors(), 'Validation error', 422);
+        }
 
         $slots = SpaceSlot::where('space_id', $id)
             ->where('date', $request->date)
@@ -96,10 +101,14 @@ class SpaceController extends Controller
     // ======================
     public function book(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'space_id' => 'required|exists:spaces,id',
-            'slot_id' => 'required|exists:space_slots,id',
+            'slot_id'  => 'required|exists:space_slots,id',
         ]);
+
+        if ($validator->fails()) {
+            return $this->error($validator->errors(), 'Validation error', 422);
+        }
 
         $user = Auth::guard('api')->user();
 

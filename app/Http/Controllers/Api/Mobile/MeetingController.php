@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 use App\Models\MeetingEvent;
 use App\Models\MeetingEventSlot;
@@ -72,9 +73,13 @@ class MeetingController extends Controller
     // ======================
     public function slots(Request $request, $id)
     {
-        $request->validate([
-            'date' => 'required|date'
+        $validator = Validator::make($request->all(), [
+            'date' => 'required|date',
         ]);
+
+        if ($validator->fails()) {
+            return $this->error($validator->errors(), 'Validation error', 422);
+        }
 
         $slots = MeetingEventSlot::where('event_id', $id)
             ->where('date', $request->date)
@@ -96,11 +101,15 @@ class MeetingController extends Controller
     // ======================
     public function book(Request $request)
     {
-        $request->validate([
-            'event_id' => 'required|exists:meeting_events,id',
-            'date' => 'required|date',
+        $validator = Validator::make($request->all(), [
+            'event_id'   => 'required|exists:meeting_events,id',
+            'date'       => 'required|date',
             'start_time' => 'required',
         ]);
+
+        if ($validator->fails()) {
+            return $this->error($validator->errors(), 'Validation error', 422);
+        }
 
         $user = Auth::guard('api')->user();
 
