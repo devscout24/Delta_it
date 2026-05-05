@@ -8,9 +8,11 @@ class MeetingEventSlot extends Model
 {
     protected $fillable = [
         'meeting_event_schedule_id',
+        'event_id',
+        'date',
         'start_time',
         'end_time',
-        'is_booked'
+        'is_booked',
     ];
 
     protected $casts = [

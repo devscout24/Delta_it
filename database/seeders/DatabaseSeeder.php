@@ -2,22 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\CompanyPayment;
-use App\Models\Document;
-use App\Models\Meeting;
-use App\Models\MeetingBooking;
-use App\Models\MeetingBookingAvailabilities;
-use App\Models\MeetingBookingAvailabilitySlot;
-use App\Models\MeetingBookingSchedule;
-use App\Models\Room;
-use App\Models\Tag;
-use App\Models\User;
-use Carbon\Carbon;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Schema;
 
 class DatabaseSeeder extends Seeder
 {
@@ -43,6 +29,7 @@ class DatabaseSeeder extends Seeder
             DocumentSeeder::class,
             NotificationSeeder::class,
             MeetingEventSeeder::class,
+            MeetingBookingSeeder::class,
             SpaceSeeder::class,
         ]);
     }
