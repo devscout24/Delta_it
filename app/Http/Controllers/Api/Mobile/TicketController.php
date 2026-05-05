@@ -91,7 +91,7 @@ class TicketController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'subject' => 'required|string|max:255',
-            'type' => 'required|in:maintenance,access,support,other',
+            'type'    => 'required|in:maintenance,access,support,other',
             'room_id' => 'nullable|exists:rooms,id',
             'message' => 'required|string',
         ]);

@@ -16,7 +16,12 @@ class RoomController extends Controller
     // ======================
     public function index(Request $request)
     {
-        $query = Room::with(['activeAllocation.company', 'floor']);
+        $companyId = auth()->user()->company_id;
+
+        $query = Room::with(['activeAllocation.company', 'floor'])
+            ->whereHas('activeAllocation', function ($q) use ($companyId) {
+                $q->where('company_id', $companyId);
+            });
 
         if ($request->filled('floor_id')) {
             $query->where('floor_id', $request->floor_id);
