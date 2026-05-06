@@ -43,7 +43,8 @@ class AdminDocumentController extends Controller
             $query->where('name', 'like', '%' . $request->search . '%');
         }
 
-        $documents = $query->latest()->paginate(10);
+        $perPage   = min((int) $request->input('per_page', 10), 100);
+        $documents = $query->latest()->paginate($perPage);
 
         $data = $documents->getCollection()->map(function ($doc) {
             return [
@@ -58,12 +59,15 @@ class AdminDocumentController extends Controller
         });
 
         return $this->success([
-            'data' => $data,
+            'data'       => $data,
             'pagination' => [
+                'total'        => $documents->total(),
+                'per_page'     => $documents->perPage(),
                 'current_page' => $documents->currentPage(),
                 'last_page'    => $documents->lastPage(),
-                'total'        => $documents->total(),
-            ]
+                'from'         => $documents->firstItem(),
+                'to'           => $documents->lastItem(),
+            ],
         ], 'Documents fetched');
     }
 
