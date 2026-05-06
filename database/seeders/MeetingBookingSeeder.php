@@ -10,9 +10,8 @@ use Illuminate\Database\Seeder;
 
 class MeetingBookingSeeder extends Seeder
 {
-    // Matches the demo user created by UserSeeder
-    private const DEMO_EMAIL = 'user@user.com';
-    private const DEMO_NAME  = 'Demo User';
+    private const DEMO_EMAIL = 'technovasolutions@manager.com';
+    private const DEMO_NAME  = 'Technova Solutions Manager';
 
     public function run(): void
     {
