@@ -14,13 +14,13 @@ class CompanyPaymentController extends Controller
     use ApiResponse;
 
     // ======================
-    // LIST (PAGINATED BY 6 MONTHS)
+    // LIST (ALL 12 MONTHS)
     // ======================
     public function index(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'company_id' => 'required|exists:companies,id',
-            'year' => 'required|integer'
+            'year'       => 'required|integer',
         ]);
 
         if ($validator->fails()) {
@@ -30,33 +30,23 @@ class CompanyPaymentController extends Controller
         $payments = CompanyPayment::where('company_id', $request->company_id)
             ->where('year', $request->year)
             ->orderBy('month')
-            ->paginate(6);
+            ->get();
 
-        $data = $payments->getCollection()->map(function ($p) {
+        $data = $payments->map(function ($p) {
             return [
-                'id' => $p->id,
-                'month' => $p->month,
-                'month_name' => Carbon::create()->month($p->month)->format('F'),
-
-                'value_non_vat' => $p->value_non_vat,
-                'value_vat' => $p->value_vat,
-
+                'id'                => $p->id,
+                'month'             => $p->month,
+                'month_name'        => Carbon::create()->month($p->month)->format('F'),
+                'value_non_vat'     => $p->value_non_vat,
+                'value_vat'         => $p->value_vat,
                 'printings_non_vat' => $p->printings_non_vat,
-                'printings_vat' => $p->printings_vat,
-
-                'total_amount' => $p->total_amount,
-                'status' => $p->status ?? 'unpaid',
+                'printings_vat'     => $p->printings_vat,
+                'total_amount'      => $p->total_amount,
+                'status'            => $p->status ?? 'unpaid',
             ];
         });
 
-        return $this->success([
-            'data' => $data,
-            'pagination' => [
-                'current_page' => $payments->currentPage(),
-                'last_page' => $payments->lastPage(),
-                'total' => $payments->total(),
-            ]
-        ], 'Payments fetched');
+        return $this->success($data, 'Payments fetched');
     }
 
     // ======================
