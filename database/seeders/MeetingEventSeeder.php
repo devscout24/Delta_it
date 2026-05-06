@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\MeetingBooking;
 use App\Models\MeetingEvent;
 use App\Models\MeetingEventSchedule;
 use App\Models\MeetingEventScheduleDay;
@@ -105,6 +106,8 @@ class MeetingEventSeeder extends Seeder
             $event = MeetingEvent::create($eventData);
             $this->createSchedules($event);
         }
+
+        $this->seedDemoBookings();
     }
 
     private function createSchedules(MeetingEvent $event): void
@@ -189,10 +192,69 @@ class MeetingEventSeeder extends Seeder
                 'date'                      => $date,
                 'start_time'                => $start->format('H:i:s'),
                 'end_time'                  => $start->copy()->addMinutes($duration)->format('H:i:s'),
-                'is_booked'                 => rand(0, 3) === 0, // ~25% pre-booked
+                'is_booked'                 => rand(0, 3) === 0,
             ]);
 
             $start->addMinutes($duration + 15);
+        }
+    }
+
+    private function seedDemoBookings(): void
+    {
+        $email = 'technovasolutions@manager.com';
+        $name  = 'Technova Solutions Manager';
+        $today = Carbon::today()->toDateString();
+
+        // 2 approved virtual bookings → /my-meetings
+        $virtualEvents = MeetingEvent::where('type', 'virtual')->take(2)->get();
+        foreach ($virtualEvents as $event) {
+            $slot = MeetingEventSlot::where('event_id', $event->id)
+                ->where('date', '>=', $today)
+                ->where('is_booked', false)
+                ->orderBy('date')
+                ->orderBy('start_time')
+                ->first();
+
+            if (!$slot) continue;
+
+            $slot->update(['is_booked' => true]);
+
+            MeetingBooking::create([
+                'event_id'   => $event->id,
+                'date'       => $slot->date,
+                'start_time' => $slot->start_time,
+                'end_time'   => $slot->end_time,
+                'name'       => $name,
+                'email'      => $email,
+                'status'     => 'approved',
+            ]);
+        }
+
+        // 3 physical bookings (approved + 2 pending) → /my-bookings
+        $physicalEvents = MeetingEvent::where('type', 'physical')->take(3)->get();
+        $statuses       = ['approved', 'pending', 'pending'];
+
+        foreach ($physicalEvents as $i => $event) {
+            $slot = MeetingEventSlot::where('event_id', $event->id)
+                ->where('date', '>=', $today)
+                ->where('is_booked', false)
+                ->orderBy('date')
+                ->orderBy('start_time')
+                ->first();
+
+            if (!$slot) continue;
+
+            $slot->update(['is_booked' => true]);
+
+            MeetingBooking::create([
+                'event_id'   => $event->id,
+                'date'       => $slot->date,
+                'start_time' => $slot->start_time,
+                'end_time'   => $slot->end_time,
+                'name'       => $name,
+                'email'      => $email,
+                'status'     => $statuses[$i],
+            ]);
         }
     }
 }
