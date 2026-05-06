@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
             TicketMessageSeeder::class,
             TicketAttachmentSeeder::class,
             DocumentSeeder::class,
+            TagSeeder::class,
             NotificationSeeder::class,
             MeetingEventSeeder::class,
             SpaceSeeder::class,

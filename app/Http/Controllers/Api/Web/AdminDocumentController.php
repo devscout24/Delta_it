@@ -34,8 +34,8 @@ class AdminDocumentController extends Controller
         $data = $documents->getCollection()->map(function ($doc) {
             return [
                 'id' => $doc->id,
-                'name' => $doc->document_name,
-                'file_url' => Storage::url($doc->document_path),
+                'name' => $doc->name,
+                'file_url' => Storage::url($doc->file_path),
 
                 'company' => $doc->company?->name,
 
@@ -78,8 +78,8 @@ class AdminDocumentController extends Controller
 
             $doc = Document::create([
                 'company_id' => $request->company_id,
-                'document_name' => $request->file('file')->getClientOriginalName(),
-                'document_path' => $path
+                'name' => $request->file('file')->getClientOriginalName(),
+                'file_path' => $path
             ]);
 
             if ($request->filled('tags')) {
@@ -111,8 +111,8 @@ class AdminDocumentController extends Controller
 
         return $this->success([
             'id' => $doc->id,
-            'name' => $doc->document_name,
-            'file_url' => Storage::url($doc->document_path),
+            'name' => $doc->name,
+            'file_url' => Storage::url($doc->file_path),
             'company_id' => $doc->company_id,
             'tags' => $doc->tags->pluck('id'),
         ], 'Document details');
@@ -149,8 +149,8 @@ class AdminDocumentController extends Controller
             $path = $request->file('file')->store('documents', 'public');
 
             $doc->update([
-                'document_name' => $request->file('file')->getClientOriginalName(),
-                'document_path' => $path
+                'name' => $request->file('file')->getClientOriginalName(),
+                'file_path' => $path
             ]);
         }
 
