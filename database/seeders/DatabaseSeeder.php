@@ -29,7 +29,6 @@ class DatabaseSeeder extends Seeder
             DocumentSeeder::class,
             NotificationSeeder::class,
             MeetingEventSeeder::class,
-            MeetingBookingSeeder::class,
             SpaceSeeder::class,
         ]);
     }

@@ -3,9 +3,11 @@
 namespace Database\Seeders;
 
 use App\Models\Space;
+use App\Models\SpaceBooking;
 use App\Models\SpaceSchedule;
 use App\Models\SpaceScheduleDay;
 use App\Models\SpaceSlot;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 
@@ -76,6 +78,8 @@ class SpaceSeeder extends Seeder
             $space = Space::create($spaceData);
             $this->createSpaceSchedules($space);
         }
+
+        $this->seedDemoBookings();
     }
 
     private function createSpaceSchedules($space)
@@ -151,6 +155,40 @@ class SpaceSeeder extends Seeder
 
             // Create slots for each day in the schedule period
             $this->createSpaceSlots($space, $schedule, $dayInfo, $startDate, $endDate);
+        }
+    }
+
+    private function seedDemoBookings(): void
+    {
+        $user = User::where('email', 'technovasolutions@manager.com')->first();
+
+        if (!$user || !$user->company_id) return;
+
+        $today    = Carbon::today()->toDateString();
+        $spaces   = Space::where('is_active', true)->take(3)->get();
+        $statuses = ['approved', 'pending', 'pending'];
+
+        foreach ($spaces as $i => $space) {
+            $slot = SpaceSlot::where('space_id', $space->id)
+                ->where('date', '>=', $today)
+                ->where('is_booked', false)
+                ->orderBy('date')
+                ->orderBy('start_time')
+                ->first();
+
+            if (!$slot) continue;
+
+            $slot->update(['is_booked' => true]);
+
+            SpaceBooking::create([
+                'space_id'   => $space->id,
+                'user_id'    => $user->id,
+                'company_id' => $user->company_id,
+                'date'       => $slot->date,
+                'start_time' => $slot->start_time,
+                'end_time'   => $slot->end_time,
+                'status'     => $statuses[$i],
+            ]);
         }
     }
 

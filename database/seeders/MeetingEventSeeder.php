@@ -7,6 +7,7 @@ use App\Models\MeetingEvent;
 use App\Models\MeetingEventSchedule;
 use App\Models\MeetingEventScheduleDay;
 use App\Models\MeetingEventSlot;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 
@@ -201,8 +202,10 @@ class MeetingEventSeeder extends Seeder
 
     private function seedDemoBookings(): void
     {
-        $email = 'technovasolutions@manager.com';
-        $name  = 'Technova Solutions Manager';
+        $user = User::where('email', 'technovasolutions@manager.com')->first();
+
+        if (!$user) return;
+
         $today = Carbon::today()->toDateString();
 
         // 2 approved virtual bookings → /my-meetings
@@ -221,11 +224,12 @@ class MeetingEventSeeder extends Seeder
 
             MeetingBooking::create([
                 'event_id'   => $event->id,
+                'user_id'    => $user->id,
                 'date'       => $slot->date,
                 'start_time' => $slot->start_time,
                 'end_time'   => $slot->end_time,
-                'name'       => $name,
-                'email'      => $email,
+                'name'       => $user->name,
+                'email'      => $user->email,
                 'status'     => 'approved',
             ]);
         }
@@ -248,11 +252,12 @@ class MeetingEventSeeder extends Seeder
 
             MeetingBooking::create([
                 'event_id'   => $event->id,
+                'user_id'    => $user->id,
                 'date'       => $slot->date,
                 'start_time' => $slot->start_time,
                 'end_time'   => $slot->end_time,
-                'name'       => $name,
-                'email'      => $email,
+                'name'       => $user->name,
+                'email'      => $user->email,
                 'status'     => $statuses[$i],
             ]);
         }

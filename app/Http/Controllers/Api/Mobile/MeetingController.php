@@ -7,7 +7,6 @@ use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use Carbon\Carbon;
 use App\Models\MeetingEvent;
 use App\Models\MeetingEventSlot;
 use App\Models\MeetingBooking;
@@ -142,12 +141,13 @@ class MeetingController extends Controller
 
         $booking = MeetingBooking::create([
             'event_id' => $request->event_id,
-            'date' => $request->date,
+            'user_id'  => $user->id,
+            'date'     => $request->date,
             'start_time' => $request->start_time,
-            'end_time' => $slot->end_time,
-            'name' => $user->name,
-            'email' => $user->email,
-            'status' => 'pending'
+            'end_time'   => $slot->end_time,
+            'name'   => $user->name,
+            'email'  => $user->email,
+            'status' => 'pending',
         ]);
 
         return $this->success($booking, 'Request sent (Pending approval)');
@@ -161,7 +161,7 @@ class MeetingController extends Controller
         $user = Auth::guard('api')->user();
 
         $data = MeetingBooking::with('event')
-            ->where('email', $user->email)
+            ->where('user_id', $user->id)
             ->whereHas('event', fn($q) => $q->where('type', 'virtual'))
             ->where('status', 'approved')
             ->get();
@@ -177,7 +177,7 @@ class MeetingController extends Controller
         $user = Auth::guard('api')->user();
 
         $data = MeetingBooking::with('event')
-            ->where('email', $user->email)
+            ->where('user_id', $user->id)
             ->whereHas('event', fn($q) => $q->where('type', 'physical'))
             ->get();
 
