@@ -54,8 +54,10 @@ class DocumentSeeder extends Seeder
             ]);
 
             // rotate through tags so each doc gets a different pair
-            $offset = ($index * 2) % count($allTagIds);
-            $doc->tags()->sync(array_slice($allTagIds, $offset, 2));
+            if (!empty($allTagIds)) {
+                $offset = ($index * 2) % count($allTagIds);
+                $doc->tags()->sync(array_slice($allTagIds, $offset, 2));
+            }
         }
     }
 }
