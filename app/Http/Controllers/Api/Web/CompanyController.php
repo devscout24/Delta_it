@@ -181,7 +181,7 @@ class CompanyController extends Controller
     public function uploadLogo(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
-            'logo' => 'required|image|max:2048'
+            'logo' => 'required|image|mimes:png,jpeg,jpg|max:15360'
         ]);
 
         if ($validator->fails()) {
