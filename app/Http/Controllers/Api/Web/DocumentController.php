@@ -70,6 +70,7 @@ class DocumentController extends Controller
         $document = Document::create([
             'company_id' => $company_id,
             'file_path' => $path,
+            'uploaded_by' => auth()->id(),
         ]);
 
         // attach tags
