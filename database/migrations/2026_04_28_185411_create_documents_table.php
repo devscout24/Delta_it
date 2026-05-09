@@ -23,7 +23,7 @@ return new class extends Migration
                 ->constrained('users')
                 ->cascadeOnDelete();
 
-            $table->string('name');
+            $table->string('name')->nullable();
             $table->string('file_path');
 
             $table->string('type')->nullable(); // pdf, doc, etc.

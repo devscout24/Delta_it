@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Document;
 use App\Models\Tag;
+use Illuminate\Support\Facades\Auth;
 
 class DocumentController extends Controller
 {
@@ -55,9 +56,12 @@ class DocumentController extends Controller
     public function store(Request $request, $company_id)
     {
         $validator = Validator::make($request->all(), [
-            'file' => 'required|file|mimes:pdf|max:10240',
-            'tags' => 'nullable|array',
-            'tags.*' => 'exists:tags,id'
+            'file'       => 'required|file|mimes:pdf|max:10240',
+            'tags'       => 'nullable|array',
+            'tags.*'     => 'exists:tags,id',
+            'visibility' => 'nullable|in:company,internal',
+            'name'       => 'nullable|string',
+            'type'       => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -68,9 +72,10 @@ class DocumentController extends Controller
         $path = $request->file('file')->store('documents', 'public');
 
         $document = Document::create([
+            'name' => $request->file('file')->getClientOriginalName(),
             'company_id' => $company_id,
             'file_path' => $path,
-            'uploaded_by' => auth()->id(),
+            'uploaded_by' => Auth::guard('api')->id(),
         ]);
 
         // attach tags
