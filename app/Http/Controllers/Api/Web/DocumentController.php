@@ -85,7 +85,7 @@ class DocumentController extends Controller
 
         return $this->success([
             'id' => $document->id,
-            'file_url' => Storage::url($path)
+            'file_url' => asset('storage/' . $document->file_path),
         ], 'Document uploaded', 201);
     }
 
